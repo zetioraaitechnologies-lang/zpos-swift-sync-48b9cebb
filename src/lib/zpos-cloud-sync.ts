@@ -63,12 +63,15 @@ async function pushNow(): Promise<void> {
   const db = zdb.get();
   const h = hashOf(db);
   if (h === localStorage.getItem(LAST_HASH_KEY)) return;
+  const row = {
+    user_id: currentUserId,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: db as any,
+    updated_at: new Date().toISOString(),
+  };
   const { data, error } = await supabase
     .from("zpos_cloud_backups")
-    .upsert(
-      { user_id: currentUserId, data: db, updated_at: new Date().toISOString() },
-      { onConflict: "user_id" },
-    )
+    .upsert(row, { onConflict: "user_id" })
     .select("updated_at")
     .single();
   if (error) {
