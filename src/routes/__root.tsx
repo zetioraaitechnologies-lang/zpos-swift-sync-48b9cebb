@@ -13,6 +13,10 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/zpos-auth";
 import { Toaster } from "sonner";
+import { PwaInstall } from "@/components/zpos/pwa-install";
+import { reportLovableError } from "../lib/lovable-error-reporting";
+import { AuthProvider } from "@/lib/zpos-auth";
+import { Toaster } from "sonner";
 
 function NotFoundComponent() {
   return (
