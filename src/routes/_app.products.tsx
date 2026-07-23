@@ -1,0 +1,304 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { zdb, fmtMoney, uid, type Product } from "@/lib/zpos-db";
+import { useAuth } from "@/lib/zpos-auth";
+import { GoldButton } from "@/components/zpos/gold-button";
+
+export const Route = createFileRoute("/_app/products")({
+  component: Products,
+});
+
+function Products() {
+  const { org, user } = useAuth();
+  const [, setV] = useState(0);
+  useEffect(() => {
+    const u = zdb.subscribe(() => setV((n) => n + 1));
+    return () => {
+      u();
+    };
+  }, []);
+  const [q, setQ] = useState("");
+  const [editing, setEditing] = useState<Product | null>(null);
+  const [showForm, setShowForm] = useState(false);
+
+  if (!org) return null;
+  const products = zdb
+    .get()
+    .products.filter((p) => p.orgId === org.id)
+    .filter((p) => p.name.toLowerCase().includes(q.toLowerCase()));
+
+  const canDelete = user?.role === "owner";
+
+  const del = (id: string) => {
+    if (!confirm("Delete this product?")) return;
+    zdb.update((d) => {
+      d.products = d.products.filter((p) => p.id !== id);
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="font-display text-3xl font-black uppercase tracking-wider">
+            Products
+          </h1>
+          <p className="text-sm text-muted-foreground">{products.length} items</p>
+        </div>
+        <GoldButton onClick={() => { setEditing(null); setShowForm(true); }}>
+          <Plus className="h-4 w-4" /> Add Product
+        </GoldButton>
+      </div>
+
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search products…"
+          className="w-full rounded-md border border-white/10 bg-black/40 py-2.5 pl-10 pr-3 text-sm outline-none focus:border-[color:var(--gold)]/60"
+        />
+      </div>
+
+      <div className="panel clip-cut-card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-white/10 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
+                <th className="p-3">Name</th>
+                <th className="p-3">Category</th>
+                <th className="p-3 text-right">Cost</th>
+                <th className="p-3 text-right">Price</th>
+                <th className="p-3 text-right">Stock</th>
+                <th className="p-3" />
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((p) => (
+                <tr
+                  key={p.id}
+                  className="border-b border-white/5 last:border-0 hover:bg-white/5"
+                >
+                  <td className="p-3 font-semibold">{p.name}</td>
+                  <td className="p-3 text-muted-foreground">{p.category}</td>
+                  <td className="p-3 text-right">{fmtMoney(p.costPrice, org.currency)}</td>
+                  <td className="p-3 text-right font-bold text-gold">
+                    {fmtMoney(p.price, org.currency)}
+                  </td>
+                  <td
+                    className={`p-3 text-right font-bold ${
+                      p.stock <= p.minStock ? "text-amber-300" : ""
+                    }`}
+                  >
+                    {p.stock}
+                  </td>
+                  <td className="p-3">
+                    <div className="flex justify-end gap-1">
+                      <button
+                        onClick={() => { setEditing(p); setShowForm(true); }}
+                        className="grid h-8 w-8 place-items-center rounded hover:bg-white/10"
+                      >
+                        <Pencil className="h-4 w-4 text-gold" />
+                      </button>
+                      {canDelete && (
+                        <button
+                          onClick={() => del(p.id)}
+                          className="grid h-8 w-8 place-items-center rounded hover:bg-red-500/10"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-400" />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {products.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-muted-foreground">
+                    No products yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {showForm && (
+        <ProductForm
+          product={editing}
+          onClose={() => setShowForm(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+function ProductForm({ product, onClose }: { product: Product | null; onClose: () => void }) {
+  const { org } = useAuth();
+  const [form, setForm] = useState({
+    name: product?.name ?? "",
+    category: product?.category ?? "",
+    barcode: product?.barcode ?? "",
+    unit: product?.unit ?? "",
+    description: product?.description ?? "",
+    costPrice: product?.costPrice?.toString() ?? "",
+    price: product?.price?.toString() ?? "",
+    stock: product?.stock?.toString() ?? "",
+    minStock: product?.minStock?.toString() ?? "",
+  });
+  if (!org) return null;
+
+  const save = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name.trim()) return;
+    const price = Number(form.price) || 0;
+    const payload = {
+      name: form.name.trim(),
+      category: form.category.trim() || "General",
+      barcode: form.barcode.trim() || undefined,
+      unit: form.unit.trim() || undefined,
+      description: form.description.trim() || undefined,
+      costPrice: Number(form.costPrice) || 0,
+      price,
+      stock: Number(form.stock) || 0,
+      minStock: Number(form.minStock) || 0,
+    };
+    zdb.update((d) => {
+      if (product) {
+        const p = d.products.find((x) => x.id === product.id);
+        if (p) Object.assign(p, payload, { updatedAt: Date.now() });
+      } else {
+        d.products.push({
+          id: uid("p"),
+          orgId: org.id,
+          ...payload,
+          updatedAt: Date.now(),
+        });
+      }
+    });
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/80 p-4">
+      <form
+        onSubmit={save}
+        className="panel clip-cut-card w-full max-w-md space-y-4 p-6"
+      >
+        <h3 className="font-display text-xl font-black uppercase tracking-widest text-gold">
+          {product ? "Edit" : "Add"} Product
+        </h3>
+        <p className="-mt-2 text-[11px] text-muted-foreground">
+          Only Name and Price are required — every other field is optional so the system fits any business.
+        </p>
+        <Field label="Name *">
+          <input
+            required
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            className="input"
+          />
+        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Category">
+            <input
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              className="input"
+              placeholder="e.g. Drinks"
+            />
+          </Field>
+          <Field label="Unit">
+            <input
+              value={form.unit}
+              onChange={(e) => setForm({ ...form, unit: e.target.value })}
+              className="input"
+              placeholder="pcs, kg, ltr, box…"
+            />
+          </Field>
+          <Field label="Barcode / SKU">
+            <input
+              value={form.barcode}
+              onChange={(e) => setForm({ ...form, barcode: e.target.value })}
+              className="input"
+            />
+          </Field>
+          <Field label="Cost Price">
+            <input
+              type="number"
+              inputMode="decimal"
+              min={0}
+              value={form.costPrice}
+              onChange={(e) => setForm({ ...form, costPrice: e.target.value })}
+              className="input"
+            />
+          </Field>
+          <Field label="Selling Price *">
+            <input
+              required
+              type="number"
+              inputMode="decimal"
+              min={0}
+              value={form.price}
+              onChange={(e) => setForm({ ...form, price: e.target.value })}
+              className="input"
+            />
+          </Field>
+          <Field label="Stock">
+            <input
+              type="number"
+              min={0}
+              value={form.stock}
+              onChange={(e) => setForm({ ...form, stock: e.target.value })}
+              className="input"
+            />
+          </Field>
+          <Field label="Min Stock">
+            <input
+              type="number"
+              min={0}
+              value={form.minStock}
+              onChange={(e) => setForm({ ...form, minStock: e.target.value })}
+              className="input"
+            />
+          </Field>
+        </div>
+        <Field label="Description">
+          <textarea
+            rows={2}
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            className="input"
+          />
+        </Field>
+        <div className="flex gap-2 pt-2">
+          <GoldButton type="submit" className="flex-1">
+            Save
+          </GoldButton>
+          <GoldButton
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            className="flex-1"
+          >
+            Cancel
+          </GoldButton>
+        </div>
+        <style>{`.input{width:100%;border-radius:0.375rem;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.4);padding:0.5rem 0.75rem;font-size:0.875rem;outline:none}.input:focus{border-color:color-mix(in oklab,var(--gold) 60%,transparent)}`}</style>
+      </form>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </span>
+      {children}
+    </label>
+  );
+}
