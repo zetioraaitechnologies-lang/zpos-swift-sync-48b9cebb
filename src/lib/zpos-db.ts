@@ -141,6 +141,14 @@ const seed = (): DB => ({
 
 const listeners = new Set<() => void>();
 
+// Keep tabs of the same origin in sync — when another tab writes to the
+// same localStorage key, notify local subscribers so UI re-reads fresh data.
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (e) => {
+    if (e.key === KEY) listeners.forEach((l) => l());
+  });
+}
+
 function read(): DB {
   if (typeof window === "undefined") return seed();
   for (const legacy of LEGACY_KEYS) localStorage.removeItem(legacy);
