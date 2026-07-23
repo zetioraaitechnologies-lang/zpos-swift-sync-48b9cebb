@@ -1,91 +1,81 @@
-# Build ZPoS as a native app (Android / iOS) with Capacitor
+# Build ZPoS as an Android / iOS app (Capacitor)
 
-ZPoS is a Progressive Web App. To ship it on the Play Store / App Store,
-wrap the built site with Capacitor. Everything below runs on your own
-computer, not inside Lovable.
+Your web app is already PWA-ready. Capacitor lets you wrap the same code as
+a real installable Android APK/AAB or iOS app for the stores.
 
-## 1. Prerequisites
+## 1. Prerequisites (once)
 
-- Node.js 20+ and `bun` (or `npm`/`pnpm`)
-- **Android**: Android Studio + JDK 17
-- **iOS**: macOS with Xcode 15+ and CocoaPods (`sudo gem install cocoapods`)
+- Node 20+ and Bun (or npm)
+- **Android:** Android Studio (bundles JDK 17 + SDK)
+- **iOS:** macOS + Xcode 15+ + CocoaPods (`sudo gem install cocoapods`)
 
-## 2. Get the code locally
-
-1. In Lovable, click **GitHub → Connect to GitHub** and export the repo.
-2. Clone it and install deps:
+## 2. Clone your GitHub repo locally
 
 ```bash
-git clone <your-repo-url> zpos
-cd zpos
-bun install
+git clone https://github.com/<you>/<your-zpos-repo>.git
+cd <your-zpos-repo>
+bun install     # or npm install
 ```
 
-## 3. Add Capacitor
+## 3. Install Capacitor
 
 ```bash
-bun add @capacitor/core @capacitor/cli
-bun add @capacitor/android @capacitor/ios
-# optional but recommended
-bun add @capacitor/splash-screen @capacitor/status-bar @capacitor/app @capacitor/preferences
+bun add @capacitor/core @capacitor/cli @capacitor/android @capacitor/ios
 ```
 
-`capacitor.config.ts` is already committed at the project root
-(`appId: ai.zetiora.zpos`, `appName: ZPoS`, `webDir: dist`).
+`capacitor.config.ts` is already in the repo (appId `com.zetiora.zpos`,
+appName `ZPoS`, webDir `dist`).
 
-## 4. Initialize native projects
+## 4. Build the web assets
 
 ```bash
-bun run build          # produces /dist
-bunx cap add android   # creates /android
-bunx cap add ios       # creates /ios (macOS only)
+bun run build
+```
+
+This produces the production bundle. Capacitor copies from `dist/`.
+
+## 5. Add native platforms
+
+```bash
+bunx cap add android
+bunx cap add ios       # macOS only
+```
+
+## 6. Sync + open
+
+```bash
 bunx cap sync
+bunx cap open android  # launches Android Studio
+bunx cap open ios      # launches Xcode
 ```
 
-## 5. Run on a device / emulator
+From there:
+- **Android Studio → Run ▶** on an emulator or a plugged-in phone.
+- **Xcode → Product → Run** on a simulator or a signed device.
+
+## 7. Ship a release build
+
+- **Android:** Build → Generate Signed Bundle / APK → AAB → upload to Google Play.
+- **iOS:** Product → Archive → Distribute App → App Store Connect.
+
+## 8. Update after code changes
+
+Every time you push new web code:
 
 ```bash
-# Android
-bunx cap open android      # then Run ▶ in Android Studio
-
-# iOS
-bunx cap open ios          # then Run ▶ in Xcode
-```
-
-## 6. Update the app after code changes
-
-Every time you change web code:
-
-```bash
+git pull
+bun install
 bun run build
 bunx cap sync
 ```
 
-## 7. Icons & splash
+Then re-run in Android Studio / Xcode.
 
-Drop a 1024×1024 PNG at `resources/icon.png` and
-`resources/splash.png`, then:
+## Notes for ZPoS specifically
 
-```bash
-bun add -D @capacitor/assets
-bunx capacitor-assets generate
-```
-
-## 8. Cloud sync in the native app
-
-The Cloud Sync feature in **Settings → Cloud Sync** works out of the
-box inside Capacitor — it uses HTTPS calls to Lovable Cloud
-(Supabase). No extra native config required.
-
-## 9. Release builds
-
-- **Android**: Android Studio → `Build → Generate Signed Bundle / APK`.
-- **iOS**: Xcode → `Product → Archive → Distribute App`.
-
-## Troubleshooting
-
-- White screen on device: check the `webDir` in `capacitor.config.ts`
-  matches your build output (`dist`).
-- Mixed-content errors: keep `androidScheme: "https"` (already set).
-- Data disappears after reinstall: users must **Back up now** in
-  Settings → Cloud Sync before uninstalling.
+- Cloud sync uses the same Lovable Cloud backend from the native shell —
+  users sign in inside the app and their data syncs across web + mobile.
+- The offline database (localStorage) works inside the WebView with no
+  changes.
+- App icon / splash: drop 1024×1024 icons into `resources/` and run
+  `bunx @capacitor/assets generate` (optional).
