@@ -5,6 +5,7 @@ import { zdb } from "@/lib/zpos-db";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
+import { CloudSyncPanel } from "@/components/zpos/cloud-sync-panel";
 
 export const Route = createFileRoute("/_app/settings")({
   component: Settings,
@@ -175,6 +176,8 @@ function Settings() {
         <GoldButton type="submit">Save changes</GoldButton>
         <style>{`.input{width:100%;border-radius:0.375rem;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.4);padding:0.5rem 0.75rem;font-size:0.875rem;outline:none}.input:focus{border-color:color-mix(in oklab,var(--gold) 60%,transparent)}`}</style>
       </form>
+
+      <CloudSyncPanel />
     </div>
   );
 }
