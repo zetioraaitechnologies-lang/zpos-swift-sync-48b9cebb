@@ -45,9 +45,10 @@ export async function cloudPush(): Promise<{ updatedAt: string }> {
   const user = await cloudGetUser();
   if (!user) throw new Error("Sign in to cloud first");
   const db = zdb.get();
-  const payload = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const payload: any = {
     user_id: user.id,
-    data: db as unknown as Record<string, unknown>,
+    data: db,
     updated_at: new Date().toISOString(),
   };
   const { data, error } = await supabase
