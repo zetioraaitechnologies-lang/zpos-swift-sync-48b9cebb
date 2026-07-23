@@ -5,6 +5,7 @@ import { zdb } from "@/lib/zpos-db";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
+import { CloudSyncPanel } from "@/components/zpos/cloud-sync-panel";
 
 export const Route = createFileRoute("/_app/settings")({
   component: Settings,
