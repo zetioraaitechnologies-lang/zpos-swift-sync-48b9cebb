@@ -1,14 +1,9 @@
-// Automatic bidirectional cloud sync for ZPoS.
-//
-// Behavior:
-// - When a user is signed into cloud auth, on app boot we PULL their backup
-//   into localStorage so the same data appears on any browser/device.
-// - Every local write is debounced-pushed to the cloud (~1.5s after the last
-//   change) so all tabs/devices converge without a manual "Backup" click.
-// - A Supabase Realtime subscription on the user's own backup row pulls
-//   remote updates written by another device.
-//
-// Uses the same table + client as zpos-cloud.ts (public.zpos_cloud_backups).
+// Automatic bidirectional cloud sync for ZPOS, keyed by ORGANIZATION.
+// - On sign-in we look up the caller's org via user_roles and pull that org's
+//   shared backup blob into localStorage so all devices for the same business
+//   see the same data.
+// - Every local write is debounced-pushed (~1.5s) to the org's row.
+// - Realtime on that row pulls remote updates from other devices live.
 
 import { supabase } from "@/integrations/supabase/client";
 import { zdb } from "./zpos-db";
@@ -18,7 +13,7 @@ const LAST_HASH_KEY = "zpos:cloud:lastHash";
 const PUSH_DEBOUNCE_MS = 1500;
 
 let started = false;
-let currentUserId: string | null = null;
+let currentOrgId: string | null = null;
 let pushTimer: ReturnType<typeof setTimeout> | null = null;
 let unsubscribeDb: (() => void) | null = null;
 let realtimeChannel: ReturnType<typeof supabase.channel> | null = null;
@@ -32,12 +27,25 @@ function hashOf(obj: unknown): string {
   return String(h);
 }
 
+async function resolveOrgIdFor(userId: string): Promise<string | null> {
+  const { data } = await supabase
+    .from("user_roles")
+    .select("org_id, role")
+    .eq("user_id", userId)
+    .in("role", ["owner", "cashier"])
+    .not("org_id", "is", null)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  return (data?.org_id as string | undefined) ?? null;
+}
+
 async function pullOnce(): Promise<void> {
-  if (!currentUserId) return;
+  if (!currentOrgId) return;
   const { data, error } = await supabase
     .from("zpos_cloud_backups")
     .select("data, updated_at")
-    .eq("user_id", currentUserId)
+    .eq("org_id", currentOrgId)
     .maybeSingle();
   if (error || !data) return;
   const remoteHash = hashOf(data.data);
@@ -51,7 +59,6 @@ async function pullOnce(): Promise<void> {
     localStorage.setItem(DB_KEY, JSON.stringify(data.data));
     localStorage.setItem(LAST_HASH_KEY, remoteHash);
     lastRemoteAt = data.updated_at as string;
-    // notify local subscribers (same tab) and other tabs via storage event
     zdb.update(() => {});
   } finally {
     applyingRemote = false;
@@ -59,19 +66,21 @@ async function pullOnce(): Promise<void> {
 }
 
 async function pushNow(): Promise<void> {
-  if (!currentUserId) return;
+  if (!currentOrgId) return;
   const db = zdb.get();
   const h = hashOf(db);
   if (h === localStorage.getItem(LAST_HASH_KEY)) return;
-  const row = {
-    user_id: currentUserId,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: db as any,
-    updated_at: new Date().toISOString(),
-  };
   const { data, error } = await supabase
     .from("zpos_cloud_backups")
-    .upsert(row, { onConflict: "user_id" })
+    .upsert(
+      {
+        org_id: currentOrgId,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        data: db as any,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "org_id" },
+    )
     .select("updated_at")
     .single();
   if (error) {
@@ -83,7 +92,7 @@ async function pushNow(): Promise<void> {
 }
 
 function schedulePush() {
-  if (applyingRemote || !currentUserId) return;
+  if (applyingRemote || !currentOrgId) return;
   if (pushTimer) clearTimeout(pushTimer);
   pushTimer = setTimeout(() => {
     pushTimer = null;
@@ -92,41 +101,45 @@ function schedulePush() {
 }
 
 function attachRealtime() {
-  if (!currentUserId) return;
+  if (!currentOrgId) return;
   if (realtimeChannel) {
-    supabase.removeChannel(realtimeChannel);
+    void supabase.removeChannel(realtimeChannel);
     realtimeChannel = null;
   }
   realtimeChannel = supabase
-    .channel(`zpos-backup-${currentUserId}`)
+    .channel(`zpos-backup-${currentOrgId}`)
     .on(
       "postgres_changes",
       {
         event: "*",
         schema: "public",
         table: "zpos_cloud_backups",
-        filter: `user_id=eq.${currentUserId}`,
+        filter: `org_id=eq.${currentOrgId}`,
       },
       (payload) => {
         const newAt = (payload.new as { updated_at?: string } | null)?.updated_at;
-        if (newAt && newAt === lastRemoteAt) return; // our own write
+        if (newAt && newAt === lastRemoteAt) return;
         void pullOnce();
       },
     )
     .subscribe();
 }
 
-async function bindToUser(userId: string | null) {
-  if (userId === currentUserId) return;
-  currentUserId = userId;
+async function bindToOrg(orgId: string | null) {
+  if (orgId === currentOrgId) return;
+  currentOrgId = orgId;
   if (realtimeChannel) {
     await supabase.removeChannel(realtimeChannel);
     realtimeChannel = null;
   }
-  if (!userId) return;
+  // New org context — clear stale hash so first pull is guaranteed to apply.
+  localStorage.removeItem(LAST_HASH_KEY);
+  if (!orgId) return;
   await pullOnce();
   attachRealtime();
-  // If cloud had no row yet, push local seed so a fresh device gets the same data.
+  // If the org's row doesn't exist yet, push local blob so a fresh device
+  // still ends up with something. Guarded by hash so it's a no-op if already
+  // in sync.
   await pushNow();
 }
 
@@ -135,17 +148,25 @@ export function startCloudSync() {
   if (started || typeof window === "undefined") return;
   started = true;
 
-  void supabase.auth.getUser().then(({ data }) => bindToUser(data.user?.id ?? null));
+  const bindFromSession = async (userId: string | null | undefined) => {
+    if (!userId) {
+      await bindToOrg(null);
+      return;
+    }
+    const orgId = await resolveOrgIdFor(userId);
+    await bindToOrg(orgId);
+  };
+
+  void supabase.auth.getUser().then(({ data }) => bindFromSession(data.user?.id));
 
   supabase.auth.onAuthStateChange((event, session) => {
-    if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED" || event === "TOKEN_REFRESHED") {
-      void bindToUser(session?.user?.id ?? null);
+    if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
+      void bindFromSession(session?.user?.id);
     }
   });
 
   unsubscribeDb = zdb.subscribe(() => schedulePush());
 
-  // Flush any pending push before the tab closes.
   window.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden" && pushTimer) {
       clearTimeout(pushTimer);
@@ -155,7 +176,6 @@ export function startCloudSync() {
   });
 }
 
-/** Test/teardown helper. */
 export function _stopCloudSync() {
   started = false;
   if (unsubscribeDb) unsubscribeDb();
@@ -164,5 +184,9 @@ export function _stopCloudSync() {
   pushTimer = null;
   if (realtimeChannel) void supabase.removeChannel(realtimeChannel);
   realtimeChannel = null;
-  currentUserId = null;
+  currentOrgId = null;
+}
+
+export async function currentSyncOrgId() {
+  return currentOrgId;
 }
