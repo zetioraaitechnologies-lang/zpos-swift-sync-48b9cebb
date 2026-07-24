@@ -480,20 +480,28 @@ export type Database = {
       zpos_cloud_backups: {
         Row: {
           data: Json
+          org_id: string
           updated_at: string
-          user_id: string
         }
         Insert: {
           data?: Json
+          org_id: string
           updated_at?: string
-          user_id: string
         }
         Update: {
           data?: Json
+          org_id?: string
           updated_at?: string
-          user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "zpos_cloud_backups_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
