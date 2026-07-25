@@ -1,24 +1,48 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { UserPlus, Ban, CheckCircle2 } from "lucide-react";
-import { zdb, uid } from "@/lib/zpos-db";
+import { useCallback, useEffect, useState } from "react";
+import { UserPlus, Trash2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
-import { resolveIdentifiers } from "@/lib/zpos-identifiers";
+import { inviteCashier, removeCashier } from "@/lib/admin.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/employees")({
   component: Employees,
 });
 
+interface EmployeeRow {
+  id: string;
+  user_id: string | null;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  role_label: string | null;
+  wage: number | null;
+}
+
 function Employees() {
   const { org, user } = useAuth();
-  const [, setV] = useState(0);
-  useEffect(() => {
-    const u = zdb.subscribe(() => setV((n) => n + 1));
-    return () => { u(); };
-  }, []);
+  const [rows, setRows] = useState<EmployeeRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const [show, setShow] = useState(false);
+
+  const load = useCallback(async () => {
+    if (!org) return;
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("employees")
+      .select("id, user_id, name, email, phone, role_label, wage")
+      .eq("org_id", org.id)
+      .order("name");
+    if (error) toast.error(error.message);
+    setRows((data ?? []) as EmployeeRow[]);
+    setLoading(false);
+  }, [org]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   if (!org || user?.role !== "owner") {
     return (
@@ -27,9 +51,21 @@ function Employees() {
       </div>
     );
   }
-  const staff = zdb
-    .get()
-    .users.filter((u) => u.orgId === org.id);
+
+  const remove = async (row: EmployeeRow) => {
+    if (!row.user_id) {
+      toast.error("This employee has no login account attached.");
+      return;
+    }
+    if (!confirm(`Remove ${row.name}'s access to this business?`)) return;
+    try {
+      await removeCashier({ data: { orgId: org.id, userId: row.user_id } });
+      toast.success("Cashier removed");
+      void load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -38,7 +74,9 @@ function Employees() {
           <h1 className="font-display text-3xl font-black uppercase tracking-wider">
             Employees
           </h1>
-          <p className="text-sm text-muted-foreground">{staff.length} accounts</p>
+          <p className="text-sm text-muted-foreground">
+            {loading ? "Loading…" : `${rows.length} accounts`}
+          </p>
         </div>
         <GoldButton onClick={() => setShow(true)}>
           <UserPlus className="h-4 w-4" /> Add Cashier
@@ -46,187 +84,159 @@ function Employees() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {staff.map((s) => (
+        {rows.map((s) => (
           <div key={s.id} className="panel clip-cut-card p-4">
             <div className="flex items-center gap-3">
               <div className="grid h-12 w-12 place-items-center rounded-full bg-gold-gradient font-display text-lg font-black text-black">
-                {s.name[0]}
+                {s.name?.[0] ?? "?"}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="truncate font-display font-bold text-gold">
                   {s.name}
                 </div>
                 <div className="truncate text-xs text-muted-foreground">
-                  {s.email}
+                  {s.email ?? s.phone ?? "—"}
                 </div>
                 <div className="mt-1 inline-block rounded bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-widest">
-                  {s.role}
+                  {s.role_label ?? "Cashier"}
                 </div>
               </div>
             </div>
-            {s.role === "cashier" && (
+            {s.user_id && (
               <div className="mt-3 border-t border-white/5 pt-3">
                 <button
-                  onClick={() => {
-                    zdb.update((d) => {
-                      const u = d.users.find((x) => x.id === s.id);
-                      if (u) u.disabled = !u.disabled;
-                    });
-                  }}
-                  className={`inline-flex w-full items-center justify-center gap-2 rounded-md border py-1.5 text-[11px] font-bold uppercase tracking-widest ${
-                    s.disabled
-                      ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
-                      : "border-red-400/30 bg-red-400/10 text-red-300"
-                  }`}
+                  onClick={() => remove(s)}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-red-400/30 bg-red-400/10 py-1.5 text-[11px] font-bold uppercase tracking-widest text-red-300"
                 >
-                  {s.disabled ? (
-                    <>
-                      <CheckCircle2 className="h-3.5 w-3.5" /> Enable
-                    </>
-                  ) : (
-                    <>
-                      <Ban className="h-3.5 w-3.5" /> Disable
-                    </>
-                  )}
+                  <Trash2 className="h-3.5 w-3.5" /> Remove access
                 </button>
               </div>
             )}
           </div>
         ))}
+        {!loading && rows.length === 0 && (
+          <div className="col-span-full panel clip-cut-card p-8 text-center text-muted-foreground">
+            No cashiers yet. Click <span className="text-gold">Add Cashier</span> to issue their login.
+          </div>
+        )}
       </div>
 
-      {show && <CashierForm onClose={() => setShow(false)} />}
+      {show && (
+        <CashierForm
+          onClose={() => setShow(false)}
+          onDone={() => {
+            setShow(false);
+            void load();
+          }}
+        />
+      )}
     </div>
   );
 }
 
-function CashierForm({ onClose }: { onClose: () => void }) {
+function CashierForm({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
   const { org } = useAuth();
-  const [mode, setMode] = useState<"email" | "phone">("email");
-  const [f, setF] = useState({ name: "", email: "", phone: "", password: "" });
+  const [f, setF] = useState({ name: "", email: "", phone: "", password: "", wage: "" });
+  const [busy, setBusy] = useState(false);
   if (!org) return null;
-  const save = (e: React.FormEvent) => {
+
+  const save = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { email, phone } = resolveIdentifiers(
-      mode === "email" ? f.email : "",
-      mode === "phone" ? f.phone : "",
-    );
-    if (!email) {
-      toast.error(mode === "phone" ? "Phone number is required" : "Email is required");
-      return;
-    }
-    let dup = false;
-    zdb.update((d) => {
-      if (d.users.some((u) => u.email.toLowerCase() === email.toLowerCase())) {
-        dup = true;
-        return;
-      }
-      d.users.push({
-        id: uid("u"),
-        name: f.name,
-        email,
-        phone: phone || undefined,
-        password: f.password,
-        role: "cashier",
-        orgId: org.id,
+    setBusy(true);
+    try {
+      const pw = f.password.trim() || "Cash" + Math.random().toString(36).slice(2, 10);
+      await inviteCashier({
+        data: {
+          orgId: org.id,
+          name: f.name,
+          email: f.email.trim(),
+          password: pw,
+          phone: f.phone || undefined,
+          wage: f.wage ? Number(f.wage) : undefined,
+        },
       });
-    });
-    if (dup) {
-      toast.error("A user with that identifier already exists.");
-      return;
+      toast.success(`Cashier created · ${f.email.trim()} / ${pw}`, { duration: 20000 });
+      onDone();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to add cashier");
+    } finally {
+      setBusy(false);
     }
-    toast.success("Cashier added");
-    onClose();
   };
+
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4">
       <form onSubmit={save} className="panel clip-cut-card w-full max-w-md space-y-4 p-6">
         <h3 className="font-display text-xl font-black uppercase tracking-widest text-gold">
           Add Cashier
         </h3>
+        <p className="text-xs text-muted-foreground">
+          Creates a login account for this business. Copy the credentials
+          before closing the confirmation toast.
+        </p>
 
-        <div className="grid grid-cols-2 gap-1 rounded-md border border-border bg-muted/60 p-1">
-          {(["email", "phone"] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => setMode(m)}
-              className={`rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-widest transition ${
-                mode === m
-                  ? "bg-gold-gradient text-black"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {m}
-            </button>
-          ))}
-        </div>
-
-        <label className="block">
-          <span className="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-            Name
-          </span>
+        <FormRow label="Name">
           <input
             required
             value={f.name}
             onChange={(e) => setF({ ...f, name: e.target.value })}
             className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
-        </label>
-
-        {mode === "email" ? (
-          <label className="block">
-            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Email
-            </span>
-            <input
-              required
-              type="email"
-              value={f.email}
-              onChange={(e) => setF({ ...f, email: e.target.value })}
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
-            />
-          </label>
-        ) : (
-          <label className="block">
-            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Phone number
-            </span>
-            <input
-              required
-              type="tel"
-              inputMode="tel"
-              value={f.phone}
-              onChange={(e) => setF({ ...f, phone: e.target.value })}
-              placeholder="0712 345 678"
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
-            />
-            <span className="mt-1 block text-[10px] text-muted-foreground">
-              Phone-only accounts sign in with just the number.
-            </span>
-          </label>
-        )}
-
-        <label className="block">
-          <span className="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-            Password
-          </span>
+        </FormRow>
+        <FormRow label="Email">
           <input
             required
+            type="email"
+            value={f.email}
+            onChange={(e) => setF({ ...f, email: e.target.value })}
+            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+          />
+        </FormRow>
+        <FormRow label="Phone (optional)">
+          <input
+            type="tel"
+            value={f.phone}
+            onChange={(e) => setF({ ...f, phone: e.target.value })}
+            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+          />
+        </FormRow>
+        <FormRow label="Wage (optional)">
+          <input
+            type="number"
+            value={f.wage}
+            onChange={(e) => setF({ ...f, wage: e.target.value })}
+            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+          />
+        </FormRow>
+        <FormRow label="Password (leave blank to auto-generate)">
+          <input
             type="text"
             value={f.password}
             onChange={(e) => setF({ ...f, password: e.target.value })}
             className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
-        </label>
+        </FormRow>
 
         <div className="flex gap-2 pt-2">
-          <GoldButton type="submit" className="flex-1">Create</GoldButton>
+          <GoldButton type="submit" className="flex-1" disabled={busy}>
+            {busy ? "Creating…" : "Create"}
+          </GoldButton>
           <GoldButton type="button" variant="outline" onClick={onClose} className="flex-1">
             Cancel
           </GoldButton>
         </div>
       </form>
     </div>
+  );
+}
+
+function FormRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </span>
+      {children}
+    </label>
   );
 }
