@@ -165,43 +165,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { ok: true };
   };
 
-  const signUpOwner: AuthCtx["signUpOwner"] = async (input) => {
-    const { data, error } = await supabase.auth.signUp({
-      email: input.email.trim(),
-      password: input.password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/`,
-        data: { display_name: input.ownerName },
-      },
-    });
-    if (error) return { ok: false, error: error.message };
-
-    // If email confirmation is required and there's no session yet, we can't
-    // create the org (INSERT policy needs auth.uid()). Owner will need to
-    // confirm email and then complete onboarding on first sign-in.
-    if (!data.session) {
-      return {
-        ok: true,
-        error: "Check your email to confirm your account, then sign in to finish setup.",
-      };
-    }
-
-    const { error: orgErr } = await supabase.from("organizations").insert({
-      business_name: input.businessName,
-      owner_user_id: data.user!.id,
-      phone: input.phone,
-      email: input.email.trim(),
-      address: input.address,
-      category: input.category || "Retail",
-      currency: input.currency || "TZS",
-    });
-    if (orgErr) return { ok: false, error: orgErr.message };
-
-    // Refresh so we pick up role + org immediately.
-    await applySession({ user: data.user! });
-    return { ok: true };
-  };
-
   const logout: AuthCtx["logout"] = async () => {
     await supabase.auth.signOut();
   };
@@ -212,7 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const value = useMemo(
-    () => ({ user, org, ready, login, signUpOwner, logout, refresh }),
+    () => ({ user, org, ready, login, logout, refresh }),
     [user, org, ready],
   );
 
