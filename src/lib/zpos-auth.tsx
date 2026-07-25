@@ -35,16 +35,6 @@ interface AuthCtx {
     identifier: string,
     password: string,
   ) => Promise<{ ok: boolean; error?: string }>;
-  signUpOwner: (input: {
-    email: string;
-    password: string;
-    ownerName: string;
-    businessName: string;
-    phone?: string;
-    category?: string;
-    address?: string;
-    currency?: string;
-  }) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
