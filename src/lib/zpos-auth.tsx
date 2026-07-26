@@ -21,11 +21,22 @@ import {
 } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { claimSuperAdmin } from "./admin.functions";
-import type { AppUser, Organization } from "./zpos-db";
-import { zdb } from "./zpos-db";
 
-const DB_KEY = "zpos:db:v2";
-const LAST_HASH_KEY = "zpos:cloud:lastHash";
+export type UserRole = "super_admin" | "owner" | "cashier";
+
+export interface AppUser {
+  id: string;
+  email: string;
+  phone?: string;
+  name: string;
+  password: string;
+  role: UserRole;
+  orgId?: string;
+  disabled?: boolean;
+}
+
+export type { Organization } from "./zpos-data";
+import type { Organization } from "./zpos-data";
 
 interface AuthCtx {
   user: AppUser | null;
