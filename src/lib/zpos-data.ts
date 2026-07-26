@@ -455,8 +455,8 @@ export async function recordSale(orgId: string, input: RecordSaleInput): Promise
     })),
     _discount: input.discount,
     _payment: input.payment,
-    _customer_id: input.customerId ?? null,
-    _customer_name: input.customerName ?? null,
+    _customer_id: input.customerId ?? undefined,
+    _customer_name: input.customerName ?? undefined,
   });
   if (error) throw error;
   return String(data);
@@ -478,7 +478,7 @@ export async function updateOrgSettings(
   if (patch.vatNumber !== undefined) upd.vat_number = patch.vatNumber || null;
   if (patch.vatRate !== undefined) upd.vat_rate = patch.vatRate ?? null;
   if (patch.website !== undefined) upd.website = patch.website || null;
-  const { error } = await supabase.from("organizations").update(upd).eq("id", orgId);
+  const { error } = await supabase.from("organizations").update(upd as never).eq("id", orgId);
   if (error) throw error;
 }
 
