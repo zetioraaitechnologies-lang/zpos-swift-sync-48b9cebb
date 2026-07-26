@@ -1,9 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import { zdb, uid, fmtMoney, type Expense } from "@/lib/zpos-db";
+import {
+  fmtMoney,
+  useLive,
+  listExpenses,
+  addExpense,
+  deleteExpense,
+  type Expense,
+} from "@/lib/zpos-data";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
+import { toast } from "sonner";
 
 const CATS: Expense["category"][] = [
   "Rent",
@@ -19,19 +27,26 @@ export const Route = createFileRoute("/_app/expenses")({
 
 function Expenses() {
   const { org } = useAuth();
-  const [, setV] = useState(0);
-  useEffect(() => {
-    const u = zdb.subscribe(() => setV((n) => n + 1));
-    return () => { u(); };
-  }, []);
+  const { data: items, refresh } = useLive<Expense[]>(
+    org?.id,
+    ["expenses"],
+    listExpenses,
+    [],
+  );
   const [show, setShow] = useState(false);
 
   if (!org) return null;
-  const items = zdb
-    .get()
-    .expenses.filter((e) => e.orgId === org.id)
-    .sort((a, b) => b.createdAt - a.createdAt);
   const total = items.reduce((a, e) => a + e.amount, 0);
+
+  const del = async (id: string) => {
+    if (!confirm("Delete expense?")) return;
+    try {
+      await deleteExpense(id);
+      await refresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -73,12 +88,7 @@ function Expenses() {
                 </td>
                 <td className="p-3">
                   <button
-                    onClick={() => {
-                      if (!confirm("Delete expense?")) return;
-                      zdb.update((d) => {
-                        d.expenses = d.expenses.filter((x) => x.id !== e.id);
-                      });
-                    }}
+                    onClick={() => del(e.id)}
                     className="grid h-8 w-8 place-items-center rounded hover:bg-red-500/10"
                   >
                     <Trash2 className="h-4 w-4 text-red-400" />
@@ -97,31 +107,30 @@ function Expenses() {
         </table>
       </div>
 
-      {show && <ExpenseForm onClose={() => setShow(false)} />}
+      {show && <ExpenseForm onClose={() => { setShow(false); void refresh(); }} />}
     </div>
   );
 }
 
 function ExpenseForm({ onClose }: { onClose: () => void }) {
-  const { org } = useAuth();
+  const { org, user } = useAuth();
   const [cat, setCat] = useState<Expense["category"]>("Rent");
   const [amt, setAmt] = useState(0);
   const [note, setNote] = useState("");
-  if (!org) return null;
+  const [busy, setBusy] = useState(false);
+  if (!org || !user) return null;
 
-  const save = (e: React.FormEvent) => {
+  const save = async (e: React.FormEvent) => {
     e.preventDefault();
-    zdb.update((d) => {
-      d.expenses.push({
-        id: uid("e"),
-        orgId: org.id,
-        category: cat,
-        amount: amt,
-        note,
-        createdAt: Date.now(),
-      });
-    });
-    onClose();
+    setBusy(true);
+    try {
+      await addExpense(org.id, user.id, { category: cat, amount: amt, note });
+      onClose();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -170,7 +179,9 @@ function ExpenseForm({ onClose }: { onClose: () => void }) {
           />
         </label>
         <div className="flex gap-2 pt-2">
-          <GoldButton type="submit" className="flex-1">Save</GoldButton>
+          <GoldButton type="submit" className="flex-1" disabled={busy}>
+            {busy ? "Saving…" : "Save"}
+          </GoldButton>
           <GoldButton type="button" variant="outline" onClick={onClose} className="flex-1">
             Cancel
           </GoldButton>

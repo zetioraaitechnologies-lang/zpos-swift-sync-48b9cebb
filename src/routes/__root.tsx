@@ -143,7 +143,6 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   useEffect(() => {
     void import("@/lib/pwa-register").then((m) => m.registerPwaServiceWorker());
-    void import("@/lib/zpos-cloud-sync").then((m) => m.startCloudSync());
   }, []);
   return (
     <QueryClientProvider client={queryClient}>

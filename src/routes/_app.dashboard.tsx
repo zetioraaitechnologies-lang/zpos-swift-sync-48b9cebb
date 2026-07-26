@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import { DollarSign, TrendingUp, Package, AlertTriangle } from "lucide-react";
 import {
   BarChart,
@@ -13,7 +12,14 @@ import {
   LineChart,
 } from "recharts";
 import { StatCard } from "@/components/zpos/stat-card";
-import { zdb, fmtMoney } from "@/lib/zpos-db";
+import {
+  fmtMoney,
+  useLive,
+  listProducts,
+  listSales,
+  type Product,
+  type Sale,
+} from "@/lib/zpos-data";
 import { useAuth } from "@/lib/zpos-auth";
 
 export const Route = createFileRoute("/_app/dashboard")({
@@ -22,13 +28,10 @@ export const Route = createFileRoute("/_app/dashboard")({
 
 function Dashboard() {
   const { org } = useAuth();
-  const [, setV] = useState(0);
-  useEffect(() => zdb.subscribe(() => setV((n) => n + 1)) as unknown as void, []);
+  const { data: products } = useLive<Product[]>(org?.id, ["products"], listProducts, []);
+  const { data: sales } = useLive<Sale[]>(org?.id, ["sales"], listSales, []);
 
   if (!org) return null;
-  const db = zdb.get();
-  const products = db.products.filter((p) => p.orgId === org.id);
-  const sales = db.sales.filter((s) => s.orgId === org.id);
   const today0 = new Date();
   today0.setHours(0, 0, 0, 0);
   const todaySales = sales.filter((s) => s.createdAt >= today0.getTime());
@@ -36,7 +39,6 @@ function Dashboard() {
   const todayProfit = todaySales.reduce((a, s) => a + s.profit, 0);
   const lowStock = products.filter((p) => p.stock <= p.minStock);
 
-  // last 7 days chart
   const days = Array.from({ length: 7 }).map((_, i) => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -62,29 +64,10 @@ function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Today's Sales"
-          value={String(todaySales.length)}
-          hint="transactions"
-          icon={TrendingUp}
-        />
-        <StatCard
-          label="Today's Revenue"
-          value={fmtMoney(todayRevenue, org.currency)}
-          icon={DollarSign}
-          accent
-        />
-        <StatCard
-          label="Today's Profit"
-          value={fmtMoney(todayProfit, org.currency)}
-          icon={TrendingUp}
-        />
-        <StatCard
-          label="Low Stock"
-          value={String(lowStock.length)}
-          hint={`${products.length} total products`}
-          icon={AlertTriangle}
-        />
+        <StatCard label="Today's Sales" value={String(todaySales.length)} hint="transactions" icon={TrendingUp} />
+        <StatCard label="Today's Revenue" value={fmtMoney(todayRevenue, org.currency)} icon={DollarSign} accent />
+        <StatCard label="Today's Profit" value={fmtMoney(todayProfit, org.currency)} icon={TrendingUp} />
+        <StatCard label="Low Stock" value={String(lowStock.length)} hint={`${products.length} total products`} icon={AlertTriangle} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -124,20 +107,8 @@ function Dashboard() {
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0 0)" />
                 <XAxis dataKey="day" stroke="oklch(0.7 0 0)" fontSize={11} />
                 <YAxis stroke="oklch(0.7 0 0)" fontSize={11} />
-                <Tooltip
-                  contentStyle={{
-                    background: "oklch(0.18 0.008 60)",
-                    border: "1px solid var(--gold)",
-                    borderRadius: 6,
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="count"
-                  stroke="var(--gold)"
-                  strokeWidth={2}
-                  dot={{ fill: "var(--gold)" }}
-                />
+                <Tooltip contentStyle={{ background: "oklch(0.18 0.008 60)", border: "1px solid var(--gold)", borderRadius: 6 }} />
+                <Line type="monotone" dataKey="count" stroke="var(--gold)" strokeWidth={2} dot={{ fill: "var(--gold)" }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -158,24 +129,21 @@ function Dashboard() {
             </div>
           ) : (
             <ul className="divide-y divide-white/5">
-              {sales
-                .slice(-6)
-                .reverse()
-                .map((s) => (
-                  <li key={s.id} className="flex items-center justify-between py-2.5">
-                    <div>
-                      <div className="text-sm font-semibold">
-                        {s.items.length} item{s.items.length > 1 ? "s" : ""}
-                      </div>
-                      <div className="text-[11px] uppercase tracking-widest text-muted-foreground">
-                        {new Date(s.createdAt).toLocaleTimeString()} · {s.payment}
-                      </div>
+              {sales.slice(0, 6).map((s) => (
+                <li key={s.id} className="flex items-center justify-between py-2.5">
+                  <div>
+                    <div className="text-sm font-semibold">
+                      {s.items.length} item{s.items.length > 1 ? "s" : ""}
                     </div>
-                    <div className="font-display font-bold text-gold">
-                      {fmtMoney(s.total, org.currency)}
+                    <div className="text-[11px] uppercase tracking-widest text-muted-foreground">
+                      {new Date(s.createdAt).toLocaleTimeString()} · {s.payment}
                     </div>
-                  </li>
-                ))}
+                  </div>
+                  <div className="font-display font-bold text-gold">
+                    {fmtMoney(s.total, org.currency)}
+                  </div>
+                </li>
+              ))}
             </ul>
           )}
         </div>

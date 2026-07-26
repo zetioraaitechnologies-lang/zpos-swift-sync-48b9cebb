@@ -21,11 +21,22 @@ import {
 } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { claimSuperAdmin } from "./admin.functions";
-import type { AppUser, Organization } from "./zpos-db";
-import { zdb } from "./zpos-db";
 
-const DB_KEY = "zpos:db:v2";
-const LAST_HASH_KEY = "zpos:cloud:lastHash";
+export type UserRole = "super_admin" | "owner" | "cashier";
+
+export interface AppUser {
+  id: string;
+  email: string;
+  phone?: string;
+  name: string;
+  password: string;
+  role: UserRole;
+  orgId?: string;
+  disabled?: boolean;
+}
+
+export type { Organization } from "./zpos-data";
+import type { Organization } from "./zpos-data";
 
 interface AuthCtx {
   user: AppUser | null;
@@ -105,14 +116,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!session?.user) {
       setUser(null);
       setOrg(null);
-      // Wipe local blob & sync markers so the next signed-in user starts clean.
-      try {
-        localStorage.removeItem(DB_KEY);
-        localStorage.removeItem(LAST_HASH_KEY);
-      } catch {
-        /* noop */
-      }
-      zdb.reset();
       return;
     }
 
@@ -186,15 +189,4 @@ export function useAuth() {
   const ctx = useContext(Ctx);
   if (!ctx) throw new Error("useAuth outside AuthProvider");
   return ctx;
-}
-
-// Kept for API compatibility with older screens.
-export function useDbVersion() {
-  const [, setV] = useState(0);
-  useEffect(() => {
-    const unsub = zdb.subscribe(() => setV((n) => n + 1));
-    return () => {
-      unsub();
-    };
-  }, []);
 }

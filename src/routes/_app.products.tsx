@@ -1,9 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
-import { zdb, fmtMoney, uid, type Product } from "@/lib/zpos-db";
+import {
+  fmtMoney,
+  useLive,
+  listProducts,
+  upsertProduct,
+  deleteProduct,
+  type Product,
+} from "@/lib/zpos-data";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/products")({
   component: Products,
@@ -11,30 +19,31 @@ export const Route = createFileRoute("/_app/products")({
 
 function Products() {
   const { org, user } = useAuth();
-  const [, setV] = useState(0);
-  useEffect(() => {
-    const u = zdb.subscribe(() => setV((n) => n + 1));
-    return () => {
-      u();
-    };
-  }, []);
+  const { data: all, refresh } = useLive<Product[]>(
+    org?.id,
+    ["products"],
+    listProducts,
+    [],
+  );
   const [q, setQ] = useState("");
   const [editing, setEditing] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
 
   if (!org) return null;
-  const products = zdb
-    .get()
-    .products.filter((p) => p.orgId === org.id)
-    .filter((p) => p.name.toLowerCase().includes(q.toLowerCase()));
+  const products = all.filter((p) =>
+    p.name.toLowerCase().includes(q.toLowerCase()),
+  );
 
   const canDelete = user?.role === "owner";
 
-  const del = (id: string) => {
+  const del = async (id: string) => {
     if (!confirm("Delete this product?")) return;
-    zdb.update((d) => {
-      d.products = d.products.filter((p) => p.id !== id);
-    });
+    try {
+      await deleteProduct(id);
+      await refresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to delete");
+    }
   };
 
   return (
@@ -128,7 +137,7 @@ function Products() {
       {showForm && (
         <ProductForm
           product={editing}
-          onClose={() => setShowForm(false)}
+          onClose={() => { setShowForm(false); void refresh(); }}
         />
       )}
     </div>
@@ -137,6 +146,7 @@ function Products() {
 
 function ProductForm({ product, onClose }: { product: Product | null; onClose: () => void }) {
   const { org } = useAuth();
+  const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
     name: product?.name ?? "",
     category: product?.category ?? "",
@@ -150,35 +160,33 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
   });
   if (!org) return null;
 
-  const save = (e: React.FormEvent) => {
+  const save = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) return;
-    const price = Number(form.price) || 0;
-    const payload = {
-      name: form.name.trim(),
-      category: form.category.trim() || "General",
-      barcode: form.barcode.trim() || undefined,
-      unit: form.unit.trim() || undefined,
-      description: form.description.trim() || undefined,
-      costPrice: Number(form.costPrice) || 0,
-      price,
-      stock: Number(form.stock) || 0,
-      minStock: Number(form.minStock) || 0,
-    };
-    zdb.update((d) => {
-      if (product) {
-        const p = d.products.find((x) => x.id === product.id);
-        if (p) Object.assign(p, payload, { updatedAt: Date.now() });
-      } else {
-        d.products.push({
-          id: uid("p"),
-          orgId: org.id,
-          ...payload,
-          updatedAt: Date.now(),
-        });
-      }
-    });
-    onClose();
+    setBusy(true);
+    try {
+      await upsertProduct(
+        org.id,
+        {
+          name: form.name.trim(),
+          category: form.category.trim() || "General",
+          barcode: form.barcode.trim() || undefined,
+          unit: form.unit.trim() || undefined,
+          description: form.description.trim() || undefined,
+          costPrice: Number(form.costPrice) || 0,
+          price: Number(form.price) || 0,
+          stock: Number(form.stock) || 0,
+          minStock: Number(form.minStock) || 0,
+        },
+        product?.id,
+      );
+      toast.success(product ? "Product updated" : "Product added");
+      onClose();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -274,8 +282,8 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
           />
         </Field>
         <div className="flex gap-2 pt-2">
-          <GoldButton type="submit" className="flex-1">
-            Save
+          <GoldButton type="submit" className="flex-1" disabled={busy}>
+            {busy ? "Saving…" : "Save"}
           </GoldButton>
           <GoldButton
             type="button"

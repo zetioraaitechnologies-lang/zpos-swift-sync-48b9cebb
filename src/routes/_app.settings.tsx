@@ -1,23 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Upload, Image as ImageIcon } from "lucide-react";
-import { zdb } from "@/lib/zpos-db";
+import { updateOrgSettings } from "@/lib/zpos-data";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
-import { CloudSyncPanel } from "@/components/zpos/cloud-sync-panel";
 
 export const Route = createFileRoute("/_app/settings")({
   component: Settings,
 });
 
 function Settings() {
-  const { org, user } = useAuth();
-  const [, setV] = useState(0);
-  useEffect(() => {
-    const u = zdb.subscribe(() => setV((n) => n + 1));
-    return () => { u(); };
-  }, []);
+  const { org, user, refresh } = useAuth();
+  const [busy, setBusy] = useState(false);
   const [f, setF] = useState(() => ({
     businessName: org?.businessName ?? "",
     phone: org?.phone ?? "",
@@ -42,43 +37,41 @@ function Settings() {
   }
 
   const onPickLogo = (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please pick an image file");
-      return;
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("Logo must be smaller than 2MB");
-      return;
-    }
+    if (!file.type.startsWith("image/")) return toast.error("Please pick an image file");
+    if (file.size > 2 * 1024 * 1024) return toast.error("Logo must be smaller than 2MB");
     const reader = new FileReader();
     reader.onload = () => setF((s) => ({ ...s, logo: reader.result as string }));
     reader.readAsDataURL(file);
   };
 
-  const save = (e: React.FormEvent) => {
+  const save = async (e: React.FormEvent) => {
     e.preventDefault();
     const rate = f.vatRate.trim() === "" ? undefined : Number(f.vatRate);
     if (rate !== undefined && (Number.isNaN(rate) || rate < 0)) {
-      toast.error("VAT rate must be a positive number");
-      return;
+      return toast.error("VAT rate must be a positive number");
     }
-    zdb.update((d) => {
-      const o = d.orgs.find((x) => x.id === org.id);
-      if (o) {
-        o.businessName = f.businessName;
-        o.phone = f.phone;
-        o.address = f.address;
-        o.currency = f.currency || "TZS";
-        o.receiptHeader = f.receiptHeader || undefined;
-        o.receiptFooter = f.receiptFooter || undefined;
-        o.logo = f.logo || undefined;
-        o.tin = f.tin || undefined;
-        o.vatNumber = f.vatNumber || undefined;
-        o.vatRate = rate;
-        o.website = f.website || undefined;
-      }
-    });
-    toast.success("Settings saved");
+    setBusy(true);
+    try {
+      await updateOrgSettings(org.id, {
+        businessName: f.businessName,
+        phone: f.phone,
+        address: f.address,
+        currency: f.currency || "TZS",
+        receiptHeader: f.receiptHeader || undefined,
+        receiptFooter: f.receiptFooter || undefined,
+        logo: f.logo || undefined,
+        tin: f.tin || undefined,
+        vatNumber: f.vatNumber || undefined,
+        vatRate: rate,
+        website: f.website || undefined,
+      });
+      await refresh();
+      toast.success("Settings saved");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -88,12 +81,11 @@ function Settings() {
           Settings
         </h1>
         <p className="text-sm text-muted-foreground">
-          Business details, receipt info & branding — every field is optional
+          Business details, receipt info & branding — synced across every device
         </p>
       </div>
 
       <form onSubmit={save} className="panel clip-cut-card space-y-6 p-6">
-        {/* Logo */}
         <div>
           <span className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
             Business Logo
@@ -133,7 +125,7 @@ function Settings() {
             </div>
           </div>
           <p className="mt-1 text-[10px] text-muted-foreground">
-            PNG or JPG, up to 2MB. Stored securely with your business data.
+            PNG or JPG, up to 2MB. Stored with your business.
           </p>
         </div>
 
@@ -173,11 +165,18 @@ function Settings() {
           </Field>
         </Section>
 
-        <GoldButton type="submit">Save changes</GoldButton>
+        <GoldButton type="submit" disabled={busy}>{busy ? "Saving…" : "Save changes"}</GoldButton>
         <style>{`.input{width:100%;border-radius:0.375rem;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.4);padding:0.5rem 0.75rem;font-size:0.875rem;outline:none}.input:focus{border-color:color-mix(in oklab,var(--gold) 60%,transparent)}`}</style>
       </form>
 
-      <CloudSyncPanel />
+      <div className="panel clip-cut-card p-5 text-xs text-muted-foreground">
+        <div className="mb-1 font-display text-sm font-bold uppercase tracking-widest text-gold">
+          Sync status
+        </div>
+        Every change here — and everywhere else in ZPOS — writes directly to the cloud
+        and appears on every signed-in device for {org.businessName} within seconds.
+        There is nothing to back up manually.
+      </div>
     </div>
   );
 }
