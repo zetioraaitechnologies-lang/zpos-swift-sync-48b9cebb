@@ -368,10 +368,12 @@ export async function deleteCustomer(id: string) {
 
 export async function addExpense(
   orgId: string,
+  userId: string,
   input: { category: Expense["category"]; amount: number; note?: string },
 ) {
   const { error } = await supabase.from("expenses").insert({
     org_id: orgId,
+    user_id: userId,
     category: input.category,
     amount: input.amount,
     note: input.note || null,
