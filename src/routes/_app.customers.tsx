@@ -1,9 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Plus, Trash2, Pencil, Phone, MapPin } from "lucide-react";
-import { zdb, uid, fmtMoney } from "@/lib/zpos-db";
+import {
+  fmtMoney,
+  useLive,
+  listCustomers,
+  listSales,
+  upsertCustomer,
+  deleteCustomer,
+  type Customer,
+  type Sale,
+} from "@/lib/zpos-data";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/customers")({
   component: Customers,
@@ -11,17 +21,27 @@ export const Route = createFileRoute("/_app/customers")({
 
 function Customers() {
   const { org } = useAuth();
-  const [, setV] = useState(0);
-  useEffect(() => {
-    const u = zdb.subscribe(() => setV((n) => n + 1));
-    return () => { u(); };
-  }, []);
+  const { data: customers, refresh } = useLive<Customer[]>(
+    org?.id,
+    ["customers"],
+    listCustomers,
+    [],
+  );
+  const { data: sales } = useLive<Sale[]>(org?.id, ["sales"], listSales, []);
   const [show, setShow] = useState(false);
-  const [edit, setEdit] = useState<string | null>(null);
+  const [edit, setEdit] = useState<Customer | null>(null);
 
   if (!org) return null;
-  const db = zdb.get();
-  const customers = db.customers.filter((c) => c.orgId === org.id);
+
+  const del = async (id: string) => {
+    if (!confirm("Delete customer?")) return;
+    try {
+      await deleteCustomer(id);
+      await refresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -39,9 +59,7 @@ function Customers() {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {customers.map((c) => {
-          const history = db.sales.filter(
-            (s) => s.orgId === org.id && s.customerId === c.id,
-          );
+          const history = sales.filter((s) => s.customerId === c.id);
           const spent = history.reduce((a, s) => a + s.total, 0);
           return (
             <div key={c.id} className="panel clip-cut-card p-4">
@@ -61,18 +79,13 @@ function Customers() {
                 </div>
                 <div className="flex gap-1">
                   <button
-                    onClick={() => { setEdit(c.id); setShow(true); }}
+                    onClick={() => { setEdit(c); setShow(true); }}
                     className="grid h-7 w-7 place-items-center rounded hover:bg-white/5"
                   >
                     <Pencil className="h-3.5 w-3.5 text-gold" />
                   </button>
                   <button
-                    onClick={() => {
-                      if (!confirm("Delete customer?")) return;
-                      zdb.update((d) => {
-                        d.customers = d.customers.filter((x) => x.id !== c.id);
-                      });
-                    }}
+                    onClick={() => del(c.id)}
                     className="grid h-7 w-7 place-items-center rounded hover:bg-red-500/10"
                   >
                     <Trash2 className="h-3.5 w-3.5 text-red-400" />
@@ -99,17 +112,23 @@ function Customers() {
 
       {show && (
         <CustomerForm
-          id={edit}
-          onClose={() => setShow(false)}
+          existing={edit}
+          onClose={() => { setShow(false); void refresh(); }}
         />
       )}
     </div>
   );
 }
 
-function CustomerForm({ id, onClose }: { id: string | null; onClose: () => void }) {
+function CustomerForm({
+  existing,
+  onClose,
+}: {
+  existing: Customer | null;
+  onClose: () => void;
+}) {
   const { org } = useAuth();
-  const existing = id ? zdb.get().customers.find((c) => c.id === id) : null;
+  const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
     name: existing?.name ?? "",
     phone: existing?.phone ?? "",
@@ -117,22 +136,17 @@ function CustomerForm({ id, onClose }: { id: string | null; onClose: () => void 
   });
   if (!org) return null;
 
-  const save = (e: React.FormEvent) => {
+  const save = async (e: React.FormEvent) => {
     e.preventDefault();
-    zdb.update((d) => {
-      if (existing) {
-        const c = d.customers.find((x) => x.id === existing.id);
-        if (c) Object.assign(c, form);
-      } else {
-        d.customers.push({
-          id: uid("c"),
-          orgId: org.id,
-          ...form,
-          createdAt: Date.now(),
-        });
-      }
-    });
-    onClose();
+    setBusy(true);
+    try {
+      await upsertCustomer(org.id, form, existing?.id);
+      onClose();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -155,7 +169,9 @@ function CustomerForm({ id, onClose }: { id: string | null; onClose: () => void 
           </label>
         ))}
         <div className="flex gap-2 pt-2">
-          <GoldButton type="submit" className="flex-1">Save</GoldButton>
+          <GoldButton type="submit" className="flex-1" disabled={busy}>
+            {busy ? "Saving…" : "Save"}
+          </GoldButton>
           <GoldButton type="button" variant="outline" onClick={onClose} className="flex-1">
             Cancel
           </GoldButton>

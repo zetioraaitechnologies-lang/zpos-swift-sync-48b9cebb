@@ -1,7 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Search, Plus, Minus, Trash2, Receipt, Printer, UserPlus, User as UserIcon, X } from "lucide-react";
-import { zdb, fmtMoney, uid, type Product } from "@/lib/zpos-db";
+import {
+  fmtMoney,
+  useLive,
+  listProducts,
+  listCustomers,
+  getSale,
+  upsertCustomer,
+  recordSale,
+  type Product,
+  type Customer,
+  type Sale,
+} from "@/lib/zpos-data";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
@@ -16,20 +27,14 @@ interface CartLine {
 }
 
 interface AttachedCustomer {
-  id?: string; // present if from DB
+  id?: string;
   name: string;
   phone?: string;
 }
 
 function POS() {
   const { org, user } = useAuth();
-  const [, setV] = useState(0);
-  useEffect(() => {
-    const u = zdb.subscribe(() => setV((n) => n + 1));
-    return () => {
-      u();
-    };
-  }, []);
+  const { data: products } = useLive<Product[]>(org?.id, ["products"], listProducts, []);
 
   const [q, setQ] = useState("");
   const [cart, setCart] = useState<CartLine[]>([]);
@@ -38,10 +43,8 @@ function POS() {
   const [showReceipt, setShowReceipt] = useState<null | string>(null);
   const [customer, setCustomer] = useState<AttachedCustomer | null>(null);
   const [showCustomer, setShowCustomer] = useState(false);
+  const [busy, setBusy] = useState(false);
 
-  if (!org || !user) return null;
-  const db = zdb.get();
-  const products = db.products.filter((p) => p.orgId === org.id);
   const filtered = useMemo(
     () =>
       products.filter(
@@ -51,6 +54,8 @@ function POS() {
       ),
     [products, q],
   );
+
+  if (!org || !user) return null;
 
   const lines = cart
     .map((c) => {
@@ -74,14 +79,11 @@ function POS() {
       qty <= 0 ? c.filter((x) => x.productId !== pid) : c.map((x) => (x.productId === pid ? { ...x, qty } : x)),
     );
 
-  const complete = () => {
+  const complete = async () => {
     if (!lines.length) return;
-    const saleId = uid("sale");
-    const profit = lines.reduce((a, l) => a + (l.p.price - l.p.costPrice) * l.qty, 0);
-    zdb.update((d) => {
-      d.sales.push({
-        id: saleId,
-        orgId: org.id,
+    setBusy(true);
+    try {
+      const saleId = await recordSale(org.id, {
         items: lines.map((l) => ({
           productId: l.p.id,
           name: l.p.name,
@@ -89,42 +91,21 @@ function POS() {
           price: l.p.price,
           cost: l.p.costPrice,
         })),
-        subtotal,
         discount,
-        total,
-        profit: profit - discount,
         payment: pay,
         customerId: customer?.id,
         customerName: customer?.name,
-        cashierId: user.id,
-        createdAt: Date.now(),
       });
-      lines.forEach((l) => {
-        const prod = d.products.find((x) => x.id === l.p.id);
-        if (prod) {
-          const before = prod.stock;
-          prod.stock = Math.max(0, prod.stock - l.qty);
-          d.stockMovements.push({
-            id: uid("mv"),
-            orgId: org.id,
-            productId: prod.id,
-            productName: prod.name,
-            type: "sale",
-            qty: -l.qty,
-            before,
-            after: prod.stock,
-            userId: user.id,
-            note: `Sale ${saleId}`,
-            createdAt: Date.now(),
-          });
-        }
-      });
-    });
-    toast.success(`Sale completed · ${fmtMoney(total, org.currency)}`);
-    setShowReceipt(saleId);
-    setCart([]);
-    setDiscount(0);
-    setCustomer(null);
+      toast.success(`Sale completed · ${fmtMoney(total, org.currency)}`);
+      setShowReceipt(saleId);
+      setCart([]);
+      setDiscount(0);
+      setCustomer(null);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Sale failed");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -135,7 +116,7 @@ function POS() {
             Point of Sale
           </h1>
           <p className="text-sm text-muted-foreground">
-            Fast checkout · offline-ready
+            Fast checkout · synced across every device
           </p>
         </div>
         <div className="relative mb-4">
@@ -174,13 +155,11 @@ function POS() {
         </div>
       </div>
 
-      {/* Cart */}
       <div className="panel clip-cut-card flex max-h-[calc(100vh-8rem)] flex-col p-5 lg:sticky lg:top-24">
         <h3 className="font-display font-bold uppercase tracking-widest text-gold">
           Cart · {lines.length}
         </h3>
 
-        {/* Customer attach */}
         <div className="mt-3 rounded-md border border-white/10 bg-black/30 p-2">
           {customer ? (
             <div className="flex items-center justify-between gap-2">
@@ -284,9 +263,9 @@ function POS() {
             onClick={complete}
             size="lg"
             className="mt-4 w-full"
-            disabled={!lines.length}
+            disabled={!lines.length || busy}
           >
-            <Receipt className="h-4 w-4" /> Complete Sale
+            <Receipt className="h-4 w-4" /> {busy ? "Processing…" : "Complete Sale"}
           </GoldButton>
         </div>
       </div>
@@ -312,32 +291,28 @@ function CustomerPicker({
   onPick: (c: AttachedCustomer) => void;
 }) {
   const { org } = useAuth();
+  const { data: customers } = useLive<Customer[]>(org?.id, ["customers"], listCustomers, []);
   const [q, setQ] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [busy, setBusy] = useState(false);
   if (!org) return null;
-  const list = zdb
-    .get()
-    .customers.filter((c) => c.orgId === org.id)
-    .filter((c) => c.name.toLowerCase().includes(q.toLowerCase()) || c.phone.includes(q));
+  const list = customers.filter(
+    (c) => c.name.toLowerCase().includes(q.toLowerCase()) || c.phone.includes(q),
+  );
 
-  const quickCreate = () => {
-    if (!name.trim()) {
-      toast.error("Customer name is required");
-      return;
+  const quickCreate = async () => {
+    if (!name.trim()) return toast.error("Customer name is required");
+    setBusy(true);
+    try {
+      const id = await upsertCustomer(org.id, { name: name.trim(), phone: phone.trim() });
+      toast.success("Customer added");
+      onPick({ id, name: name.trim(), phone: phone.trim() });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setBusy(false);
     }
-    const id = uid("c");
-    zdb.update((d) => {
-      d.customers.push({
-        id,
-        orgId: org.id,
-        name: name.trim(),
-        phone: phone.trim(),
-        createdAt: Date.now(),
-      });
-    });
-    toast.success("Customer added");
-    onPick({ id, name: name.trim(), phone: phone.trim() });
   };
 
   return (
@@ -397,8 +372,8 @@ function CustomerPicker({
             />
           </div>
           <div className="mt-2 flex gap-2">
-            <GoldButton onClick={quickCreate} className="flex-1">
-              Save & Attach
+            <GoldButton onClick={quickCreate} className="flex-1" disabled={busy}>
+              {busy ? "Saving…" : "Save & Attach"}
             </GoldButton>
             <button
               type="button"
@@ -427,7 +402,8 @@ function Row({ label, value, big }: { label: string; value: string; big?: boolea
 
 function ReceiptModal({ saleId, onClose }: { saleId: string; onClose: () => void }) {
   const { org } = useAuth();
-  const sale = zdb.get().sales.find((s) => s.id === saleId);
+  const [sale, setSale] = useState<Sale | null>(null);
+  useMemo(() => { void getSale(saleId).then(setSale); }, [saleId]);
   if (!sale || !org) return null;
 
   const print = () => window.print();
@@ -472,7 +448,7 @@ function ReceiptModal({ saleId, onClose }: { saleId: string; onClose: () => void
         <div className="my-4 border-t border-dashed border-white/20 print:!border-gray-400" />
         <div className="space-y-1 text-sm">
           {sale.items.map((i) => (
-            <div key={i.productId} className="flex justify-between">
+            <div key={i.productId + i.name} className="flex justify-between">
               <span>
                 {i.qty} × {i.name}
               </span>

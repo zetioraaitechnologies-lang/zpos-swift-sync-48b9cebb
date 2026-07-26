@@ -1,7 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { Sparkles, X, Send, Loader2 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
-import { zdb, fmtMoney } from "@/lib/zpos-db";
+import {
+  fmtMoney,
+  useLive,
+  listProducts,
+  listSales,
+  listExpenses,
+  type Product,
+  type Sale,
+  type Expense,
+} from "@/lib/zpos-data";
 import { useAuth } from "@/lib/zpos-auth";
 import { askAlpha, type AlphaSnapshot } from "@/lib/alpha.functions";
 import { cn } from "@/lib/utils";
@@ -14,6 +23,9 @@ interface Msg {
 export function AlphaFab() {
   const { org, user } = useAuth();
   const ask = useServerFn(askAlpha);
+  const { data: products } = useLive<Product[]>(org?.id, ["products"], listProducts, []);
+  const { data: sales } = useLive<Sale[]>(org?.id, ["sales"], listSales, []);
+  const { data: expenses } = useLive<Expense[]>(org?.id, ["expenses"], listExpenses, []);
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -46,14 +58,9 @@ export function AlphaFab() {
 
   const buildSnapshot = (): AlphaSnapshot | null => {
     if (!org) return null;
-    const db = zdb.get();
-    const orgId = org.id;
     const t0 = new Date();
     t0.setHours(0, 0, 0, 0);
-    const sales = db.sales.filter((s) => s.orgId === orgId);
     const todaySales = sales.filter((s) => s.createdAt >= t0.getTime());
-    const products = db.products.filter((p) => p.orgId === orgId);
-    const expenses = db.expenses.filter((e) => e.orgId === orgId);
     const map = new Map<string, number>();
     sales.forEach((s) =>
       s.items.forEach((i) => map.set(i.name, (map.get(i.name) ?? 0) + i.qty)),

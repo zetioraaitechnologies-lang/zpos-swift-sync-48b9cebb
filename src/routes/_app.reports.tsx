@@ -1,9 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FileDown } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { zdb, fmtMoney } from "@/lib/zpos-db";
+import {
+  fmtMoney,
+  useLive,
+  listProducts,
+  listSales,
+  listExpenses,
+  type Product,
+  type Sale,
+  type Expense,
+} from "@/lib/zpos-data";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 
@@ -13,31 +22,23 @@ export const Route = createFileRoute("/_app/reports")({
 
 function Reports() {
   const { org } = useAuth();
-  const [, setV] = useState(0);
-  useEffect(() => {
-    const u = zdb.subscribe(() => setV((n) => n + 1));
-    return () => { u(); };
-  }, []);
+  const { data: sales } = useLive<Sale[]>(org?.id, ["sales"], listSales, []);
+  const { data: expensesAll } = useLive<Expense[]>(org?.id, ["expenses"], listExpenses, []);
+  const { data: products } = useLive<Product[]>(org?.id, ["products"], listProducts, []);
   const [range, setRange] = useState<"day" | "week" | "month">("week");
 
   if (!org) return null;
-  const db = zdb.get();
   const now = new Date();
   const from = new Date(now);
   if (range === "day") from.setHours(0, 0, 0, 0);
   else if (range === "week") from.setDate(now.getDate() - 7);
   else from.setMonth(now.getMonth() - 1);
 
-  const sales = db.sales.filter(
-    (s) => s.orgId === org.id && s.createdAt >= from.getTime(),
-  );
-  const expenses = db.expenses.filter(
-    (e) => e.orgId === org.id && e.createdAt >= from.getTime(),
-  );
-  const products = db.products.filter((p) => p.orgId === org.id);
+  const inRange = sales.filter((s) => s.createdAt >= from.getTime());
+  const expenses = expensesAll.filter((e) => e.createdAt >= from.getTime());
 
-  const revenue = sales.reduce((a, s) => a + s.total, 0);
-  const profit = sales.reduce((a, s) => a + s.profit, 0);
+  const revenue = inRange.reduce((a, s) => a + s.total, 0);
+  const profit = inRange.reduce((a, s) => a + s.profit, 0);
   const expTotal = expenses.reduce((a, e) => a + e.amount, 0);
   const net = profit - expTotal;
   const lowStock = products.filter((p) => p.stock <= p.minStock);
@@ -71,7 +72,7 @@ function Reports() {
 
     autoTable(doc, {
       head: [["Date", "Items", "Payment", "Total"]],
-      body: sales
+      body: inRange
         .slice()
         .reverse()
         .map((s) => [
@@ -137,7 +138,7 @@ function Reports() {
         <Metric label="Net" value={fmtMoney(net, org.currency)} accent />
       </div>
 
-      <Section title={`Sales (${sales.length})`}>
+      <Section title={`Sales (${inRange.length})`}>
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/10 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -148,7 +149,7 @@ function Reports() {
             </tr>
           </thead>
           <tbody>
-            {sales.slice().reverse().map((s) => (
+            {inRange.map((s) => (
               <tr key={s.id} className="border-b border-white/5 last:border-0">
                 <td className="p-2 text-muted-foreground">
                   {new Date(s.createdAt).toLocaleString()}
@@ -160,7 +161,7 @@ function Reports() {
                 </td>
               </tr>
             ))}
-            {sales.length === 0 && (
+            {inRange.length === 0 && (
               <tr>
                 <td colSpan={4} className="p-6 text-center text-muted-foreground">
                   No sales in this period.
@@ -199,9 +200,7 @@ function Metric({ label, value, accent }: { label: string; value: string; accent
       <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
         {label}
       </div>
-      <div
-        className={`mt-2 font-display text-2xl font-black ${accent ? "text-gold" : ""}`}
-      >
+      <div className={`mt-2 font-display text-2xl font-black ${accent ? "text-gold" : ""}`}>
         {value}
       </div>
     </div>

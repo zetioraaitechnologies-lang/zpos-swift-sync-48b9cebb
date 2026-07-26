@@ -1,7 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ArrowUp, ArrowDown, RefreshCcw, AlertTriangle, History } from "lucide-react";
-import { zdb, uid } from "@/lib/zpos-db";
+import {
+  useLive,
+  listProducts,
+  listStockMovements,
+  adjustStock,
+  type Product,
+  type StockMovement,
+} from "@/lib/zpos-data";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
@@ -12,66 +19,49 @@ export const Route = createFileRoute("/_app/inventory")({
 
 function Inventory() {
   const { org, user } = useAuth();
-  const [, setV] = useState(0);
-  useEffect(() => {
-    const u = zdb.subscribe(() => setV((n) => n + 1));
-    return () => { u(); };
-  }, []);
+  const { data: products, refresh: refreshProducts } = useLive<Product[]>(
+    org?.id,
+    ["products"],
+    listProducts,
+    [],
+  );
+  const { data: movements, refresh: refreshMv } = useLive<StockMovement[]>(
+    org?.id,
+    ["stock_movements"],
+    (id) => listStockMovements(id, 50),
+    [],
+  );
   const [mode, setMode] = useState<"in" | "out" | "adj">("in");
   const [pid, setPid] = useState("");
   const [amt, setAmt] = useState(0);
   const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false);
 
   if (!org || !user) return null;
-  const db = zdb.get();
-  const products = db.products.filter((p) => p.orgId === org.id);
   const low = products.filter((p) => p.stock <= p.minStock);
-  const movements = db.stockMovements
-    .filter((m) => m.orgId === org.id)
-    .sort((a, b) => b.createdAt - a.createdAt)
-    .slice(0, 50);
 
-  const apply = () => {
-    if (!pid) {
-      toast.error("Pick a product");
-      return;
-    }
-    if (mode !== "adj" && amt <= 0) {
-      toast.error("Amount must be greater than zero");
-      return;
-    }
-    if (mode === "adj" && amt < 0) {
-      toast.error("Adjusted quantity cannot be negative");
-      return;
-    }
-    let productName = "";
-    zdb.update((d) => {
-      const p = d.products.find((x) => x.id === pid);
-      if (!p) return;
-      productName = p.name;
-      const before = p.stock;
-      let change = 0;
-      if (mode === "in") { p.stock += amt; change = amt; }
-      else if (mode === "out") { p.stock = Math.max(0, p.stock - amt); change = -Math.min(amt, before); }
-      else { change = amt - before; p.stock = amt; }
-      p.updatedAt = Date.now();
-      d.stockMovements.push({
-        id: uid("mv"),
-        orgId: org.id,
-        productId: p.id,
-        productName: p.name,
-        type: mode === "adj" ? "adjust" : mode,
-        qty: change,
-        before,
-        after: p.stock,
-        userId: user.id,
+  const apply = async () => {
+    if (!pid) return toast.error("Pick a product");
+    if (mode !== "adj" && amt <= 0) return toast.error("Amount must be > 0");
+    if (mode === "adj" && amt < 0) return toast.error("Quantity cannot be negative");
+    setBusy(true);
+    try {
+      await adjustStock(org.id, {
+        productId: pid,
+        mode,
+        amount: amt,
         note: note.trim() || undefined,
-        createdAt: Date.now(),
+        userId: user.id,
       });
-    });
-    toast.success(`${mode === "in" ? "Stock in" : mode === "out" ? "Stock out" : "Adjustment"} logged for ${productName}`);
-    setAmt(0);
-    setNote("");
+      toast.success(mode === "in" ? "Stock in logged" : mode === "out" ? "Stock out logged" : "Adjustment logged");
+      setAmt(0);
+      setNote("");
+      await Promise.all([refreshProducts(), refreshMv()]);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const modes = [
@@ -126,7 +116,7 @@ function Inventory() {
             placeholder={mode === "adj" ? "New qty" : "Amount"}
             className="rounded-md border border-white/10 bg-black/40 px-3 py-2.5 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
-          <GoldButton onClick={apply}>Apply</GoldButton>
+          <GoldButton onClick={apply} disabled={busy}>{busy ? "Saving…" : "Apply"}</GoldButton>
         </div>
         <input
           value={note}
