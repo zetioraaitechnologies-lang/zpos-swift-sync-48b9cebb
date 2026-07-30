@@ -32,10 +32,10 @@ function AppLayout() {
     <div className="min-h-screen bg-background text-foreground">
       <AppSidebar open={open} onClose={() => setOpen(false)} />
       <div className="lg:pl-72">
-        <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-[color:var(--gold)]/15 bg-card/95 px-4 py-3 backdrop-blur-lg print:hidden">
+        <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-card/95 px-4 py-3 backdrop-blur-lg print:hidden">
           <MobileMenuButton onOpen={() => setOpen(true)} />
           <div className="min-w-0 flex-1">
-            <div className="truncate font-display text-sm font-bold uppercase tracking-widest text-gold">
+            <div className="truncate font-display text-sm font-bold uppercase tracking-[0.16em] text-foreground">
               {user.name}
             </div>
             <div className="truncate text-[10px] uppercase tracking-widest text-muted-foreground">
