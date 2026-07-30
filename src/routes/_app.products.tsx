@@ -50,7 +50,7 @@ function Products() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-bold uppercase tracking-wider">
+          <h1 className="font-display text-3xl font-bold tracking-tight">
             Products
           </h1>
           <p className="text-sm text-muted-foreground">{products.length} items</p>
@@ -195,7 +195,7 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
         onSubmit={save}
         className="panel clip-cut-card w-full max-w-md space-y-4 p-6"
       >
-        <h3 className="font-display text-xl font-bold uppercase tracking-widest text-gold">
+        <h3 className="font-display text-xl font-bold tracking-tight text-gold">
           {product ? "Edit" : "Add"} Product
         </h3>
         <p className="-mt-2 text-[11px] text-muted-foreground">

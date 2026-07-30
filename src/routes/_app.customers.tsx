@@ -47,7 +47,7 @@ function Customers() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-bold uppercase tracking-wider">
+          <h1 className="font-display text-3xl font-bold tracking-tight">
             Customers
           </h1>
           <p className="text-sm text-muted-foreground">{customers.length} contacts</p>
@@ -152,7 +152,7 @@ function CustomerForm({
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-navy-deep/60 p-4">
       <form onSubmit={save} className="panel clip-cut-card w-full max-w-md space-y-4 p-6">
-        <h3 className="font-display text-xl font-bold uppercase tracking-widest text-gold">
+        <h3 className="font-display text-xl font-bold tracking-tight text-gold">
           {existing ? "Edit" : "Add"} Customer
         </h3>
         {(["name", "phone", "address"] as const).map((k) => (

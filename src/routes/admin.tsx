@@ -112,7 +112,7 @@ function Admin() {
       <main className="mx-auto max-w-7xl space-y-6 p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="font-display text-3xl font-bold uppercase tracking-wider">
+            <h1 className="font-display text-3xl font-bold tracking-tight">
               Organizations
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -254,7 +254,7 @@ function CreateOrgForm({ onClose, onCreated }: { onClose: () => void; onCreated:
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-navy-deep/50 p-4">
       <form onSubmit={save} className="panel clip-cut-card w-full max-w-lg space-y-3 p-6">
-        <h3 className="font-display text-xl font-bold uppercase tracking-widest text-gold">
+        <h3 className="font-display text-xl font-bold tracking-tight text-gold">
           Create Organization
         </h3>
         <p className="text-xs text-muted-foreground">

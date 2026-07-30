@@ -112,7 +112,7 @@ function POS() {
     <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
       <div className="flex min-h-0 flex-col">
         <div className="mb-4">
-          <h1 className="font-display text-3xl font-bold uppercase tracking-wider">
+          <h1 className="font-display text-3xl font-bold tracking-tight">
             Point of Sale
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -423,7 +423,7 @@ function ReceiptModal({ saleId, onClose }: { saleId: string; onClose: () => void
               {org.receiptHeader}
             </div>
           )}
-          <div className="font-display text-xl font-bold uppercase tracking-widest text-gold print:!text-navy-deep">
+          <div className="font-display text-xl font-bold tracking-tight text-gold print:!text-navy-deep">
             {org.businessName}
           </div>
           <div className="text-[11px] uppercase tracking-widest text-muted-foreground print:!text-gray-700">

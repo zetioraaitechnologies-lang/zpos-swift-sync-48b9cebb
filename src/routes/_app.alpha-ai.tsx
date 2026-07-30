@@ -22,7 +22,7 @@ function AlphaPage() {
           <Sparkles className="h-7 w-7 text-navy-deep" />
         </div>
         <div>
-          <h1 className="font-display text-3xl font-bold uppercase tracking-wider">
+          <h1 className="font-display text-3xl font-bold tracking-tight">
             Alpha AI
           </h1>
           <p className="text-sm text-muted-foreground">
