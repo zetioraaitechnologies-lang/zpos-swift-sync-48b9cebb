@@ -152,7 +152,7 @@ export function AlphaFab() {
     <>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-5 right-5 z-40 grid h-14 w-14 place-items-center rounded-none-full bg-gold-gradient text-navy-deep shadow-[0_10px_30px_-8px_var(--gold)] transition hover:scale-105 print:hidden"
+        className="fixed bottom-5 right-5 z-40 grid h-14 w-14 place-items-center rounded-full bg-gold-gradient text-navy-deep shadow-[0_10px_30px_-8px_var(--gold)] transition hover:scale-105 print:hidden"
         aria-label="Alpha AI"
       >
         {open ? <X className="h-6 w-6" /> : <Sparkles className="h-6 w-6" />}

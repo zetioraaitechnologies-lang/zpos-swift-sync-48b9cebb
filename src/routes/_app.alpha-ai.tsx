@@ -45,7 +45,7 @@ function AlphaPage() {
             {prompts.map((p) => (
               <span
                 key={p}
-                className="rounded-none-full border border-[color:var(--gold)]/30 bg-input px-3 py-1 text-xs"
+                className="rounded-full border border-[color:var(--gold)]/30 bg-input px-3 py-1 text-xs"
               >
                 {p}
               </span>

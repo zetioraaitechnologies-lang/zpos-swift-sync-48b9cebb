@@ -107,7 +107,7 @@ export function AppSidebar({
 
         <div className="border-t border-[color:var(--gold)]/15 p-4">
           <div className="mb-3 flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-none-full border border-[color:var(--gold)]/40 bg-navy-deep/50 font-display text-sm font-bold text-gold">
+            <div className="grid h-10 w-10 place-items-center rounded-full border border-[color:var(--gold)]/40 bg-navy-deep/50 font-display text-sm font-bold text-gold">
               {user?.name?.[0] ?? "?"}
             </div>
             <div className="min-w-0">

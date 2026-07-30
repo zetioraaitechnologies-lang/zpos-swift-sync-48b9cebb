@@ -143,7 +143,7 @@ function Admin() {
                   </div>
                 </div>
                 <span
-                  className={`rounded-none-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
                     o.status === "active"
                       ? "bg-emerald-400/15 text-emerald-300"
                       : "bg-red-400/15 text-red-300"
