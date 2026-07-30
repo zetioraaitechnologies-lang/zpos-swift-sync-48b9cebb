@@ -5,14 +5,15 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
 
-  --font-display: "Orbitron", "Rajdhani", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Rajdhani", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Jost", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, monospace;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -33,87 +34,92 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-navy: var(--navy);
+  --color-navy-deep: var(--navy-deep);
   --color-gold: var(--gold);
   --color-gold-bright: var(--gold-bright);
   --color-gold-deep: var(--gold-deep);
+  --color-cream: var(--cream);
   --color-success: var(--success);
   --color-warning: var(--warning);
 }
 
-/* Light theme is now the primary theme — premium ivory + deep gold */
+/* ZETIORA identity: deep navy + amber gold on clean white, cyber-cut corners */
 :root {
-  --radius: 0.5rem;
+  --radius: 0rem;
 
-  --background: oklch(0.985 0.005 85);
-  --foreground: oklch(0.18 0.01 60);
+  --navy: oklch(0.24 0.06 262);
+  --navy-deep: oklch(0.19 0.055 262);
+  --gold: oklch(0.73 0.15 71);
+  --gold-bright: oklch(0.82 0.14 78);
+  --gold-deep: oklch(0.62 0.14 68);
+  --cream: oklch(0.93 0.06 85);
+
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.24 0.06 262);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.01 60);
+  --card-foreground: oklch(0.24 0.06 262);
 
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.01 60);
+  --popover-foreground: oklch(0.24 0.06 262);
 
-  --primary: oklch(0.62 0.13 75);
-  --primary-foreground: oklch(0.99 0.005 85);
+  --primary: oklch(0.24 0.06 262);
+  --primary-foreground: oklch(0.99 0 0);
 
-  --secondary: oklch(0.95 0.01 80);
-  --secondary-foreground: oklch(0.22 0.01 60);
+  --secondary: oklch(0.965 0.005 262);
+  --secondary-foreground: oklch(0.24 0.06 262);
 
-  --muted: oklch(0.95 0.01 80);
-  --muted-foreground: oklch(0.45 0.02 65);
+  --muted: oklch(0.965 0.005 262);
+  --muted-foreground: oklch(0.52 0.02 262);
 
-  --accent: oklch(0.9 0.05 82);
-  --accent-foreground: oklch(0.22 0.02 65);
+  --accent: oklch(0.93 0.06 85);
+  --accent-foreground: oklch(0.24 0.06 262);
 
   --destructive: oklch(0.58 0.22 27);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.85 0.02 75 / 70%);
-  --input: oklch(0.94 0.01 80);
-  --ring: oklch(0.62 0.13 75);
+  --border: oklch(0.9 0.01 262);
+  --input: oklch(0.96 0.005 262);
+  --ring: oklch(0.24 0.06 262);
 
-  --gold: oklch(0.62 0.13 75);
-  --gold-bright: oklch(0.78 0.15 82);
-  --gold-deep: oklch(0.5 0.12 70);
   --success: oklch(0.55 0.16 155);
-  --warning: oklch(0.7 0.16 70);
+  --warning: oklch(0.73 0.15 71);
 
   --gradient-gold: linear-gradient(
     135deg,
-    oklch(0.55 0.12 70) 0%,
-    oklch(0.78 0.15 82) 50%,
-    oklch(0.6 0.13 72) 100%
+    oklch(0.78 0.15 76) 0%,
+    oklch(0.73 0.15 71) 100%
   );
-  --gradient-gold-soft: linear-gradient(
+  --gradient-navy: linear-gradient(
     135deg,
-    oklch(0.5 0.12 70) 0%,
-    oklch(0.72 0.14 82) 100%
+    oklch(0.26 0.06 262) 0%,
+    oklch(0.19 0.055 262) 100%
   );
-  --shadow-gold: 0 10px 30px -10px oklch(0.62 0.13 75 / 30%);
-  --shadow-panel: 0 8px 24px -12px oklch(0.2 0.02 60 / 18%);
+  --shadow-gold: 0 10px 30px -12px oklch(0.73 0.15 71 / 35%);
+  --shadow-panel: 0 1px 0 0 oklch(0.9 0.01 262);
 }
 
 .dark {
   color-scheme: dark;
-  --background: oklch(0.14 0.005 60);
-  --foreground: oklch(0.96 0.02 85);
-  --card: oklch(0.18 0.008 60);
-  --card-foreground: oklch(0.96 0.02 85);
-  --popover: oklch(0.16 0.008 60);
-  --popover-foreground: oklch(0.96 0.02 85);
-  --primary: oklch(0.78 0.15 82);
-  --primary-foreground: oklch(0.14 0.005 60);
-  --secondary: oklch(0.22 0.01 60);
-  --secondary-foreground: oklch(0.96 0.02 85);
-  --muted: oklch(0.22 0.01 60);
-  --muted-foreground: oklch(0.68 0.02 80);
-  --accent: oklch(0.28 0.04 82);
-  --accent-foreground: oklch(0.96 0.02 85);
-  --border: oklch(0.28 0.02 75 / 60%);
-  --input: oklch(0.22 0.01 60);
-  --ring: oklch(0.78 0.15 82);
-  --gold: oklch(0.78 0.15 82);
-  --shadow-panel: 0 8px 32px -12px oklch(0 0 0 / 60%);
+  --background: oklch(0.16 0.045 262);
+  --foreground: oklch(0.97 0.005 262);
+  --card: oklch(0.2 0.05 262);
+  --card-foreground: oklch(0.97 0.005 262);
+  --popover: oklch(0.2 0.05 262);
+  --popover-foreground: oklch(0.97 0.005 262);
+  --primary: oklch(0.73 0.15 71);
+  --primary-foreground: oklch(0.16 0.045 262);
+  --secondary: oklch(0.24 0.05 262);
+  --secondary-foreground: oklch(0.97 0.005 262);
+  --muted: oklch(0.24 0.05 262);
+  --muted-foreground: oklch(0.72 0.02 262);
+  --accent: oklch(0.3 0.06 262);
+  --accent-foreground: oklch(0.97 0.005 262);
+  --border: oklch(0.32 0.03 262 / 70%);
+  --input: oklch(0.24 0.05 262);
+  --ring: oklch(0.73 0.15 71);
+  --shadow-panel: 0 1px 0 0 oklch(0.32 0.03 262 / 70%);
 }
 
 html,
@@ -121,7 +127,7 @@ body {
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-sans);
-  font-weight: 500;
+  font-weight: 400;
 }
 
 @layer base {
@@ -130,27 +136,35 @@ body {
   }
   h1, h2, h3, h4, .font-display {
     font-family: var(--font-display);
-    letter-spacing: 0.01em;
+    letter-spacing: -0.02em;
+    font-weight: 700;
   }
 }
 
+/* Cyber cuts — notch on top-right and bottom-left, ZETIORA signature */
 @utility clip-cut {
-  clip-path: polygon(22px 0%, 100% 0%, calc(100% - 22px) 100%, 0% 100%);
+  clip-path: polygon(
+    0 0, calc(100% - 16px) 0, 100% 16px,
+    100% 100%, 16px 100%, 0 calc(100% - 16px)
+  );
 }
 @utility clip-cut-sm {
-  clip-path: polygon(14px 0%, 100% 0%, calc(100% - 14px) 100%, 0% 100%);
+  clip-path: polygon(
+    0 0, calc(100% - 10px) 0, 100% 10px,
+    100% 100%, 10px 100%, 0 calc(100% - 10px)
+  );
 }
 @utility clip-cut-card {
   clip-path: polygon(
-    16px 0%, 100% 0%, 100% calc(100% - 16px),
-    calc(100% - 16px) 100%, 0% 100%, 0% 16px
+    0 0, calc(100% - 26px) 0, 100% 26px,
+    100% 100%, 26px 100%, 0 calc(100% - 26px)
   );
 }
 
 @utility panel {
   background: var(--color-card);
-  border: 1px solid oklch(0.72 0.05 78 / 45%);
-  box-shadow: var(--shadow-panel);
+  border: 1px solid var(--color-border);
+  box-shadow: none;
 }
 
 @utility text-gold {
@@ -158,6 +172,18 @@ body {
 }
 @utility bg-gold-gradient {
   background: var(--gradient-gold);
+}
+@utility bg-navy-gradient {
+  background: var(--gradient-navy);
+}
+
+/* Uppercase letterspaced eyebrow labels used across ZETIORA surfaces */
+@utility eyebrow {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.7rem;
+  font-weight: 500;
 }
 
 /* Receipt printing — only the receipt area prints */
