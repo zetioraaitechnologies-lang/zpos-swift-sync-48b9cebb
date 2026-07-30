@@ -81,7 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "ZPOS is an offline-first Point of Sale and inventory management platform for modern businesses. Sell, track stock, manage customers and grow — built by Zetiora AI Technologies.",
       },
       { name: "author", content: "Zetiora AI Technologies" },
-      { name: "theme-color", content: "#0d0d0d" },
+      { name: "theme-color", content: "#101f3d" },
       { property: "og:title", content: "ZPOS — Smart Business Management by Zetiora AI" },
       {
         property: "og:description",
