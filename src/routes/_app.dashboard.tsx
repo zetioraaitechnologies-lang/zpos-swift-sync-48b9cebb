@@ -55,7 +55,7 @@ function Dashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-3xl font-black uppercase tracking-wider">
+        <h1 className="font-display text-3xl font-bold uppercase tracking-wider">
           Dashboard
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -128,7 +128,7 @@ function Dashboard() {
               No sales yet. Head to POS to make your first sale.
             </div>
           ) : (
-            <ul className="divide-y divide-white/5">
+            <ul className="divide-y divide-border">
               {sales.slice(0, 6).map((s) => (
                 <li key={s.id} className="flex items-center justify-between py-2.5">
                   <div>
@@ -160,7 +160,7 @@ function Dashboard() {
               All stock levels are healthy.
             </div>
           ) : (
-            <ul className="divide-y divide-white/5">
+            <ul className="divide-y divide-border">
               {lowStock.map((p) => (
                 <li key={p.id} className="flex items-center justify-between py-2.5">
                   <div>

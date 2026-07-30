@@ -90,10 +90,10 @@ function Admin() {
     <div className="min-h-screen bg-background">
       <header className="flex items-center gap-3 border-b border-[color:var(--gold)]/15 bg-card/95 px-6 py-4 backdrop-blur-lg">
         <div className="grid h-10 w-10 place-items-center bg-gold-gradient clip-cut-sm">
-          <span className="font-display text-lg font-black text-black">Z</span>
+          <span className="font-display text-lg font-bold text-navy-deep">Z</span>
         </div>
         <div className="flex-1">
-          <div className="font-display text-lg font-black tracking-widest text-gold">
+          <div className="font-display text-lg font-bold tracking-widest text-gold">
             ZPOS · Super Admin
           </div>
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -103,7 +103,7 @@ function Admin() {
         <ConnectivityBadge />
         <button
           onClick={logout}
-          className="inline-flex items-center gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-red-300 hover:bg-red-500/20"
+          className="inline-flex items-center gap-2 rounded-none-none border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-red-300 hover:bg-red-500/20"
         >
           <LogOut className="h-3.5 w-3.5" /> Logout
         </button>
@@ -112,7 +112,7 @@ function Admin() {
       <main className="mx-auto max-w-7xl space-y-6 p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="font-display text-3xl font-black uppercase tracking-wider">
+            <h1 className="font-display text-3xl font-bold uppercase tracking-wider">
               Organizations
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -129,7 +129,7 @@ function Admin() {
             <div key={o.id} className="panel clip-cut-card p-5">
               <div className="flex items-start gap-3">
                 <div className="grid h-11 w-11 place-items-center bg-gold-gradient clip-cut-sm">
-                  <Building2 className="h-5 w-5 text-black" />
+                  <Building2 className="h-5 w-5 text-navy-deep" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-display text-lg font-bold text-gold">
@@ -143,7 +143,7 @@ function Admin() {
                   </div>
                 </div>
                 <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
+                  className={`rounded-none-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
                     o.status === "active"
                       ? "bg-emerald-400/15 text-emerald-300"
                       : "bg-red-400/15 text-red-300"
@@ -200,10 +200,10 @@ function IconBtn({
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-center gap-1 rounded-md border py-2 text-[9px] font-bold uppercase tracking-widest ${
+      className={`flex flex-col items-center gap-1 rounded-none-none border py-2 text-[9px] font-bold uppercase tracking-widest ${
         danger
           ? "border-red-500/30 text-red-300 hover:bg-red-500/10"
-          : "border-white/10 text-muted-foreground hover:bg-white/5 hover:text-gold"
+          : "border-border text-muted-foreground hover:bg-secondary hover:text-gold"
       }`}
     >
       {children}
@@ -252,9 +252,9 @@ function CreateOrgForm({ onClose, onCreated }: { onClose: () => void; onCreated:
   };
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-navy-deep/50 p-4">
       <form onSubmit={save} className="panel clip-cut-card w-full max-w-lg space-y-3 p-6">
-        <h3 className="font-display text-xl font-black uppercase tracking-widest text-gold">
+        <h3 className="font-display text-xl font-bold uppercase tracking-widest text-gold">
           Create Organization
         </h3>
         <p className="text-xs text-muted-foreground">
@@ -320,7 +320,7 @@ function Field({
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+        className="w-full rounded-none-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
       />
       {hint && <span className="mt-1 block text-[10px] text-muted-foreground">{hint}</span>}
     </label>

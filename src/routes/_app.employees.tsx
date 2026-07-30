@@ -71,7 +71,7 @@ function Employees() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-black uppercase tracking-wider">
+          <h1 className="font-display text-3xl font-bold uppercase tracking-wider">
             Employees
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -87,7 +87,7 @@ function Employees() {
         {rows.map((s) => (
           <div key={s.id} className="panel clip-cut-card p-4">
             <div className="flex items-center gap-3">
-              <div className="grid h-12 w-12 place-items-center rounded-full bg-gold-gradient font-display text-lg font-black text-black">
+              <div className="grid h-12 w-12 place-items-center rounded-none-full bg-gold-gradient font-display text-lg font-bold text-navy-deep">
                 {s.name?.[0] ?? "?"}
               </div>
               <div className="min-w-0 flex-1">
@@ -97,16 +97,16 @@ function Employees() {
                 <div className="truncate text-xs text-muted-foreground">
                   {s.email ?? s.phone ?? "—"}
                 </div>
-                <div className="mt-1 inline-block rounded bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-widest">
+                <div className="mt-1 inline-block rounded-none bg-secondary px-2 py-0.5 text-[10px] uppercase tracking-widest">
                   {s.role_label ?? "Cashier"}
                 </div>
               </div>
             </div>
             {s.user_id && (
-              <div className="mt-3 border-t border-white/5 pt-3">
+              <div className="mt-3 border-t border-border pt-3">
                 <button
                   onClick={() => remove(s)}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-red-400/30 bg-red-400/10 py-1.5 text-[11px] font-bold uppercase tracking-widest text-red-300"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-none-none border border-red-400/30 bg-red-400/10 py-1.5 text-[11px] font-bold uppercase tracking-widest text-red-300"
                 >
                   <Trash2 className="h-3.5 w-3.5" /> Remove access
                 </button>
@@ -165,9 +165,9 @@ function CashierForm({ onClose, onDone }: { onClose: () => void; onDone: () => v
   };
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-navy-deep/50 p-4">
       <form onSubmit={save} className="panel clip-cut-card w-full max-w-md space-y-4 p-6">
-        <h3 className="font-display text-xl font-black uppercase tracking-widest text-gold">
+        <h3 className="font-display text-xl font-bold uppercase tracking-widest text-gold">
           Add Cashier
         </h3>
         <p className="text-xs text-muted-foreground">
@@ -180,7 +180,7 @@ function CashierForm({ onClose, onDone }: { onClose: () => void; onDone: () => v
             required
             value={f.name}
             onChange={(e) => setF({ ...f, name: e.target.value })}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
         </FormRow>
         <FormRow label="Email">
@@ -189,7 +189,7 @@ function CashierForm({ onClose, onDone }: { onClose: () => void; onDone: () => v
             type="email"
             value={f.email}
             onChange={(e) => setF({ ...f, email: e.target.value })}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
         </FormRow>
         <FormRow label="Phone (optional)">
@@ -197,7 +197,7 @@ function CashierForm({ onClose, onDone }: { onClose: () => void; onDone: () => v
             type="tel"
             value={f.phone}
             onChange={(e) => setF({ ...f, phone: e.target.value })}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
         </FormRow>
         <FormRow label="Wage (optional)">
@@ -205,7 +205,7 @@ function CashierForm({ onClose, onDone }: { onClose: () => void; onDone: () => v
             type="number"
             value={f.wage}
             onChange={(e) => setF({ ...f, wage: e.target.value })}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
         </FormRow>
         <FormRow label="Password (leave blank to auto-generate)">
@@ -213,7 +213,7 @@ function CashierForm({ onClose, onDone }: { onClose: () => void; onDone: () => v
             type="text"
             value={f.password}
             onChange={(e) => setF({ ...f, password: e.target.value })}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
         </FormRow>
 

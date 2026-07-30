@@ -73,7 +73,7 @@ function Inventory() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-3xl font-black uppercase tracking-wider">
+        <h1 className="font-display text-3xl font-bold uppercase tracking-wider">
           Inventory
         </h1>
         <p className="text-sm text-muted-foreground">Manage stock levels — every change is logged</p>
@@ -85,10 +85,10 @@ function Inventory() {
             <button
               key={m.k}
               onClick={() => setMode(m.k)}
-              className={`inline-flex items-center gap-2 rounded-md border px-4 py-2 text-xs font-bold uppercase tracking-widest ${
+              className={`inline-flex items-center gap-2 rounded-none-none border px-4 py-2 text-xs font-bold uppercase tracking-widest ${
                 mode === m.k
                   ? "border-[color:var(--gold)] bg-[color:var(--gold)]/15 text-gold"
-                  : "border-white/10 text-muted-foreground hover:bg-white/5"
+                  : "border-border text-muted-foreground hover:bg-secondary"
               }`}
             >
               <m.icon className="h-3.5 w-3.5" /> {m.label}
@@ -99,7 +99,7 @@ function Inventory() {
           <select
             value={pid}
             onChange={(e) => setPid(e.target.value)}
-            className="rounded-md border border-white/10 bg-black/40 px-3 py-2.5 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="rounded-none-none border border-border bg-input px-3 py-2.5 text-sm outline-none focus:border-[color:var(--gold)]/60"
           >
             <option value="">Select product…</option>
             {products.map((p) => (
@@ -114,7 +114,7 @@ function Inventory() {
             value={amt}
             onChange={(e) => setAmt(+e.target.value)}
             placeholder={mode === "adj" ? "New qty" : "Amount"}
-            className="rounded-md border border-white/10 bg-black/40 px-3 py-2.5 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="rounded-none-none border border-border bg-input px-3 py-2.5 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
           <GoldButton onClick={apply} disabled={busy}>{busy ? "Saving…" : "Apply"}</GoldButton>
         </div>
@@ -122,7 +122,7 @@ function Inventory() {
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder="Note (optional) — e.g. Supplier delivery, damaged goods…"
-          className="mt-3 w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+          className="mt-3 w-full rounded-none-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
         />
       </div>
 
@@ -138,7 +138,7 @@ function Inventory() {
             All stock healthy.
           </div>
         ) : (
-          <ul className="divide-y divide-white/5">
+          <ul className="divide-y divide-border">
             {low.map((p) => (
               <li key={p.id} className="flex items-center justify-between py-2.5">
                 <div>
@@ -182,7 +182,7 @@ function Inventory() {
               </thead>
               <tbody>
                 {movements.map((m) => (
-                  <tr key={m.id} className="border-t border-white/5">
+                  <tr key={m.id} className="border-t border-border">
                     <td className="p-2 text-muted-foreground">{new Date(m.createdAt).toLocaleString()}</td>
                     <td className="p-2 font-semibold">{m.productName}</td>
                     <td className="p-2 uppercase">{m.type}</td>

@@ -50,7 +50,7 @@ function Products() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-black uppercase tracking-wider">
+          <h1 className="font-display text-3xl font-bold uppercase tracking-wider">
             Products
           </h1>
           <p className="text-sm text-muted-foreground">{products.length} items</p>
@@ -66,7 +66,7 @@ function Products() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search products…"
-          className="w-full rounded-md border border-white/10 bg-black/40 py-2.5 pl-10 pr-3 text-sm outline-none focus:border-[color:var(--gold)]/60"
+          className="w-full rounded-none-none border border-border bg-input py-2.5 pl-10 pr-3 text-sm outline-none focus:border-[color:var(--gold)]/60"
         />
       </div>
 
@@ -74,7 +74,7 @@ function Products() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
+              <tr className="border-b border-border text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                 <th className="p-3">Name</th>
                 <th className="p-3">Category</th>
                 <th className="p-3 text-right">Cost</th>
@@ -87,7 +87,7 @@ function Products() {
               {products.map((p) => (
                 <tr
                   key={p.id}
-                  className="border-b border-white/5 last:border-0 hover:bg-white/5"
+                  className="border-b border-border last:border-0 hover:bg-secondary"
                 >
                   <td className="p-3 font-semibold">{p.name}</td>
                   <td className="p-3 text-muted-foreground">{p.category}</td>
@@ -106,14 +106,14 @@ function Products() {
                     <div className="flex justify-end gap-1">
                       <button
                         onClick={() => { setEditing(p); setShowForm(true); }}
-                        className="grid h-8 w-8 place-items-center rounded hover:bg-white/10"
+                        className="grid h-8 w-8 place-items-center rounded-none hover:bg-white/10"
                       >
                         <Pencil className="h-4 w-4 text-gold" />
                       </button>
                       {canDelete && (
                         <button
                           onClick={() => del(p.id)}
-                          className="grid h-8 w-8 place-items-center rounded hover:bg-red-500/10"
+                          className="grid h-8 w-8 place-items-center rounded-none hover:bg-red-500/10"
                         >
                           <Trash2 className="h-4 w-4 text-red-400" />
                         </button>
@@ -190,12 +190,12 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
   };
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/80 p-4">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-navy-deep/60 p-4">
       <form
         onSubmit={save}
         className="panel clip-cut-card w-full max-w-md space-y-4 p-6"
       >
-        <h3 className="font-display text-xl font-black uppercase tracking-widest text-gold">
+        <h3 className="font-display text-xl font-bold uppercase tracking-widest text-gold">
           {product ? "Edit" : "Add"} Product
         </h3>
         <p className="-mt-2 text-[11px] text-muted-foreground">

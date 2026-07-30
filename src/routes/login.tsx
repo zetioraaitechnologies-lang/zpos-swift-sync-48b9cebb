@@ -61,15 +61,15 @@ function Login() {
         <div className="relative z-10 flex h-full flex-col justify-between p-12">
           <div className="flex items-center gap-3">
             <div className="grid h-12 w-12 place-items-center bg-gold-gradient clip-cut-sm">
-              <span className="font-display text-xl font-black text-black">Z</span>
+              <span className="font-display text-xl font-bold text-navy-deep">Z</span>
             </div>
             <div>
-              <div className="font-display text-2xl font-black tracking-widest text-gold">ZPOS</div>
+              <div className="font-display text-2xl font-bold tracking-widest text-gold">ZPOS</div>
               <div className="text-xs uppercase tracking-[0.25em] text-white/70">Smart · Simple · Powerful</div>
             </div>
           </div>
           <div>
-            <h1 className="font-display text-5xl font-black leading-tight text-white">
+            <h1 className="font-display text-5xl font-bold leading-tight text-white">
               Run your business
               <br />
               <span className="text-gold">without limits.</span>
@@ -90,16 +90,16 @@ function Login() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-background" />
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
           <div className="grid h-14 w-14 place-items-center bg-gold-gradient clip-cut-sm">
-            <span className="font-display text-2xl font-black text-black">Z</span>
+            <span className="font-display text-2xl font-bold text-navy-deep">Z</span>
           </div>
-          <div className="font-display text-3xl font-black tracking-widest text-gold">ZPOS</div>
+          <div className="font-display text-3xl font-bold tracking-widest text-gold">ZPOS</div>
         </div>
       </div>
 
       <div className="relative z-10 flex w-full items-start justify-center px-5 pb-10 pt-64 sm:pt-72 lg:w-[520px] lg:items-center lg:px-6 lg:pt-10">
         <div className="relative w-full max-w-md">
           <div className="panel p-6 clip-cut-card sm:p-8">
-            <h2 className="font-display text-2xl font-black uppercase tracking-wider text-gold">
+            <h2 className="font-display text-2xl font-bold uppercase tracking-wider text-gold">
               Sign in
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -117,7 +117,7 @@ function Login() {
                     autoComplete="username"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-md border border-border bg-input/60 py-2.5 pl-10 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:border-[color:var(--gold)] focus:ring-2 focus:ring-[color:var(--gold)]/20"
+                    className="w-full rounded-none-none border border-border bg-input/60 py-2.5 pl-10 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:border-[color:var(--gold)] focus:ring-2 focus:ring-[color:var(--gold)]/20"
                     placeholder="you@business.com"
                   />
                 </div>
@@ -133,13 +133,13 @@ function Login() {
                     required
                     minLength={6}
                     autoComplete="current-password"
-                    className="w-full rounded-md border border-border bg-input/60 py-2.5 pl-10 pr-10 text-sm outline-none placeholder:text-muted-foreground focus:border-[color:var(--gold)] focus:ring-2 focus:ring-[color:var(--gold)]/20"
+                    className="w-full rounded-none-none border border-border bg-input/60 py-2.5 pl-10 pr-10 text-sm outline-none placeholder:text-muted-foreground focus:border-[color:var(--gold)] focus:ring-2 focus:ring-[color:var(--gold)]/20"
                     placeholder="••••••••"
                   />
                   <button
                     type="button"
                     onClick={() => setShow((v) => !v)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-gold"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-none p-1 text-muted-foreground hover:text-gold"
                     aria-label="Toggle password"
                   >
                     {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -148,7 +148,7 @@ function Login() {
               </div>
 
               {err && (
-                <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                <div className="rounded-none-none border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
                   {err}
                 </div>
               )}
@@ -158,7 +158,7 @@ function Login() {
               </GoldButton>
             </form>
 
-            <div className="mt-6 rounded-md border border-border bg-muted/50 p-3 text-[11px] leading-relaxed text-muted-foreground">
+            <div className="mt-6 rounded-none-none border border-border bg-muted/50 p-3 text-[11px] leading-relaxed text-muted-foreground">
               This is a closed system. Owners are created by the ZPOS super admin.
               Cashiers are created by their business owner. Need credentials? Contact your admin.
             </div>
@@ -204,7 +204,7 @@ function BootstrapPanel({ onDone }: { onDone: () => void }) {
   };
 
   return (
-    <form onSubmit={go} className="mt-3 space-y-3 rounded-md border border-[color:var(--gold)]/30 bg-black/30 p-3">
+    <form onSubmit={go} className="mt-3 space-y-3 rounded-none-none border border-[color:var(--gold)]/30 bg-secondary p-3">
       <p className="text-[11px] text-muted-foreground">
         Run once to seed the allow-listed super-admin account. Ignored if it already exists.
       </p>
@@ -213,7 +213,7 @@ function BootstrapPanel({ onDone }: { onDone: () => void }) {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
-        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+        className="w-full rounded-none-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
       />
       <input
         type="password"
@@ -222,7 +222,7 @@ function BootstrapPanel({ onDone }: { onDone: () => void }) {
         required
         minLength={8}
         placeholder="Set super-admin password (min 8)"
-        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+        className="w-full rounded-none-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
       />
       <GoldButton type="submit" size="sm" className="w-full" disabled={busy}>
         {busy ? "Working…" : "Seed super admin"}

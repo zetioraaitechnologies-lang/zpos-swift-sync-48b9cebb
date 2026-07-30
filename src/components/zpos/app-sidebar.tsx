@@ -62,10 +62,10 @@ export function AppSidebar({
         <div className="flex items-center justify-between border-b border-[color:var(--gold)]/15 px-5 py-5">
           <Link to="/dashboard" className="flex items-center gap-3">
             <div className="grid h-10 w-10 place-items-center bg-gold-gradient clip-cut-sm">
-              <span className="font-display text-lg font-black text-black">Z</span>
+              <span className="font-display text-lg font-bold text-navy-deep">Z</span>
             </div>
             <div>
-              <div className="font-display text-lg font-black tracking-widest text-gold">
+              <div className="font-display text-lg font-bold tracking-widest text-gold">
                 ZPOS
               </div>
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -92,10 +92,10 @@ export function AppSidebar({
                 to={n.to}
                 onClick={onClose}
                 className={cn(
-                  "group flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-semibold uppercase tracking-wider transition-all",
+                  "group flex items-center gap-3 rounded-none-none px-3 py-2.5 text-sm font-semibold uppercase tracking-wider transition-all",
                   active
-                    ? "bg-gold-gradient text-black shadow-[0_6px_20px_-8px_var(--gold)]"
-                    : "text-muted-foreground hover:bg-white/5 hover:text-gold",
+                    ? "bg-gold-gradient text-navy-deep shadow-[0_6px_20px_-8px_var(--gold)]"
+                    : "text-muted-foreground hover:bg-secondary hover:text-gold",
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -107,7 +107,7 @@ export function AppSidebar({
 
         <div className="border-t border-[color:var(--gold)]/15 p-4">
           <div className="mb-3 flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-full border border-[color:var(--gold)]/40 bg-black/60 font-display text-sm font-black text-gold">
+            <div className="grid h-10 w-10 place-items-center rounded-none-full border border-[color:var(--gold)]/40 bg-navy-deep/50 font-display text-sm font-bold text-gold">
               {user?.name?.[0] ?? "?"}
             </div>
             <div className="min-w-0">
@@ -119,7 +119,7 @@ export function AppSidebar({
           </div>
           <button
             onClick={logout}
-            className="flex w-full items-center justify-center gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-red-300 hover:bg-red-500/20"
+            className="flex w-full items-center justify-center gap-2 rounded-none-none border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-red-300 hover:bg-red-500/20"
           >
             <LogOut className="h-3.5 w-3.5" /> Logout
           </button>
@@ -133,7 +133,7 @@ export function MobileMenuButton({ onOpen }: { onOpen: () => void }) {
   return (
     <button
       onClick={onOpen}
-      className="grid h-10 w-10 place-items-center rounded-md border border-[color:var(--gold)]/30 bg-black/40 text-gold lg:hidden"
+      className="grid h-10 w-10 place-items-center rounded-none-none border border-[color:var(--gold)]/30 bg-input text-gold lg:hidden"
       aria-label="Open menu"
     >
       <Menu className="h-5 w-5" />

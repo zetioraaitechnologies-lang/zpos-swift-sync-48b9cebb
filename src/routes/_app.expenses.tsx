@@ -52,7 +52,7 @@ function Expenses() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-black uppercase tracking-wider">
+          <h1 className="font-display text-3xl font-bold uppercase tracking-wider">
             Expenses
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -67,7 +67,7 @@ function Expenses() {
       <div className="panel clip-cut-card overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
+            <tr className="border-b border-border text-left text-[10px] uppercase tracking-widest text-muted-foreground">
               <th className="p-3">Date</th>
               <th className="p-3">Category</th>
               <th className="p-3">Note</th>
@@ -77,7 +77,7 @@ function Expenses() {
           </thead>
           <tbody>
             {items.map((e) => (
-              <tr key={e.id} className="border-b border-white/5 last:border-0 hover:bg-white/5">
+              <tr key={e.id} className="border-b border-border last:border-0 hover:bg-secondary">
                 <td className="p-3 text-muted-foreground">
                   {new Date(e.createdAt).toLocaleDateString()}
                 </td>
@@ -89,7 +89,7 @@ function Expenses() {
                 <td className="p-3">
                   <button
                     onClick={() => del(e.id)}
-                    className="grid h-8 w-8 place-items-center rounded hover:bg-red-500/10"
+                    className="grid h-8 w-8 place-items-center rounded-none hover:bg-red-500/10"
                   >
                     <Trash2 className="h-4 w-4 text-red-400" />
                   </button>
@@ -134,9 +134,9 @@ function ExpenseForm({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/80 p-4">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-navy-deep/60 p-4">
       <form onSubmit={save} className="panel clip-cut-card w-full max-w-md space-y-4 p-6">
-        <h3 className="font-display text-xl font-black uppercase tracking-widest text-gold">
+        <h3 className="font-display text-xl font-bold uppercase tracking-widest text-gold">
           Add Expense
         </h3>
         <label className="block">
@@ -146,7 +146,7 @@ function ExpenseForm({ onClose }: { onClose: () => void }) {
           <select
             value={cat}
             onChange={(e) => setCat(e.target.value as Expense["category"])}
-            className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           >
             {CATS.map((c) => (
               <option key={c} value={c}>
@@ -165,7 +165,7 @@ function ExpenseForm({ onClose }: { onClose: () => void }) {
             min={0}
             value={amt}
             onChange={(e) => setAmt(+e.target.value)}
-            className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
         </label>
         <label className="block">
@@ -175,7 +175,7 @@ function ExpenseForm({ onClose }: { onClose: () => void }) {
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
         </label>
         <div className="flex gap-2 pt-2">

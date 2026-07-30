@@ -40,9 +40,9 @@ export function PwaInstall() {
   if (installed || !evt) return null;
 
   return (
-    <div className="fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-sm rounded-lg border border-gold/40 bg-black/90 p-3 shadow-2xl backdrop-blur">
+    <div className="fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-sm rounded-none-none border border-gold/40 bg-navy p-3 shadow-2xl backdrop-blur">
       <div className="flex items-start gap-3">
-        <img src="/icon-192.png" alt="ZPoS" className="h-10 w-10 rounded-md" />
+        <img src="/icon-192.png" alt="ZPoS" className="h-10 w-10 rounded-none-none" />
         <div className="flex-1">
           <div className="font-display text-sm font-bold uppercase tracking-widest text-gold">
             Install ZPoS
@@ -59,7 +59,7 @@ export function PwaInstall() {
                 if (c.outcome === "accepted") setInstalled(true);
                 setEvt(null);
               }}
-              className="inline-flex items-center gap-1.5 rounded-md bg-gold-gradient px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-black"
+              className="inline-flex items-center gap-1.5 rounded-none-none bg-gold-gradient px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-navy-deep"
             >
               <Download className="h-3.5 w-3.5" /> Install
             </button>
@@ -69,7 +69,7 @@ export function PwaInstall() {
                 localStorage.setItem(DISMISS_KEY, "1");
                 setEvt(null);
               }}
-              className="inline-flex items-center rounded-md border border-white/10 px-2 py-1.5 text-xs text-muted-foreground hover:bg-white/5"
+              className="inline-flex items-center rounded-none-none border border-border px-2 py-1.5 text-xs text-muted-foreground hover:bg-secondary"
               aria-label="Dismiss"
             >
               <X className="h-3.5 w-3.5" />

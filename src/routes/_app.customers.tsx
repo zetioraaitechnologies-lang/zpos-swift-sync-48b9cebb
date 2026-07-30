@@ -47,7 +47,7 @@ function Customers() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-black uppercase tracking-wider">
+          <h1 className="font-display text-3xl font-bold uppercase tracking-wider">
             Customers
           </h1>
           <p className="text-sm text-muted-foreground">{customers.length} contacts</p>
@@ -80,19 +80,19 @@ function Customers() {
                 <div className="flex gap-1">
                   <button
                     onClick={() => { setEdit(c); setShow(true); }}
-                    className="grid h-7 w-7 place-items-center rounded hover:bg-white/5"
+                    className="grid h-7 w-7 place-items-center rounded-none hover:bg-secondary"
                   >
                     <Pencil className="h-3.5 w-3.5 text-gold" />
                   </button>
                   <button
                     onClick={() => del(c.id)}
-                    className="grid h-7 w-7 place-items-center rounded hover:bg-red-500/10"
+                    className="grid h-7 w-7 place-items-center rounded-none hover:bg-red-500/10"
                   >
                     <Trash2 className="h-3.5 w-3.5 text-red-400" />
                   </button>
                 </div>
               </div>
-              <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-3 text-xs">
+              <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-xs">
                 <span className="text-muted-foreground">
                   {history.length} purchases
                 </span>
@@ -150,9 +150,9 @@ function CustomerForm({
   };
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/80 p-4">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-navy-deep/60 p-4">
       <form onSubmit={save} className="panel clip-cut-card w-full max-w-md space-y-4 p-6">
-        <h3 className="font-display text-xl font-black uppercase tracking-widest text-gold">
+        <h3 className="font-display text-xl font-bold uppercase tracking-widest text-gold">
           {existing ? "Edit" : "Add"} Customer
         </h3>
         {(["name", "phone", "address"] as const).map((k) => (
@@ -164,7 +164,7 @@ function CustomerForm({
               required={k !== "address"}
               value={form[k]}
               onChange={(e) => setForm({ ...form, [k]: e.target.value })}
-              className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+              className="w-full rounded-none-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
             />
           </label>
         ))}

@@ -42,7 +42,7 @@ export function ConnectivityBadge({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-2 rounded-full border bg-black/40 px-3 py-1 text-xs font-semibold uppercase tracking-wider",
+        "inline-flex items-center gap-2 rounded-none-full border bg-input px-3 py-1 text-xs font-semibold uppercase tracking-wider",
         cfg.ring,
         className,
       )}
@@ -52,7 +52,7 @@ export function ConnectivityBadge({ className }: { className?: string }) {
           : cfg.label
       }
     >
-      <span className={cn("h-2 w-2 rounded-full", cfg.dot)} />
+      <span className={cn("h-2 w-2 rounded-none-full", cfg.dot)} />
       <cfg.Icon className="h-3 w-3 opacity-70" />
       <span>{cfg.label}</span>
     </div>

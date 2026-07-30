@@ -19,7 +19,7 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="font-display text-7xl font-black text-gold">404</h1>
+        <h1 className="font-display text-7xl font-bold text-gold">404</h1>
         <h2 className="mt-4 font-display text-xl font-semibold">Page not found</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           The page you're looking for doesn't exist.
@@ -27,7 +27,7 @@ function NotFoundComponent() {
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center bg-gold-gradient clip-cut px-6 py-2.5 text-sm font-display font-bold uppercase tracking-widest text-black"
+            className="inline-flex items-center justify-center bg-gold-gradient clip-cut px-6 py-2.5 text-sm font-display font-bold uppercase tracking-widest text-navy-deep"
           >
             Go home
           </Link>
@@ -59,7 +59,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center bg-gold-gradient clip-cut px-6 py-2.5 text-sm font-display font-bold uppercase tracking-widest text-black"
+            className="inline-flex items-center justify-center bg-gold-gradient clip-cut px-6 py-2.5 text-sm font-display font-bold uppercase tracking-widest text-navy-deep"
           >
             Try again
           </button>

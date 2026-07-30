@@ -112,7 +112,7 @@ function POS() {
     <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
       <div className="flex min-h-0 flex-col">
         <div className="mb-4">
-          <h1 className="font-display text-3xl font-black uppercase tracking-wider">
+          <h1 className="font-display text-3xl font-bold uppercase tracking-wider">
             Point of Sale
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -125,7 +125,7 @@ function POS() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search product or scan barcode…"
-            className="w-full rounded-md border border-white/10 bg-black/40 py-3 pl-10 pr-3 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none-none border border-border bg-input py-3 pl-10 pr-3 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
         </div>
         <div className="max-h-[calc(100vh-16rem)] overflow-y-auto pr-1">
@@ -141,7 +141,7 @@ function POS() {
                 <div className="mt-1 text-[10px] uppercase tracking-widest text-muted-foreground">
                   {p.category} · {p.stock}{p.unit ? ` ${p.unit}` : ""} in stock
                 </div>
-                <div className="mt-3 font-display text-lg font-black text-gold">
+                <div className="mt-3 font-display text-lg font-bold text-gold">
                   {fmtMoney(p.price, org.currency)}
                 </div>
               </button>
@@ -160,7 +160,7 @@ function POS() {
           Cart · {lines.length}
         </h3>
 
-        <div className="mt-3 rounded-md border border-white/10 bg-black/30 p-2">
+        <div className="mt-3 rounded-none-none border border-border bg-secondary p-2">
           {customer ? (
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 text-sm">
@@ -196,7 +196,7 @@ function POS() {
           {lines.map((l) => (
             <div
               key={l.p.id}
-              className="flex items-center gap-2 rounded-md border border-white/5 bg-black/30 p-2"
+              className="flex items-center gap-2 rounded-none-none border border-border bg-secondary p-2"
             >
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-semibold">{l.p.name}</div>
@@ -207,20 +207,20 @@ function POS() {
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setQty(l.p.id, l.qty - 1)}
-                  className="grid h-7 w-7 place-items-center rounded border border-white/10 hover:bg-white/5"
+                  className="grid h-7 w-7 place-items-center rounded-none border border-border hover:bg-secondary"
                 >
                   <Minus className="h-3 w-3" />
                 </button>
                 <span className="w-6 text-center text-sm font-bold">{l.qty}</span>
                 <button
                   onClick={() => setQty(l.p.id, l.qty + 1)}
-                  className="grid h-7 w-7 place-items-center rounded border border-white/10 hover:bg-white/5"
+                  className="grid h-7 w-7 place-items-center rounded-none border border-border hover:bg-secondary"
                 >
                   <Plus className="h-3 w-3" />
                 </button>
                 <button
                   onClick={() => setQty(l.p.id, 0)}
-                  className="ml-1 grid h-7 w-7 place-items-center rounded text-red-400 hover:bg-red-500/10"
+                  className="ml-1 grid h-7 w-7 place-items-center rounded-none text-red-400 hover:bg-red-500/10"
                 >
                   <Trash2 className="h-3 w-3" />
                 </button>
@@ -229,7 +229,7 @@ function POS() {
           ))}
         </div>
 
-        <div className="mt-4 space-y-2 border-t border-white/10 pt-4 text-sm">
+        <div className="mt-4 space-y-2 border-t border-border pt-4 text-sm">
           <Row label="Subtotal" value={fmtMoney(subtotal, org.currency)} />
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Discount</span>
@@ -238,7 +238,7 @@ function POS() {
               min={0}
               value={discount}
               onChange={(e) => setDiscount(Math.max(0, Number(e.target.value) || 0))}
-              className="w-28 rounded border border-white/10 bg-black/40 px-2 py-1 text-right text-sm outline-none focus:border-[color:var(--gold)]/60"
+              className="w-28 rounded-none border border-border bg-input px-2 py-1 text-right text-sm outline-none focus:border-[color:var(--gold)]/60"
             />
           </div>
           <Row label="Total" value={fmtMoney(total, org.currency)} big />
@@ -248,10 +248,10 @@ function POS() {
               <button
                 key={m}
                 onClick={() => setPay(m)}
-                className={`rounded-md border py-2 text-[11px] font-bold uppercase tracking-widest ${
+                className={`rounded-none-none border py-2 text-[11px] font-bold uppercase tracking-widest ${
                   pay === m
                     ? "border-[color:var(--gold)] bg-[color:var(--gold)]/15 text-gold"
-                    : "border-white/10 text-muted-foreground hover:bg-white/5"
+                    : "border-border text-muted-foreground hover:bg-secondary"
                 }`}
               >
                 {m}
@@ -319,7 +319,7 @@ function CustomerPicker({
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4">
       <div className="panel clip-cut-card w-full max-w-md space-y-4 p-6">
         <div className="flex items-center justify-between">
-          <h3 className="font-display text-lg font-black uppercase tracking-widest text-gold">
+          <h3 className="font-display text-lg font-bold uppercase tracking-widest text-gold">
             Attach Customer
           </h3>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
@@ -332,14 +332,14 @@ function CustomerPicker({
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search saved customers…"
-            className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
           <div className="mt-2 max-h-40 space-y-1 overflow-y-auto">
             {list.map((c) => (
               <button
                 key={c.id}
                 onClick={() => onPick({ id: c.id, name: c.name, phone: c.phone })}
-                className="flex w-full items-center justify-between rounded-md border border-white/5 bg-black/20 px-3 py-2 text-left text-sm hover:border-[color:var(--gold)]/40"
+                className="flex w-full items-center justify-between rounded-none-none border border-border bg-black/20 px-3 py-2 text-left text-sm hover:border-[color:var(--gold)]/40"
               >
                 <span className="font-semibold">{c.name}</span>
                 <span className="text-[11px] text-muted-foreground">{c.phone}</span>
@@ -353,7 +353,7 @@ function CustomerPicker({
           </div>
         </div>
 
-        <div className="border-t border-white/10 pt-3">
+        <div className="border-t border-border pt-3">
           <div className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
             Or add a new one
           </div>
@@ -362,13 +362,13 @@ function CustomerPicker({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Name"
-              className="rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+              className="rounded-none-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
             />
             <input
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="Phone (optional)"
-              className="rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+              className="rounded-none-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
             />
           </div>
           <div className="mt-2 flex gap-2">
@@ -378,7 +378,7 @@ function CustomerPicker({
             <button
               type="button"
               onClick={() => onPick({ name: name.trim() || "Walk-in", phone: phone.trim() || undefined })}
-              className="flex-1 rounded-md border border-white/10 py-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground hover:bg-white/5"
+              className="flex-1 rounded-none-none border border-border py-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground hover:bg-secondary"
             >
               Use without saving
             </button>
@@ -393,7 +393,7 @@ function Row({ label, value, big }: { label: string; value: string; big?: boolea
   return (
     <div className="flex items-center justify-between">
       <span className="text-muted-foreground">{label}</span>
-      <span className={big ? "font-display text-xl font-black text-gold" : "font-semibold"}>
+      <span className={big ? "font-display text-xl font-bold text-gold" : "font-semibold"}>
         {value}
       </span>
     </div>
@@ -409,21 +409,21 @@ function ReceiptModal({ saleId, onClose }: { saleId: string; onClose: () => void
   const print = () => window.print();
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 print:static print:bg-transparent print:p-0">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-navy-deep/50 p-4 print:static print:bg-transparent print:p-0">
       <div
         id="receipt-print-area"
-        className="panel clip-cut-card w-full max-w-sm p-6 print:!bg-white print:!text-black print:!shadow-none print:!border-0"
+        className="panel clip-cut-card w-full max-w-sm p-6 print:!bg-white print:!text-navy-deep print:!shadow-none print:!border-0"
       >
         <div className="text-center">
           {org.logo && (
-            <img src={org.logo} alt="" className="mx-auto mb-2 h-14 w-14 rounded-md object-cover" />
+            <img src={org.logo} alt="" className="mx-auto mb-2 h-14 w-14 rounded-none-none object-cover" />
           )}
           {org.receiptHeader && (
             <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground print:!text-gray-800">
               {org.receiptHeader}
             </div>
           )}
-          <div className="font-display text-xl font-black uppercase tracking-widest text-gold print:!text-black">
+          <div className="font-display text-xl font-bold uppercase tracking-widest text-gold print:!text-navy-deep">
             {org.businessName}
           </div>
           <div className="text-[11px] uppercase tracking-widest text-muted-foreground print:!text-gray-700">
@@ -474,7 +474,7 @@ function ReceiptModal({ saleId, onClose }: { saleId: string; onClose: () => void
               <span>{fmtMoney((sale.total * org.vatRate) / (100 + org.vatRate), org.currency)}</span>
             </div>
           )}
-          <div className="flex justify-between font-display text-lg font-black text-gold print:!text-black">
+          <div className="flex justify-between font-display text-lg font-bold text-gold print:!text-navy-deep">
             <span>TOTAL</span>
             <span>{fmtMoney(sale.total, org.currency)}</span>
           </div>
