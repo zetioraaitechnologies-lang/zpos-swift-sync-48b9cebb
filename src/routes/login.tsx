@@ -99,7 +99,7 @@ function Login() {
       <div className="relative z-10 flex w-full items-start justify-center px-5 pb-10 pt-64 sm:pt-72 lg:w-[520px] lg:items-center lg:px-6 lg:pt-10">
         <div className="relative w-full max-w-md">
           <div className="panel p-6 clip-cut-card sm:p-8">
-            <h2 className="font-display text-2xl font-bold uppercase tracking-wider text-gold">
+            <h2 className="font-display text-3xl font-bold tracking-tight text-foreground">
               Sign in
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">

@@ -42,7 +42,7 @@ export function ConnectivityBadge({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-2 rounded-full border bg-input px-3 py-1 text-xs font-semibold uppercase tracking-wider",
+        "inline-flex items-center gap-2 clip-cut-sm border bg-input px-3 py-1 text-xs font-semibold uppercase tracking-wider",
         cfg.ring,
         className,
       )}
