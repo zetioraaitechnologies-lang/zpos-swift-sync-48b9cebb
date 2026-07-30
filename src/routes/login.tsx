@@ -117,7 +117,7 @@ function Login() {
                     autoComplete="username"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-none-none border border-border bg-input/60 py-2.5 pl-10 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:border-[color:var(--gold)] focus:ring-2 focus:ring-[color:var(--gold)]/20"
+                    className="w-full rounded-none border border-border bg-input/60 py-2.5 pl-10 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:border-[color:var(--gold)] focus:ring-2 focus:ring-[color:var(--gold)]/20"
                     placeholder="you@business.com"
                   />
                 </div>
@@ -133,7 +133,7 @@ function Login() {
                     required
                     minLength={6}
                     autoComplete="current-password"
-                    className="w-full rounded-none-none border border-border bg-input/60 py-2.5 pl-10 pr-10 text-sm outline-none placeholder:text-muted-foreground focus:border-[color:var(--gold)] focus:ring-2 focus:ring-[color:var(--gold)]/20"
+                    className="w-full rounded-none border border-border bg-input/60 py-2.5 pl-10 pr-10 text-sm outline-none placeholder:text-muted-foreground focus:border-[color:var(--gold)] focus:ring-2 focus:ring-[color:var(--gold)]/20"
                     placeholder="••••••••"
                   />
                   <button
@@ -148,7 +148,7 @@ function Login() {
               </div>
 
               {err && (
-                <div className="rounded-none-none border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                <div className="rounded-none border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
                   {err}
                 </div>
               )}
@@ -158,7 +158,7 @@ function Login() {
               </GoldButton>
             </form>
 
-            <div className="mt-6 rounded-none-none border border-border bg-muted/50 p-3 text-[11px] leading-relaxed text-muted-foreground">
+            <div className="mt-6 rounded-none border border-border bg-muted/50 p-3 text-[11px] leading-relaxed text-muted-foreground">
               This is a closed system. Owners are created by the ZPOS super admin.
               Cashiers are created by their business owner. Need credentials? Contact your admin.
             </div>
@@ -204,7 +204,7 @@ function BootstrapPanel({ onDone }: { onDone: () => void }) {
   };
 
   return (
-    <form onSubmit={go} className="mt-3 space-y-3 rounded-none-none border border-[color:var(--gold)]/30 bg-secondary p-3">
+    <form onSubmit={go} className="mt-3 space-y-3 rounded-none border border-[color:var(--gold)]/30 bg-secondary p-3">
       <p className="text-[11px] text-muted-foreground">
         Run once to seed the allow-listed super-admin account. Ignored if it already exists.
       </p>
@@ -213,7 +213,7 @@ function BootstrapPanel({ onDone }: { onDone: () => void }) {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
-        className="w-full rounded-none-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+        className="w-full rounded-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
       />
       <input
         type="password"
@@ -222,7 +222,7 @@ function BootstrapPanel({ onDone }: { onDone: () => void }) {
         required
         minLength={8}
         placeholder="Set super-admin password (min 8)"
-        className="w-full rounded-none-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+        className="w-full rounded-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
       />
       <GoldButton type="submit" size="sm" className="w-full" disabled={busy}>
         {busy ? "Working…" : "Seed super admin"}

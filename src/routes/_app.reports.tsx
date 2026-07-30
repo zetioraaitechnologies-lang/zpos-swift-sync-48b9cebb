@@ -116,7 +116,7 @@ function Reports() {
             <button
               key={r}
               onClick={() => setRange(r)}
-              className={`rounded-none-none border px-4 py-2 text-xs font-bold uppercase tracking-widest ${
+              className={`rounded-none border px-4 py-2 text-xs font-bold uppercase tracking-widest ${
                 range === r
                   ? "border-[color:var(--gold)] bg-[color:var(--gold)]/15 text-gold"
                   : "border-border text-muted-foreground hover:bg-secondary"

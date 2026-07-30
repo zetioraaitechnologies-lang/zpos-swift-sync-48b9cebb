@@ -106,7 +106,7 @@ function Employees() {
               <div className="mt-3 border-t border-border pt-3">
                 <button
                   onClick={() => remove(s)}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-none-none border border-red-400/30 bg-red-400/10 py-1.5 text-[11px] font-bold uppercase tracking-widest text-red-300"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-none border border-red-400/30 bg-red-400/10 py-1.5 text-[11px] font-bold uppercase tracking-widest text-red-300"
                 >
                   <Trash2 className="h-3.5 w-3.5" /> Remove access
                 </button>
@@ -180,7 +180,7 @@ function CashierForm({ onClose, onDone }: { onClose: () => void; onDone: () => v
             required
             value={f.name}
             onChange={(e) => setF({ ...f, name: e.target.value })}
-            className="w-full rounded-none-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
         </FormRow>
         <FormRow label="Email">
@@ -189,7 +189,7 @@ function CashierForm({ onClose, onDone }: { onClose: () => void; onDone: () => v
             type="email"
             value={f.email}
             onChange={(e) => setF({ ...f, email: e.target.value })}
-            className="w-full rounded-none-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
         </FormRow>
         <FormRow label="Phone (optional)">
@@ -197,7 +197,7 @@ function CashierForm({ onClose, onDone }: { onClose: () => void; onDone: () => v
             type="tel"
             value={f.phone}
             onChange={(e) => setF({ ...f, phone: e.target.value })}
-            className="w-full rounded-none-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
         </FormRow>
         <FormRow label="Wage (optional)">
@@ -205,7 +205,7 @@ function CashierForm({ onClose, onDone }: { onClose: () => void; onDone: () => v
             type="number"
             value={f.wage}
             onChange={(e) => setF({ ...f, wage: e.target.value })}
-            className="w-full rounded-none-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
         </FormRow>
         <FormRow label="Password (leave blank to auto-generate)">
@@ -213,7 +213,7 @@ function CashierForm({ onClose, onDone }: { onClose: () => void; onDone: () => v
             type="text"
             value={f.password}
             onChange={(e) => setF({ ...f, password: e.target.value })}
-            className="w-full rounded-none-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
         </FormRow>
 

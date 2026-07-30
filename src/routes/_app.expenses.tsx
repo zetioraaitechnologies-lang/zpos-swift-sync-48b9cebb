@@ -146,7 +146,7 @@ function ExpenseForm({ onClose }: { onClose: () => void }) {
           <select
             value={cat}
             onChange={(e) => setCat(e.target.value as Expense["category"])}
-            className="w-full rounded-none-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           >
             {CATS.map((c) => (
               <option key={c} value={c}>
@@ -165,7 +165,7 @@ function ExpenseForm({ onClose }: { onClose: () => void }) {
             min={0}
             value={amt}
             onChange={(e) => setAmt(+e.target.value)}
-            className="w-full rounded-none-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
         </label>
         <label className="block">
@@ -175,7 +175,7 @@ function ExpenseForm({ onClose }: { onClose: () => void }) {
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            className="w-full rounded-none-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
         </label>
         <div className="flex gap-2 pt-2">

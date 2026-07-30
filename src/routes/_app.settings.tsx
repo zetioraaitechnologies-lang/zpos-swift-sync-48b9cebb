@@ -91,7 +91,7 @@ function Settings() {
             Business Logo
           </span>
           <div className="flex items-center gap-4">
-            <div className="grid h-20 w-20 place-items-center overflow-hidden rounded-none-none border border-border bg-input">
+            <div className="grid h-20 w-20 place-items-center overflow-hidden rounded-none border border-border bg-input">
               {f.logo ? (
                 <img src={f.logo} alt="logo" className="h-full w-full object-cover" />
               ) : (
@@ -102,7 +102,7 @@ function Settings() {
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="inline-flex items-center gap-2 rounded-none-none border border-border px-3 py-2 text-xs font-semibold uppercase tracking-widest hover:bg-secondary"
+                className="inline-flex items-center gap-2 rounded-none border border-border px-3 py-2 text-xs font-semibold uppercase tracking-widest hover:bg-secondary"
               >
                 <Upload className="h-3.5 w-3.5" /> Upload image
               </button>
@@ -110,7 +110,7 @@ function Settings() {
                 <button
                   type="button"
                   onClick={() => setF({ ...f, logo: "" })}
-                  className="rounded-none-none border border-red-500/30 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-red-300 hover:bg-red-500/10"
+                  className="rounded-none border border-red-500/30 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-red-300 hover:bg-red-500/10"
                 >
                   Remove
                 </button>

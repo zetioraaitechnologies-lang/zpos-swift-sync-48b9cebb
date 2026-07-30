@@ -66,7 +66,7 @@ function Products() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search products…"
-          className="w-full rounded-none-none border border-border bg-input py-2.5 pl-10 pr-3 text-sm outline-none focus:border-[color:var(--gold)]/60"
+          className="w-full rounded-none border border-border bg-input py-2.5 pl-10 pr-3 text-sm outline-none focus:border-[color:var(--gold)]/60"
         />
       </div>
 

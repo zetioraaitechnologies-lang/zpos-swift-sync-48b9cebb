@@ -164,7 +164,7 @@ function CustomerForm({
               required={k !== "address"}
               value={form[k]}
               onChange={(e) => setForm({ ...form, [k]: e.target.value })}
-              className="w-full rounded-none-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+              className="w-full rounded-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
             />
           </label>
         ))}

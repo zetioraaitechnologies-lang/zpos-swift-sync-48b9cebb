@@ -125,7 +125,7 @@ function POS() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search product or scan barcode…"
-            className="w-full rounded-none-none border border-border bg-input py-3 pl-10 pr-3 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none border border-border bg-input py-3 pl-10 pr-3 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
         </div>
         <div className="max-h-[calc(100vh-16rem)] overflow-y-auto pr-1">
@@ -160,7 +160,7 @@ function POS() {
           Cart · {lines.length}
         </h3>
 
-        <div className="mt-3 rounded-none-none border border-border bg-secondary p-2">
+        <div className="mt-3 rounded-none border border-border bg-secondary p-2">
           {customer ? (
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 text-sm">
@@ -196,7 +196,7 @@ function POS() {
           {lines.map((l) => (
             <div
               key={l.p.id}
-              className="flex items-center gap-2 rounded-none-none border border-border bg-secondary p-2"
+              className="flex items-center gap-2 rounded-none border border-border bg-secondary p-2"
             >
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-semibold">{l.p.name}</div>
@@ -248,7 +248,7 @@ function POS() {
               <button
                 key={m}
                 onClick={() => setPay(m)}
-                className={`rounded-none-none border py-2 text-[11px] font-bold uppercase tracking-widest ${
+                className={`rounded-none border py-2 text-[11px] font-bold uppercase tracking-widest ${
                   pay === m
                     ? "border-[color:var(--gold)] bg-[color:var(--gold)]/15 text-gold"
                     : "border-border text-muted-foreground hover:bg-secondary"
@@ -316,7 +316,7 @@ function CustomerPicker({
   };
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-navy-deep/60 p-4">
       <div className="panel clip-cut-card w-full max-w-md space-y-4 p-6">
         <div className="flex items-center justify-between">
           <h3 className="font-display text-lg font-bold uppercase tracking-widest text-gold">
@@ -332,14 +332,14 @@ function CustomerPicker({
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search saved customers…"
-            className="w-full rounded-none-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="w-full rounded-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
           <div className="mt-2 max-h-40 space-y-1 overflow-y-auto">
             {list.map((c) => (
               <button
                 key={c.id}
                 onClick={() => onPick({ id: c.id, name: c.name, phone: c.phone })}
-                className="flex w-full items-center justify-between rounded-none-none border border-border bg-black/20 px-3 py-2 text-left text-sm hover:border-[color:var(--gold)]/40"
+                className="flex w-full items-center justify-between rounded-none border border-border bg-secondary px-3 py-2 text-left text-sm hover:border-[color:var(--gold)]/40"
               >
                 <span className="font-semibold">{c.name}</span>
                 <span className="text-[11px] text-muted-foreground">{c.phone}</span>
@@ -362,13 +362,13 @@ function CustomerPicker({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Name"
-              className="rounded-none-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+              className="rounded-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
             />
             <input
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="Phone (optional)"
-              className="rounded-none-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+              className="rounded-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
             />
           </div>
           <div className="mt-2 flex gap-2">
@@ -378,7 +378,7 @@ function CustomerPicker({
             <button
               type="button"
               onClick={() => onPick({ name: name.trim() || "Walk-in", phone: phone.trim() || undefined })}
-              className="flex-1 rounded-none-none border border-border py-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground hover:bg-secondary"
+              className="flex-1 rounded-none border border-border py-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground hover:bg-secondary"
             >
               Use without saving
             </button>
@@ -416,7 +416,7 @@ function ReceiptModal({ saleId, onClose }: { saleId: string; onClose: () => void
       >
         <div className="text-center">
           {org.logo && (
-            <img src={org.logo} alt="" className="mx-auto mb-2 h-14 w-14 rounded-none-none object-cover" />
+            <img src={org.logo} alt="" className="mx-auto mb-2 h-14 w-14 rounded-none object-cover" />
           )}
           {org.receiptHeader && (
             <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground print:!text-gray-800">
@@ -445,7 +445,7 @@ function ReceiptModal({ saleId, onClose }: { saleId: string; onClose: () => void
             </div>
           )}
         </div>
-        <div className="my-4 border-t border-dashed border-white/20 print:!border-gray-400" />
+        <div className="my-4 border-t border-dashed border-border print:!border-gray-400" />
         <div className="space-y-1 text-sm">
           {sale.items.map((i) => (
             <div key={i.productId + i.name} className="flex justify-between">
@@ -456,7 +456,7 @@ function ReceiptModal({ saleId, onClose }: { saleId: string; onClose: () => void
             </div>
           ))}
         </div>
-        <div className="my-4 border-t border-dashed border-white/20 print:!border-gray-400" />
+        <div className="my-4 border-t border-dashed border-border print:!border-gray-400" />
         <div className="space-y-1 text-sm">
           <div className="flex justify-between">
             <span>Subtotal</span>

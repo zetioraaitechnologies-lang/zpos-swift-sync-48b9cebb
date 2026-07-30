@@ -160,7 +160,7 @@ export function AlphaFab() {
 
       <div
         className={cn(
-          "panel fixed bottom-24 right-5 z-40 flex w-[92vw] max-w-sm flex-col overflow-hidden rounded-none-none border border-[color:var(--gold)]/30 shadow-2xl transition-all print:hidden",
+          "panel fixed bottom-24 right-5 z-40 flex w-[92vw] max-w-sm flex-col overflow-hidden rounded-none border border-[color:var(--gold)]/30 shadow-2xl transition-all print:hidden",
           open ? "opacity-100 translate-y-0" : "pointer-events-none translate-y-4 opacity-0",
         )}
         style={{ height: "min(70vh, 520px)" }}
@@ -181,7 +181,7 @@ export function AlphaFab() {
             <div
               key={i}
               className={cn(
-                "max-w-[85%] whitespace-pre-wrap rounded-none-none px-3 py-2",
+                "max-w-[85%] whitespace-pre-wrap rounded-none px-3 py-2",
                 m.from === "user"
                   ? "ml-auto bg-gold-gradient text-navy-deep"
                   : "bg-muted text-foreground",
@@ -191,7 +191,7 @@ export function AlphaFab() {
             </div>
           ))}
           {busy && (
-            <div className="inline-flex items-center gap-2 rounded-none-none bg-muted px-3 py-2 text-muted-foreground">
+            <div className="inline-flex items-center gap-2 rounded-none bg-muted px-3 py-2 text-muted-foreground">
               <Loader2 className="h-3.5 w-3.5 animate-spin" /> Thinking…
             </div>
           )}
@@ -204,12 +204,12 @@ export function AlphaFab() {
             onKeyDown={(e) => e.key === "Enter" && send()}
             disabled={busy}
             placeholder={online ? "Ask Alpha…" : "Offline — basic answers only"}
-            className="flex-1 rounded-none-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60 disabled:opacity-60"
+            className="flex-1 rounded-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60 disabled:opacity-60"
           />
           <button
             onClick={send}
             disabled={busy || !input.trim()}
-            className="grid h-10 w-10 place-items-center rounded-none-none bg-gold-gradient text-navy-deep disabled:opacity-50"
+            className="grid h-10 w-10 place-items-center rounded-none bg-gold-gradient text-navy-deep disabled:opacity-50"
             aria-label="Send"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}

@@ -50,7 +50,7 @@ export function AppSidebar({
         <button
           aria-label="Close menu"
           onClick={onClose}
-          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-navy-deep/60 backdrop-blur-sm lg:hidden"
         />
       )}
       <aside
@@ -92,7 +92,7 @@ export function AppSidebar({
                 to={n.to}
                 onClick={onClose}
                 className={cn(
-                  "group flex items-center gap-3 rounded-none-none px-3 py-2.5 text-sm font-semibold uppercase tracking-wider transition-all",
+                  "group flex items-center gap-3 rounded-none px-3 py-2.5 text-sm font-semibold uppercase tracking-wider transition-all",
                   active
                     ? "bg-gold-gradient text-navy-deep shadow-[0_6px_20px_-8px_var(--gold)]"
                     : "text-muted-foreground hover:bg-secondary hover:text-gold",
@@ -119,7 +119,7 @@ export function AppSidebar({
           </div>
           <button
             onClick={logout}
-            className="flex w-full items-center justify-center gap-2 rounded-none-none border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-red-300 hover:bg-red-500/20"
+            className="flex w-full items-center justify-center gap-2 rounded-none border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-red-300 hover:bg-red-500/20"
           >
             <LogOut className="h-3.5 w-3.5" /> Logout
           </button>
@@ -133,7 +133,7 @@ export function MobileMenuButton({ onOpen }: { onOpen: () => void }) {
   return (
     <button
       onClick={onOpen}
-      className="grid h-10 w-10 place-items-center rounded-none-none border border-[color:var(--gold)]/30 bg-input text-gold lg:hidden"
+      className="grid h-10 w-10 place-items-center rounded-none border border-[color:var(--gold)]/30 bg-input text-gold lg:hidden"
       aria-label="Open menu"
     >
       <Menu className="h-5 w-5" />

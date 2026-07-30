@@ -85,7 +85,7 @@ function Inventory() {
             <button
               key={m.k}
               onClick={() => setMode(m.k)}
-              className={`inline-flex items-center gap-2 rounded-none-none border px-4 py-2 text-xs font-bold uppercase tracking-widest ${
+              className={`inline-flex items-center gap-2 rounded-none border px-4 py-2 text-xs font-bold uppercase tracking-widest ${
                 mode === m.k
                   ? "border-[color:var(--gold)] bg-[color:var(--gold)]/15 text-gold"
                   : "border-border text-muted-foreground hover:bg-secondary"
@@ -99,7 +99,7 @@ function Inventory() {
           <select
             value={pid}
             onChange={(e) => setPid(e.target.value)}
-            className="rounded-none-none border border-border bg-input px-3 py-2.5 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="rounded-none border border-border bg-input px-3 py-2.5 text-sm outline-none focus:border-[color:var(--gold)]/60"
           >
             <option value="">Select product…</option>
             {products.map((p) => (
@@ -114,7 +114,7 @@ function Inventory() {
             value={amt}
             onChange={(e) => setAmt(+e.target.value)}
             placeholder={mode === "adj" ? "New qty" : "Amount"}
-            className="rounded-none-none border border-border bg-input px-3 py-2.5 text-sm outline-none focus:border-[color:var(--gold)]/60"
+            className="rounded-none border border-border bg-input px-3 py-2.5 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
           <GoldButton onClick={apply} disabled={busy}>{busy ? "Saving…" : "Apply"}</GoldButton>
         </div>
@@ -122,7 +122,7 @@ function Inventory() {
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder="Note (optional) — e.g. Supplier delivery, damaged goods…"
-          className="mt-3 w-full rounded-none-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+          className="mt-3 w-full rounded-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
         />
       </div>
 

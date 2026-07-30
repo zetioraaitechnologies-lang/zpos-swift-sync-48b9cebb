@@ -103,7 +103,7 @@ function Admin() {
         <ConnectivityBadge />
         <button
           onClick={logout}
-          className="inline-flex items-center gap-2 rounded-none-none border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-red-300 hover:bg-red-500/20"
+          className="inline-flex items-center gap-2 rounded-none border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-red-300 hover:bg-red-500/20"
         >
           <LogOut className="h-3.5 w-3.5" /> Logout
         </button>
@@ -200,7 +200,7 @@ function IconBtn({
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-center gap-1 rounded-none-none border py-2 text-[9px] font-bold uppercase tracking-widest ${
+      className={`flex flex-col items-center gap-1 rounded-none border py-2 text-[9px] font-bold uppercase tracking-widest ${
         danger
           ? "border-red-500/30 text-red-300 hover:bg-red-500/10"
           : "border-border text-muted-foreground hover:bg-secondary hover:text-gold"
@@ -320,7 +320,7 @@ function Field({
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-none-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+        className="w-full rounded-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
       />
       {hint && <span className="mt-1 block text-[10px] text-muted-foreground">{hint}</span>}
     </label>
