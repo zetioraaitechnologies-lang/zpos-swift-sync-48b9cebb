@@ -104,7 +104,7 @@ function Reports() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
         <div>
-          <h1 className="font-display text-3xl font-black uppercase tracking-wider">
+          <h1 className="font-display text-3xl font-bold tracking-tight">
             Reports
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -116,10 +116,10 @@ function Reports() {
             <button
               key={r}
               onClick={() => setRange(r)}
-              className={`rounded-md border px-4 py-2 text-xs font-bold uppercase tracking-widest ${
+              className={`rounded-none border px-4 py-2 text-xs font-bold uppercase tracking-widest ${
                 range === r
                   ? "border-[color:var(--gold)] bg-[color:var(--gold)]/15 text-gold"
-                  : "border-white/10 text-muted-foreground hover:bg-white/5"
+                  : "border-border text-muted-foreground hover:bg-secondary"
               }`}
             >
               {r}
@@ -141,7 +141,7 @@ function Reports() {
       <Section title={`Sales (${inRange.length})`}>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
+            <tr className="border-b border-border text-left text-[10px] uppercase tracking-widest text-muted-foreground">
               <th className="p-2">Date</th>
               <th className="p-2">Items</th>
               <th className="p-2">Payment</th>
@@ -150,7 +150,7 @@ function Reports() {
           </thead>
           <tbody>
             {inRange.map((s) => (
-              <tr key={s.id} className="border-b border-white/5 last:border-0">
+              <tr key={s.id} className="border-b border-border last:border-0">
                 <td className="p-2 text-muted-foreground">
                   {new Date(s.createdAt).toLocaleString()}
                 </td>
@@ -178,7 +178,7 @@ function Reports() {
             All stock levels healthy.
           </div>
         ) : (
-          <ul className="divide-y divide-white/5">
+          <ul className="divide-y divide-border">
             {lowStock.map((p) => (
               <li key={p.id} className="flex justify-between py-2 text-sm">
                 <span>{p.name}</span>
@@ -200,7 +200,7 @@ function Metric({ label, value, accent }: { label: string; value: string; accent
       <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
         {label}
       </div>
-      <div className={`mt-2 font-display text-2xl font-black ${accent ? "text-gold" : ""}`}>
+      <div className={`mt-2 font-display text-2xl font-bold ${accent ? "text-gold" : ""}`}>
         {value}
       </div>
     </div>

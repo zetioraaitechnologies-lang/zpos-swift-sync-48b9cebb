@@ -19,10 +19,10 @@ function AlphaPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <div className="grid h-14 w-14 place-items-center bg-gold-gradient clip-cut-sm">
-          <Sparkles className="h-7 w-7 text-black" />
+          <Sparkles className="h-7 w-7 text-navy-deep" />
         </div>
         <div>
-          <h1 className="font-display text-3xl font-black uppercase tracking-wider">
+          <h1 className="font-display text-3xl font-bold tracking-tight">
             Alpha AI
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -45,7 +45,7 @@ function AlphaPage() {
             {prompts.map((p) => (
               <span
                 key={p}
-                className="rounded-full border border-[color:var(--gold)]/30 bg-black/40 px-3 py-1 text-xs"
+                className="rounded-full border border-[color:var(--gold)]/30 bg-input px-3 py-1 text-xs"
               >
                 {p}
               </span>

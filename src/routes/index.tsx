@@ -17,7 +17,7 @@ function Index() {
   }, [ready, user, nav]);
   return (
     <div className="grid min-h-screen place-items-center bg-background">
-      <div className="font-display text-2xl font-black tracking-widest text-gold">
+      <div className="font-display text-2xl font-bold tracking-widest text-gold">
         ZPOS
       </div>
     </div>
