@@ -57,7 +57,7 @@ function Login() {
         className="relative hidden flex-1 bg-cover bg-center lg:block"
         style={{ backgroundImage: `url(${loginBg.url})` }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[color:var(--navy-deep)] via-[color:var(--navy)]/80 to-[color:var(--navy)]/20" />
         <div className="relative z-10 flex h-full flex-col justify-between p-12">
           <div className="flex items-center gap-3">
             <div className="grid h-12 w-12 place-items-center bg-gold-gradient clip-cut-sm">
@@ -87,7 +87,7 @@ function Login() {
 
       <div className="absolute inset-x-0 top-0 h-56 overflow-hidden lg:hidden">
         <img src={loginBg.url} alt="" className="h-full w-full object-cover object-center" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[color:var(--navy-deep)] via-[color:var(--navy)]/70 to-background" />
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
           <div className="grid h-14 w-14 place-items-center bg-gold-gradient clip-cut-sm">
             <span className="font-display text-2xl font-bold text-navy-deep">Z</span>
@@ -153,7 +153,7 @@ function Login() {
                 </div>
               )}
 
-              <GoldButton type="submit" size="lg" className="w-full" disabled={loading}>
+              <GoldButton type="submit" variant="navy" size="lg" className="w-full" disabled={loading}>
                 {loading ? "Please wait…" : "Sign in →"}
               </GoldButton>
             </form>
