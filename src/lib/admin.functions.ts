@@ -21,13 +21,19 @@ export const claimSuperAdmin = createServerFn({ method: "POST" })
       return { granted: false as const };
     }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const { data: existingRole } = await supabaseAdmin
       .from("user_roles")
-      .upsert(
-        { user_id: context.userId, org_id: null, role: "super_admin" },
-        { onConflict: "user_id,org_id,role", ignoreDuplicates: true },
-      );
-    if (error) throw new Error(error.message);
+      .select("id")
+      .eq("user_id", context.userId)
+      .is("org_id", null)
+      .eq("role", "super_admin")
+      .maybeSingle();
+    if (!existingRole) {
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .insert({ user_id: context.userId, org_id: null, role: "super_admin" });
+      if (error && !/duplicate key/i.test(error.message)) throw new Error(error.message);
+    }
     return { granted: true as const };
   });
 
