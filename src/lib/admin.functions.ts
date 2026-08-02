@@ -300,3 +300,85 @@ export const deleteOrg = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+/** Super-admin only: update an organization's profile details. */
+export const updateOrg = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        orgId: z.string().uuid(),
+        businessName: z.string().min(1),
+        email: z.string().email().nullable().optional(),
+        phone: z.string().nullable().optional(),
+        address: z.string().nullable().optional(),
+        category: z.string().nullable().optional(),
+        currency: z.string().nullable().optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: ok } = await context.supabase.rpc("is_super_admin", {
+      _user_id: context.userId,
+    });
+    if (!ok) throw new Error("Forbidden");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("organizations")
+      .update({
+        business_name: data.businessName,
+        email: data.email ?? null,
+        phone: data.phone ?? null,
+        address: data.address ?? null,
+        category: data.category ?? null,
+        currency: data.currency ?? "TZS",
+      })
+      .eq("id", data.orgId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/** Super-admin only: platform-wide metrics grouped per organization. */
+export const getPlatformStats = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: ok } = await context.supabase.rpc("is_super_admin", {
+      _user_id: context.userId,
+    });
+    if (!ok) throw new Error("Forbidden");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const [products, employees, sales, customers] = await Promise.all([
+      supabaseAdmin.from("products").select("org_id"),
+      supabaseAdmin.from("employees").select("org_id"),
+      supabaseAdmin.from("sales").select("org_id, total, created_at"),
+      supabaseAdmin.from("customers").select("org_id"),
+    ]);
+
+    const per: Record<
+      string,
+      { products: number; employees: number; sales: number; customers: number; revenue: number; lastSale: string | null }
+    > = {};
+    const bump = (id: string) =>
+      (per[id] ??= {
+        products: 0,
+        employees: 0,
+        sales: 0,
+        customers: 0,
+        revenue: 0,
+        lastSale: null,
+      });
+
+    for (const r of products.data ?? []) bump(r.org_id as string).products++;
+    for (const r of employees.data ?? []) bump(r.org_id as string).employees++;
+    for (const r of customers.data ?? []) bump(r.org_id as string).customers++;
+    for (const r of sales.data ?? []) {
+      const s = bump(r.org_id as string);
+      s.sales++;
+      s.revenue += Number(r.total ?? 0);
+      const at = r.created_at as string | null;
+      if (at && (!s.lastSale || at > s.lastSale)) s.lastSale = at;
+    }
+
+    return { per };
+  });
