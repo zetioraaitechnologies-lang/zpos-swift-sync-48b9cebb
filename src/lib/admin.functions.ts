@@ -21,13 +21,19 @@ export const claimSuperAdmin = createServerFn({ method: "POST" })
       return { granted: false as const };
     }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const { data: existingRole } = await supabaseAdmin
       .from("user_roles")
-      .upsert(
-        { user_id: context.userId, org_id: null, role: "super_admin" },
-        { onConflict: "user_id,org_id,role", ignoreDuplicates: true },
-      );
-    if (error) throw new Error(error.message);
+      .select("id")
+      .eq("user_id", context.userId)
+      .is("org_id", null)
+      .eq("role", "super_admin")
+      .maybeSingle();
+    if (!existingRole) {
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .insert({ user_id: context.userId, org_id: null, role: "super_admin" });
+      if (error && !/duplicate key/i.test(error.message)) throw new Error(error.message);
+    }
     return { granted: true as const };
   });
 
@@ -58,10 +64,7 @@ export const bootstrapSuperAdmin = createServerFn({ method: "POST" })
     if (error || !created?.user) throw new Error(error?.message ?? "Failed to create super admin");
     await supabaseAdmin
       .from("user_roles")
-      .upsert(
-        { user_id: created.user.id, org_id: null, role: "super_admin" },
-        { onConflict: "user_id,org_id,role", ignoreDuplicates: true },
-      );
+      .insert({ user_id: created.user.id, org_id: null, role: "super_admin" });
     return { created: true as const, existed: false as const };
   });
 
@@ -107,7 +110,11 @@ export const createOrgWithOwner = createServerFn({ method: "POST" })
       const found = list?.users?.find((u) => (u.email ?? "").toLowerCase() === emailLc);
       if (!found) throw new Error(createErr?.message ?? "Could not create owner account");
       ownerId = found.id;
-      await supabaseAdmin.auth.admin.updateUserById(ownerId, { password: data.password });
+      const { error: pwErr } = await supabaseAdmin.auth.admin.updateUserById(ownerId, {
+        password: data.password,
+        email_confirm: true,
+      });
+      if (pwErr) throw new Error(`Could not set owner password: ${pwErr.message}`);
     }
 
     // Trigger handle_new_org auto-assigns the owner role.
@@ -212,7 +219,7 @@ export const inviteCashier = createServerFn({ method: "POST" })
       );
     if (roleErr) throw new Error(roleErr.message);
 
-    // Employee record (owner-visible list).
+    // Employee record (owner-visible list) — unique on (org_id, user_id).
     const { error: empErr } = await supabaseAdmin.from("employees").upsert(
       {
         org_id: data.orgId,
@@ -225,19 +232,7 @@ export const inviteCashier = createServerFn({ method: "POST" })
       },
       { onConflict: "org_id,user_id" },
     );
-    // Non-fatal; employees table has no unique on (org_id,user_id) yet — ignore duplicates gracefully
-    if (empErr && !/duplicate|conflict/i.test(empErr.message)) {
-      // Fall back to plain insert
-      await supabaseAdmin.from("employees").insert({
-        org_id: data.orgId,
-        user_id: newUserId,
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        role_label: "Cashier",
-        wage: data.wage,
-      });
-    }
+    if (empErr) throw new Error(empErr.message);
 
     return { userId: newUserId };
   });
