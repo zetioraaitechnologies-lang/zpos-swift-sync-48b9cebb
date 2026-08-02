@@ -110,7 +110,11 @@ export const createOrgWithOwner = createServerFn({ method: "POST" })
       const found = list?.users?.find((u) => (u.email ?? "").toLowerCase() === emailLc);
       if (!found) throw new Error(createErr?.message ?? "Could not create owner account");
       ownerId = found.id;
-      await supabaseAdmin.auth.admin.updateUserById(ownerId, { password: data.password });
+      const { error: pwErr } = await supabaseAdmin.auth.admin.updateUserById(ownerId, {
+        password: data.password,
+        email_confirm: true,
+      });
+      if (pwErr) throw new Error(`Could not set owner password: ${pwErr.message}`);
     }
 
     // Trigger handle_new_org auto-assigns the owner role.
