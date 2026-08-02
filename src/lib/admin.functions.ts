@@ -219,7 +219,7 @@ export const inviteCashier = createServerFn({ method: "POST" })
       );
     if (roleErr) throw new Error(roleErr.message);
 
-    // Employee record (owner-visible list).
+    // Employee record (owner-visible list) — unique on (org_id, user_id).
     const { error: empErr } = await supabaseAdmin.from("employees").upsert(
       {
         org_id: data.orgId,
@@ -232,19 +232,7 @@ export const inviteCashier = createServerFn({ method: "POST" })
       },
       { onConflict: "org_id,user_id" },
     );
-    // Non-fatal; employees table has no unique on (org_id,user_id) yet — ignore duplicates gracefully
-    if (empErr && !/duplicate|conflict/i.test(empErr.message)) {
-      // Fall back to plain insert
-      await supabaseAdmin.from("employees").insert({
-        org_id: data.orgId,
-        user_id: newUserId,
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        role_label: "Cashier",
-        wage: data.wage,
-      });
-    }
+    if (empErr) throw new Error(empErr.message);
 
     return { userId: newUserId };
   });
