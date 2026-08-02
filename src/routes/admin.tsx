@@ -90,7 +90,7 @@ function Admin() {
     <div className="min-h-screen bg-background">
       <header className="flex items-center gap-3 border-b border-[color:var(--gold)]/15 bg-card/95 px-6 py-4 backdrop-blur-lg">
         <div className="grid h-10 w-10 place-items-center bg-gold-gradient clip-cut-sm">
-          <span className="font-display text-lg font-bold text-navy-deep">Z</span>
+          <span className="font-display text-lg font-bold text-on-accent">Z</span>
         </div>
         <div className="flex-1">
           <div className="font-display text-lg font-bold tracking-widest text-gold">
@@ -129,7 +129,7 @@ function Admin() {
             <div key={o.id} className="panel clip-cut-card p-5">
               <div className="flex items-start gap-3">
                 <div className="grid h-11 w-11 place-items-center bg-gold-gradient clip-cut-sm">
-                  <Building2 className="h-5 w-5 text-navy-deep" />
+                  <Building2 className="h-5 w-5 text-on-accent" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-display text-lg font-bold text-gold">

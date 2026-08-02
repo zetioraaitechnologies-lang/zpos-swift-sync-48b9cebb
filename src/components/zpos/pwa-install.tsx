@@ -59,7 +59,7 @@ export function PwaInstall() {
                 if (c.outcome === "accepted") setInstalled(true);
                 setEvt(null);
               }}
-              className="inline-flex items-center gap-1.5 rounded-none bg-gold-gradient px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-navy-deep"
+              className="inline-flex items-center gap-1.5 rounded-none bg-gold-gradient px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-on-accent"
             >
               <Download className="h-3.5 w-3.5" /> Install
             </button>

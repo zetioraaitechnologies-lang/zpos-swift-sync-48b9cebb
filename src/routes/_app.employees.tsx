@@ -87,7 +87,7 @@ function Employees() {
         {rows.map((s) => (
           <div key={s.id} className="panel clip-cut-card p-4">
             <div className="flex items-center gap-3">
-              <div className="grid h-12 w-12 place-items-center rounded-full bg-gold-gradient font-display text-lg font-bold text-navy-deep">
+              <div className="grid h-12 w-12 place-items-center rounded-full bg-gold-gradient font-display text-lg font-bold text-on-accent">
                 {s.name?.[0] ?? "?"}
               </div>
               <div className="min-w-0 flex-1">

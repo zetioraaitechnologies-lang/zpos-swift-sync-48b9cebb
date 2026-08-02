@@ -152,7 +152,7 @@ export function AlphaFab() {
     <>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-5 right-5 z-40 grid h-14 w-14 place-items-center rounded-full bg-gold-gradient text-navy-deep shadow-[0_10px_30px_-8px_var(--gold)] transition hover:scale-105 print:hidden"
+        className="fixed bottom-5 right-5 z-40 grid h-14 w-14 place-items-center rounded-full bg-gold-gradient text-on-accent shadow-[0_10px_30px_-8px_var(--gold)] transition hover:scale-105 print:hidden"
         aria-label="Alpha AI"
       >
         {open ? <X className="h-6 w-6" /> : <Sparkles className="h-6 w-6" />}
@@ -167,7 +167,7 @@ export function AlphaFab() {
       >
         <div className="flex items-center gap-3 border-b border-[color:var(--gold)]/20 bg-muted/60 px-4 py-3">
           <div className="grid h-8 w-8 place-items-center bg-gold-gradient clip-cut-sm">
-            <Sparkles className="h-4 w-4 text-navy-deep" />
+            <Sparkles className="h-4 w-4 text-on-accent" />
           </div>
           <div className="flex-1">
             <div className="font-display text-sm font-bold text-gold">Alpha AI</div>
@@ -183,7 +183,7 @@ export function AlphaFab() {
               className={cn(
                 "max-w-[85%] whitespace-pre-wrap rounded-none px-3 py-2",
                 m.from === "user"
-                  ? "ml-auto bg-gold-gradient text-navy-deep"
+                  ? "ml-auto bg-gold-gradient text-on-accent"
                   : "bg-muted text-foreground",
               )}
             >
@@ -209,7 +209,7 @@ export function AlphaFab() {
           <button
             onClick={send}
             disabled={busy || !input.trim()}
-            className="grid h-10 w-10 place-items-center rounded-none bg-gold-gradient text-navy-deep disabled:opacity-50"
+            className="grid h-10 w-10 place-items-center rounded-none bg-gold-gradient text-on-accent disabled:opacity-50"
             aria-label="Send"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}

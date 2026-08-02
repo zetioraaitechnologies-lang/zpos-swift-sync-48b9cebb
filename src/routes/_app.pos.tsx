@@ -412,7 +412,7 @@ function ReceiptModal({ saleId, onClose }: { saleId: string; onClose: () => void
     <div className="fixed inset-0 z-50 grid place-items-center bg-navy-deep/50 p-4 print:static print:bg-transparent print:p-0">
       <div
         id="receipt-print-area"
-        className="panel clip-cut-card w-full max-w-sm p-6 print:!bg-white print:!text-navy-deep print:!shadow-none print:!border-0"
+        className="panel clip-cut-card w-full max-w-sm p-6 print:!bg-white print:!text-on-accent print:!shadow-none print:!border-0"
       >
         <div className="text-center">
           {org.logo && (
@@ -423,7 +423,7 @@ function ReceiptModal({ saleId, onClose }: { saleId: string; onClose: () => void
               {org.receiptHeader}
             </div>
           )}
-          <div className="font-display text-xl font-bold tracking-tight text-gold print:!text-navy-deep">
+          <div className="font-display text-xl font-bold tracking-tight text-gold print:!text-on-accent">
             {org.businessName}
           </div>
           <div className="text-[11px] uppercase tracking-widest text-muted-foreground print:!text-gray-700">
@@ -474,7 +474,7 @@ function ReceiptModal({ saleId, onClose }: { saleId: string; onClose: () => void
               <span>{fmtMoney((sale.total * org.vatRate) / (100 + org.vatRate), org.currency)}</span>
             </div>
           )}
-          <div className="flex justify-between font-display text-lg font-bold text-gold print:!text-navy-deep">
+          <div className="flex justify-between font-display text-lg font-bold text-gold print:!text-on-accent">
             <span>TOTAL</span>
             <span>{fmtMoney(sale.total, org.currency)}</span>
           </div>
