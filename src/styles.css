@@ -47,16 +47,18 @@
 }
 
 
-/* ZETIORA identity: deep navy + amber gold on clean white, cyber-cut corners */
+/* ZETIORA identity: deep navy + electric azure on clean white, cyber-cut corners */
 :root {
   --radius: 0rem;
 
   --navy: oklch(0.24 0.06 262);
   --navy-deep: oklch(0.19 0.055 262);
-  --gold: oklch(0.73 0.15 71);
-  --gold-bright: oklch(0.82 0.14 78);
-  --gold-deep: oklch(0.62 0.14 68);
-  --cream: oklch(0.93 0.06 85);
+  /* Accent (token kept as --gold for compatibility, now azure) */
+  --gold: oklch(0.55 0.16 250);
+  --gold-bright: oklch(0.65 0.15 240);
+  --gold-deep: oklch(0.44 0.15 258);
+  --on-accent: oklch(0.99 0 0);
+  --cream: oklch(0.94 0.03 250);
 
   --background: oklch(1 0 0);
   --foreground: oklch(0.24 0.06 262);
@@ -70,36 +72,37 @@
   --primary: oklch(0.24 0.06 262);
   --primary-foreground: oklch(0.99 0 0);
 
-  --secondary: oklch(0.965 0.005 262);
+  --secondary: oklch(0.975 0.004 262);
   --secondary-foreground: oklch(0.24 0.06 262);
 
-  --muted: oklch(0.965 0.005 262);
-  --muted-foreground: oklch(0.52 0.02 262);
+  --muted: oklch(0.975 0.004 262);
+  --muted-foreground: oklch(0.48 0.02 262);
 
-  --accent: oklch(0.93 0.06 85);
+  --accent: oklch(0.95 0.03 250);
   --accent-foreground: oklch(0.24 0.06 262);
 
   --destructive: oklch(0.58 0.22 27);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.9 0.01 262);
-  --input: oklch(0.96 0.005 262);
-  --ring: oklch(0.24 0.06 262);
+  --border: oklch(0.88 0.012 262);
+  --input: oklch(1 0 0);
+  --ring: oklch(0.55 0.16 250);
 
   --success: oklch(0.55 0.16 155);
-  --warning: oklch(0.73 0.15 71);
+  --warning: oklch(0.72 0.15 71);
 
   --gradient-gold: linear-gradient(
     135deg,
-    oklch(0.78 0.15 76) 0%,
-    oklch(0.73 0.15 71) 100%
+    oklch(0.6 0.16 245) 0%,
+    oklch(0.45 0.15 258) 100%
   );
   --gradient-navy: linear-gradient(
     135deg,
     oklch(0.26 0.06 262) 0%,
     oklch(0.19 0.055 262) 100%
   );
-  --shadow-gold: 0 10px 30px -12px oklch(0.73 0.15 71 / 35%);
+  --shadow-gold: 0 10px 30px -12px oklch(0.55 0.16 250 / 35%);
+
   --shadow-panel: 0 1px 0 0 oklch(0.9 0.01 262);
 }
 
