@@ -35,7 +35,7 @@ export function StatCard({
             accent ? "bg-gold-gradient" : "bg-navy",
           )}
         >
-          <Icon className={cn("h-5 w-5", accent ? "text-navy-deep" : "text-gold")} />
+          <Icon className={cn("h-5 w-5", accent ? "text-on-accent" : "text-gold")} />
         </div>
       </div>
     </div>

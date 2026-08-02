@@ -62,7 +62,7 @@ export function AppSidebar({
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-5">
           <Link to="/dashboard" className="flex items-center gap-3">
             <div className="grid h-10 w-10 place-items-center bg-gold-gradient clip-cut-sm">
-              <span className="font-display text-lg font-bold text-navy-deep">Z</span>
+              <span className="font-display text-lg font-bold text-on-accent">Z</span>
             </div>
             <div>
               <div className="font-display text-lg font-bold tracking-[0.22em]">
@@ -94,7 +94,7 @@ export function AppSidebar({
                 className={cn(
                   "group flex items-center gap-3 clip-cut-sm px-3 py-2.5 font-display text-xs font-semibold uppercase tracking-[0.16em] transition-all",
                   active
-                    ? "bg-gold-gradient text-navy-deep"
+                    ? "bg-gold-gradient text-on-accent"
                     : "text-white/65 hover:bg-white/10 hover:text-gold",
                 )}
               >

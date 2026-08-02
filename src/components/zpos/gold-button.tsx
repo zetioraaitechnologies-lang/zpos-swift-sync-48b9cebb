@@ -22,7 +22,7 @@ export const GoldButton = forwardRef<HTMLButtonElement, Props>(function GoldButt
   const base =
     "inline-flex items-center justify-center gap-2 font-display font-semibold uppercase tracking-[0.18em] transition-all disabled:opacity-50 disabled:pointer-events-none select-none";
   const variants: Record<Variant, string> = {
-    gold: "bg-gold-gradient text-navy-deep hover:brightness-105 active:brightness-95",
+    gold: "bg-gold-gradient text-on-accent hover:brightness-105 active:brightness-95",
     navy: "bg-navy text-primary-foreground hover:bg-navy-deep",
     outline:
       "bg-transparent text-navy border-2 border-[color:var(--navy)] hover:bg-[color:var(--navy)] hover:text-[color:var(--primary-foreground)]",

@@ -44,7 +44,7 @@ function AppLayout() {
           </div>
           <ConnectivityBadge />
         </header>
-        <main className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
+        <main className="mx-auto max-w-6xl px-4 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
           <Outlet />
         </main>
       </div>

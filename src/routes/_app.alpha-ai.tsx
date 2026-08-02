@@ -19,7 +19,7 @@ function AlphaPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <div className="grid h-14 w-14 place-items-center bg-gold-gradient clip-cut-sm">
-          <Sparkles className="h-7 w-7 text-navy-deep" />
+          <Sparkles className="h-7 w-7 text-on-accent" />
         </div>
         <div>
           <h1 className="font-display text-3xl font-bold tracking-tight">

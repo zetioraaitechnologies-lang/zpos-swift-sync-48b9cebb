@@ -27,7 +27,7 @@ function NotFoundComponent() {
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center bg-gold-gradient clip-cut px-6 py-2.5 text-sm font-display font-bold uppercase tracking-widest text-navy-deep"
+            className="inline-flex items-center justify-center bg-gold-gradient clip-cut px-6 py-2.5 text-sm font-display font-bold uppercase tracking-widest text-on-accent"
           >
             Go home
           </Link>
@@ -59,7 +59,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center bg-gold-gradient clip-cut px-6 py-2.5 text-sm font-display font-bold uppercase tracking-widest text-navy-deep"
+            className="inline-flex items-center justify-center bg-gold-gradient clip-cut px-6 py-2.5 text-sm font-display font-bold uppercase tracking-widest text-on-accent"
           >
             Try again
           </button>
@@ -114,7 +114,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap",
       },
       { rel: "icon", type: "image/png", href: "/icon-192.png" },
     ],
@@ -149,7 +149,7 @@ function RootComponent() {
       <AuthProvider>
         <Outlet />
         <PwaInstall />
-        <Toaster position="top-right" richColors closeButton theme="dark" />
+        <Toaster position="top-right" richColors closeButton theme="light" />
       </AuthProvider>
     </QueryClientProvider>
   );

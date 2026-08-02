@@ -61,7 +61,7 @@ function Login() {
         <div className="relative z-10 flex h-full flex-col justify-between p-12">
           <div className="flex items-center gap-3">
             <div className="grid h-12 w-12 place-items-center bg-gold-gradient clip-cut-sm">
-              <span className="font-display text-xl font-bold text-navy-deep">Z</span>
+              <span className="font-display text-xl font-bold text-on-accent">Z</span>
             </div>
             <div>
               <div className="font-display text-2xl font-bold tracking-widest text-gold">ZPOS</div>
@@ -90,7 +90,7 @@ function Login() {
         <div className="absolute inset-0 bg-gradient-to-b from-[color:var(--navy-deep)] via-[color:var(--navy)]/70 to-background" />
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
           <div className="grid h-14 w-14 place-items-center bg-gold-gradient clip-cut-sm">
-            <span className="font-display text-2xl font-bold text-navy-deep">Z</span>
+            <span className="font-display text-2xl font-bold text-on-accent">Z</span>
           </div>
           <div className="font-display text-3xl font-bold tracking-widest text-gold">ZPOS</div>
         </div>
@@ -117,7 +117,7 @@ function Login() {
                     autoComplete="username"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-none border border-border bg-input/60 py-2.5 pl-10 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:border-[color:var(--gold)] focus:ring-2 focus:ring-[color:var(--gold)]/20"
+                    className="w-full rounded-none border border-border bg-input py-2.5 pl-10 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:border-[color:var(--gold)] focus:ring-2 focus:ring-[color:var(--gold)]/20"
                     placeholder="you@business.com"
                   />
                 </div>
@@ -133,7 +133,7 @@ function Login() {
                     required
                     minLength={6}
                     autoComplete="current-password"
-                    className="w-full rounded-none border border-border bg-input/60 py-2.5 pl-10 pr-10 text-sm outline-none placeholder:text-muted-foreground focus:border-[color:var(--gold)] focus:ring-2 focus:ring-[color:var(--gold)]/20"
+                    className="w-full rounded-none border border-border bg-input py-2.5 pl-10 pr-10 text-sm outline-none placeholder:text-muted-foreground focus:border-[color:var(--gold)] focus:ring-2 focus:ring-[color:var(--gold)]/20"
                     placeholder="••••••••"
                   />
                   <button
