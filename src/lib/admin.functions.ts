@@ -64,10 +64,7 @@ export const bootstrapSuperAdmin = createServerFn({ method: "POST" })
     if (error || !created?.user) throw new Error(error?.message ?? "Failed to create super admin");
     await supabaseAdmin
       .from("user_roles")
-      .upsert(
-        { user_id: created.user.id, org_id: null, role: "super_admin" },
-        { onConflict: "user_id,org_id,role", ignoreDuplicates: true },
-      );
+      .insert({ user_id: created.user.id, org_id: null, role: "super_admin" });
     return { created: true as const, existed: false as const };
   });
 
