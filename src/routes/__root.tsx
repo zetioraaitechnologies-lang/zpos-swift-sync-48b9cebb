@@ -114,7 +114,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap",
       },
       { rel: "icon", type: "image/png", href: "/icon-192.png" },
     ],
@@ -149,7 +149,7 @@ function RootComponent() {
       <AuthProvider>
         <Outlet />
         <PwaInstall />
-        <Toaster position="top-right" richColors closeButton theme="dark" />
+        <Toaster position="top-right" richColors closeButton theme="light" />
       </AuthProvider>
     </QueryClientProvider>
   );
