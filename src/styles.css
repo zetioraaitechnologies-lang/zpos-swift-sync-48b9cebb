@@ -114,7 +114,10 @@
   --card-foreground: oklch(0.97 0.005 262);
   --popover: oklch(0.2 0.05 262);
   --popover-foreground: oklch(0.97 0.005 262);
-  --primary: oklch(0.73 0.15 71);
+  --gold: oklch(0.72 0.14 240);
+  --gold-bright: oklch(0.8 0.12 232);
+  --gold-deep: oklch(0.58 0.15 250);
+  --primary: oklch(0.72 0.14 240);
   --primary-foreground: oklch(0.16 0.045 262);
   --secondary: oklch(0.24 0.05 262);
   --secondary-foreground: oklch(0.97 0.005 262);
@@ -124,7 +127,7 @@
   --accent-foreground: oklch(0.97 0.005 262);
   --border: oklch(0.32 0.03 262 / 70%);
   --input: oklch(0.24 0.05 262);
-  --ring: oklch(0.73 0.15 71);
+  --ring: oklch(0.72 0.14 240);
   --shadow-panel: 0 1px 0 0 oklch(0.32 0.03 262 / 70%);
 }
 
@@ -133,7 +136,7 @@ body {
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-sans);
-  font-weight: 400;
+  font-weight: 600;
 }
 
 @layer base {
@@ -145,7 +148,18 @@ body {
     letter-spacing: 0.01em;
     font-weight: 700;
   }
+  input, select, textarea {
+    background-color: var(--color-input);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-weight: 600;
+  }
+  input::placeholder, textarea::placeholder {
+    font-weight: 500;
+    color: var(--color-muted-foreground);
+  }
 }
+
 
 /* Cyber cuts — notch on top-right and bottom-left, ZETIORA signature */
 @utility clip-cut {
