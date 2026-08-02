@@ -523,7 +523,9 @@ export function useLive<T>(
   useEffect(() => {
     void refresh();
     if (!orgId) return;
-    const chan = supabase.channel(`live-${tables.join("-")}-${orgId}`);
+    const chan = supabase.channel(
+      `live-${tables.join("-")}-${orgId}-${Math.random().toString(36).slice(2)}`,
+    );
     tables.forEach((table) => {
       chan.on(
         "postgres_changes",
