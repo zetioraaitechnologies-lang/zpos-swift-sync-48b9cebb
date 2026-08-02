@@ -40,10 +40,12 @@
   --color-gold: var(--gold);
   --color-gold-bright: var(--gold-bright);
   --color-gold-deep: var(--gold-deep);
+  --color-on-accent: var(--on-accent);
   --color-cream: var(--cream);
   --color-success: var(--success);
   --color-warning: var(--warning);
 }
+
 
 /* ZETIORA identity: deep navy + amber gold on clean white, cyber-cut corners */
 :root {
