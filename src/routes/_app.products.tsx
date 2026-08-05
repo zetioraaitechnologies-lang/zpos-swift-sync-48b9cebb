@@ -38,7 +38,8 @@ function Products() {
   const del = async (id: string) => {
     if (!confirm("Delete this product?")) return;
     try {
-      await deleteProduct(id);
+      await safeDeleteProduct(id);
+      toast.success("Queued for deletion");
       await refresh();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to delete");
