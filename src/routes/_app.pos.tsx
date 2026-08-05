@@ -140,6 +140,18 @@ function POS() {
             Fast checkout · synced across every device
           </p>
         </div>
+
+        {!online && (
+          <div className="mb-4 flex items-center gap-2 border border-amber-300/40 bg-amber-300/10 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-amber-600">
+            <WifiOff className="h-3.5 w-3.5" />
+            Offline mode — sales are queued and will sync when connection returns
+          </div>
+        )}
+        {online && pending > 0 && (
+          <div className="mb-4 flex items-center gap-2 border border-[color:var(--gold)]/40 bg-[color:var(--gold)]/10 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--gold)]">
+            {pending} sale{pending > 1 ? "s" : ""} waiting to sync…
+          </div>
+        )}
         <div className="relative mb-4">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
