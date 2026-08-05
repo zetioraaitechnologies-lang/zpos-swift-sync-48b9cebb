@@ -1,20 +1,28 @@
 import { useEffect, useState } from "react";
 import { Wifi, WifiOff, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { isOnline, pendingCount, subscribeSyncStatus } from "@/lib/zpos-offline";
 
 type State = "online" | "syncing" | "offline";
 
 export function ConnectivityBadge({ className }: { className?: string }) {
-  const [state, setState] = useState<State>("online");
+  const [state, setState] = useState<State>(isOnline() ? "online" : "offline");
+  const [pending, setPending] = useState(pendingCount());
 
   useEffect(() => {
-    const set = () => setState(navigator.onLine ? "online" : "offline");
-    set();
-    window.addEventListener("online", set);
-    window.addEventListener("offline", set);
+    const setNet = () => setState(isOnline() ? (pendingCount() > 0 ? "syncing" : "online") : "offline");
+    setNet();
+    window.addEventListener("online", setNet);
+    window.addEventListener("offline", setNet);
+    const unsub = subscribeSyncStatus((s) => {
+      setPending(s.pending);
+      if (s.running) setState("syncing");
+      else setState(isOnline() ? (s.pending > 0 ? "syncing" : "online") : "offline");
+    });
     return () => {
-      window.removeEventListener("online", set);
-      window.removeEventListener("offline", set);
+      window.removeEventListener("online", setNet);
+      window.removeEventListener("offline", setNet);
+      unsub();
     };
   }, []);
 
@@ -26,7 +34,7 @@ export function ConnectivityBadge({ className }: { className?: string }) {
       ring: "border-emerald-400/40",
     },
     syncing: {
-      label: "Syncing…",
+      label: pending > 0 ? `Syncing ${pending}` : "Syncing…",
       Icon: RefreshCw,
       dot: "bg-amber-300",
       ring: "border-amber-300/40",
@@ -53,7 +61,7 @@ export function ConnectivityBadge({ className }: { className?: string }) {
       }
     >
       <span className={cn("h-2 w-2 rounded-full", cfg.dot)} />
-      <cfg.Icon className="h-3 w-3 opacity-70" />
+      <cfg.Icon className={cn("h-3 w-3 opacity-70", state === "syncing" && "animate-spin")} />
       <span>{cfg.label}</span>
     </div>
   );
