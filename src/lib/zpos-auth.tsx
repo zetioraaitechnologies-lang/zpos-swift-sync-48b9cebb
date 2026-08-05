@@ -1,13 +1,15 @@
-// ZPOS Auth — Supabase-backed.
+// ZPOS Auth — Supabase-backed, closed system.
 //
 // Identity: Supabase Auth (email + password) is the single source of truth.
 // Role & org come from `public.user_roles` (super_admin | owner | cashier).
 // Business details come from `public.organizations`.
 //
-// The rest of the app still consumes `useAuth()` and the same `AppUser` /
-// `Organization` shapes as before, so screens keep working. On sign-in the
-// cloud sync layer hydrates the local `zdb` blob from the org-shared cloud
-// backup so all devices in an org see the same data.
+// Rules enforced here:
+//   * No public sign-up — only seeded super-admin + admin-created owners.
+//   * Unknown users (no role row) are rejected instead of defaulting to owner.
+//   * Suspended organizations block owner/cashier access.
+//   * Profile display name is fetched from `public.profiles`.
+//   * Super-admin claim only runs for the allowlisted email.
 
 import {
   createContext,
@@ -19,6 +21,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useRouter } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { claimSuperAdmin } from "./admin.functions";
 
@@ -29,10 +32,8 @@ export interface AppUser {
   email: string;
   phone?: string;
   name: string;
-  password: string;
   role: UserRole;
   orgId?: string;
-  disabled?: boolean;
 }
 
 export type { Organization } from "./zpos-data";
@@ -42,6 +43,7 @@ interface AuthCtx {
   user: AppUser | null;
   org: Organization | null;
   ready: boolean;
+  isOnline: boolean;
   login: (
     identifier: string,
     password: string,
@@ -58,11 +60,13 @@ interface RoleRow {
   role: "super_admin" | "owner" | "cashier";
 }
 
+const SUPER_ADMIN_EMAILS = ["zetioraaitechnologies@gmail.com"];
+
 function rowToOrg(row: Record<string, unknown>): Organization {
   return {
     id: row.id as string,
     businessName: (row.business_name as string) ?? "",
-    ownerName: "", // populated from profile if needed
+    ownerName: "",
     phone: (row.phone as string) ?? "",
     email: (row.email as string) ?? "",
     address: (row.address as string) ?? "",
@@ -80,29 +84,69 @@ function rowToOrg(row: Record<string, unknown>): Organization {
   };
 }
 
+async function loadProfileName(userId: string): Promise<string | null> {
+  const { data } = await supabase
+    .from("profiles")
+    .select("display_name")
+    .eq("id", userId)
+    .maybeSingle();
+  return (data?.display_name as string | null) ?? null;
+}
+
 async function loadRoleAndOrg(
   userId: string,
-): Promise<{ role: AppUser["role"]; orgId?: string; org: Organization | null }> {
-  const { data: roles } = await supabase
+  email: string,
+): Promise<{ user: AppUser | null; org: Organization | null; error?: string }> {
+  const { data: roles, error: rolesErr } = await supabase
     .from("user_roles")
     .select("user_id, org_id, role")
     .eq("user_id", userId);
+  if (rolesErr) return { user: null, org: null, error: rolesErr.message };
+
   const rows = (roles ?? []) as RoleRow[];
+  if (rows.length === 0) {
+    return { user: null, org: null, error: "This account is not assigned to any organization." };
+  }
+
   const super_ = rows.find((r) => r.role === "super_admin");
-  if (super_) return { role: "super_admin", org: null };
+  if (super_) {
+    const name = (await loadProfileName(userId)) || email.split("@")[0];
+    return {
+      user: { id: userId, email, name, role: "super_admin" },
+      org: null,
+    };
+  }
+
   const owner = rows.find((r) => r.role === "owner" && r.org_id);
   const cashier = rows.find((r) => r.role === "cashier" && r.org_id);
   const active = owner ?? cashier;
-  if (!active) return { role: "owner", org: null }; // needs onboarding
-  const { data: orgRow } = await supabase
+  if (!active?.org_id) {
+    return { user: null, org: null, error: "This account has no organization assigned." };
+  }
+
+  const { data: orgRow, error: orgErr } = await supabase
     .from("organizations")
     .select("*")
-    .eq("id", active.org_id!)
+    .eq("id", active.org_id)
     .maybeSingle();
+  if (orgErr) return { user: null, org: null, error: orgErr.message };
+  if (!orgRow) return { user: null, org: null, error: "Organization not found." };
+
+  const org = rowToOrg(orgRow as Record<string, unknown>);
+  if (org.status === "suspended") {
+    return { user: null, org: null, error: "This organization has been suspended. Contact support." };
+  }
+
+  const name = (await loadProfileName(userId)) || email.split("@")[0];
   return {
-    role: owner ? "owner" : "cashier",
-    orgId: active.org_id!,
-    org: orgRow ? rowToOrg(orgRow as Record<string, unknown>) : null,
+    user: {
+      id: userId,
+      email,
+      name,
+      role: owner ? "owner" : "cashier",
+      orgId: active.org_id,
+    },
+    org,
   };
 }
 
@@ -110,7 +154,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [org, setOrg] = useState<Organization | null>(null);
   const [ready, setReady] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
   const claimedRef = useRef<string | null>(null);
+  const router = useRouter();
 
   const applySession = useCallback(async (session: { user: { id: string; email?: string | null } } | null) => {
     if (!session?.user) {
@@ -119,26 +165,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    // Bootstrap super_admin once per session (idempotent).
-    if (claimedRef.current !== session.user.id) {
+    const email = (session.user.email ?? "").toLowerCase();
+
+    // Bootstrap super_admin once per session, only for allowlisted email.
+    if (claimedRef.current !== session.user.id && SUPER_ADMIN_EMAILS.includes(email)) {
       claimedRef.current = session.user.id;
       try {
         await claimSuperAdmin();
       } catch {
-        /* not fatal — user just isn't a super admin */
+        /* not fatal */
       }
     }
 
-    const { role, orgId, org: orgRow } = await loadRoleAndOrg(session.user.id);
-    setUser({
-      id: session.user.id,
-      email: session.user.email ?? "",
-      name: session.user.email?.split("@")[0] ?? "User",
-      password: "",
-      role,
-      orgId,
-    });
-    setOrg(orgRow);
+    const result = await loadRoleAndOrg(session.user.id, email);
+    if (result.error) {
+      // Sign out unknown/unassigned accounts so they can't wander the app.
+      await supabase.auth.signOut();
+      setUser(null);
+      setOrg(null);
+      return;
+    }
+    setUser(result.user);
+    setOrg(result.org);
   }, []);
 
   useEffect(() => {
@@ -152,12 +200,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       void applySession(session as never);
+      if (event === "SIGNED_OUT") router.invalidate();
     });
+
+    const setOnline = () => setIsOnline(navigator.onLine);
+    setOnline();
+    window.addEventListener("online", setOnline);
+    window.addEventListener("offline", setOnline);
+
     return () => {
       mounted = false;
       sub.subscription.unsubscribe();
+      window.removeEventListener("online", setOnline);
+      window.removeEventListener("offline", setOnline);
     };
-  }, [applySession]);
+  }, [applySession, router]);
 
   const login: AuthCtx["login"] = async (identifier, password) => {
     const { error } = await supabase.auth.signInWithPassword({
@@ -178,8 +235,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const value = useMemo(
-    () => ({ user, org, ready, login, logout, refresh }),
-    [user, org, ready],
+    () => ({ user, org, ready, isOnline, login, logout, refresh }),
+    [user, org, ready, isOnline],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
