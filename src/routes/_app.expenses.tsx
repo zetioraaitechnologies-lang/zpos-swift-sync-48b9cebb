@@ -124,7 +124,8 @@ function ExpenseForm({ onClose }: { onClose: () => void }) {
     e.preventDefault();
     setBusy(true);
     try {
-      await addExpense(org.id, user.id, { category: cat, amount: amt, note });
+      await safeAddExpense(org.id, user.id, { category: cat, amount: amt, note });
+      toast.success("Queued for add");
       onClose();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed");
