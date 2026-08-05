@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { Search, Plus, Minus, Trash2, Receipt, Printer, UserPlus, User as UserIcon, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Search, Plus, Minus, Trash2, Receipt, Printer, UserPlus, User as UserIcon, X, WifiOff } from "lucide-react";
 import {
   fmtMoney,
   useLive,
@@ -8,11 +8,11 @@ import {
   listCustomers,
   getSale,
   upsertCustomer,
-  recordSale,
   type Product,
   type Customer,
   type Sale,
 } from "@/lib/zpos-data";
+import { safeRecordSale, isOnline, pendingCount, subscribeSyncStatus } from "@/lib/zpos-offline";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
