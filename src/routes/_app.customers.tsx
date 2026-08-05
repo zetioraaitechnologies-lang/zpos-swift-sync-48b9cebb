@@ -35,7 +35,8 @@ function Customers() {
   const del = async (id: string) => {
     if (!confirm("Delete customer?")) return;
     try {
-      await deleteCustomer(id);
+      await safeDeleteCustomer(id);
+      toast.success("Queued for deletion");
       await refresh();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed");
