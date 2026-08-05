@@ -44,6 +44,20 @@ function POS() {
   const [customer, setCustomer] = useState<AttachedCustomer | null>(null);
   const [showCustomer, setShowCustomer] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [online, setOnline] = useState(isOnline());
+  const [pending, setPending] = useState(pendingCount());
+
+  useEffect(() => {
+    const onNet = () => setOnline(isOnline());
+    window.addEventListener("online", onNet);
+    window.addEventListener("offline", onNet);
+    const unsub = subscribeSyncStatus((s) => setPending(s.pending));
+    return () => {
+      window.removeEventListener("online", onNet);
+      window.removeEventListener("offline", onNet);
+      unsub();
+    };
+  }, []);
 
   const filtered = useMemo(
     () =>
