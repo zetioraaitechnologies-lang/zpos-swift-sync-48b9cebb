@@ -5,10 +5,9 @@ import {
   fmtMoney,
   useLive,
   listExpenses,
-  addExpense,
-  deleteExpense,
   type Expense,
 } from "@/lib/zpos-data";
+import { safeAddExpense, safeDeleteExpense } from "@/lib/zpos-offline";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
