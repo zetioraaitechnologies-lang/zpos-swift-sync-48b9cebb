@@ -6,11 +6,10 @@ import {
   useLive,
   listCustomers,
   listSales,
-  upsertCustomer,
-  deleteCustomer,
   type Customer,
   type Sale,
 } from "@/lib/zpos-data";
+import { safeUpsertCustomer, safeDeleteCustomer } from "@/lib/zpos-offline";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
