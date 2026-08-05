@@ -5,10 +5,9 @@ import {
   fmtMoney,
   useLive,
   listProducts,
-  upsertProduct,
-  deleteProduct,
   type Product,
 } from "@/lib/zpos-data";
+import { safeUpsertProduct, safeDeleteProduct } from "@/lib/zpos-offline";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
