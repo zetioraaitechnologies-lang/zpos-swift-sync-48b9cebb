@@ -40,7 +40,8 @@ function Expenses() {
   const del = async (id: string) => {
     if (!confirm("Delete expense?")) return;
     try {
-      await deleteExpense(id);
+      await safeDeleteExpense(id);
+      toast.success("Queued for deletion");
       await refresh();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed");
