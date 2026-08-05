@@ -165,7 +165,7 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
     if (!form.name.trim()) return;
     setBusy(true);
     try {
-      await upsertProduct(
+      await safeUpsertProduct(
         org.id,
         {
           name: form.name.trim(),
@@ -180,7 +180,7 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
         },
         product?.id,
       );
-      toast.success(product ? "Product updated" : "Product added");
+      toast.success(product ? "Product queued for update" : "Product queued for add");
       onClose();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Save failed");
