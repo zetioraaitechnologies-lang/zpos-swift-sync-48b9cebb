@@ -140,7 +140,8 @@ function CustomerForm({
     e.preventDefault();
     setBusy(true);
     try {
-      await upsertCustomer(org.id, form, existing?.id);
+      await safeUpsertCustomer(org.id, form, existing?.id);
+      toast.success(existing ? "Queued for update" : "Queued for add");
       onClose();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Save failed");
