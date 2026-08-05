@@ -217,11 +217,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [applySession, router]);
 
   const login: AuthCtx["login"] = async (identifier, password) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: identifier.trim(),
       password,
     });
     if (error) return { ok: false, error: error.message };
+    if (!data.user) return { ok: false, error: "No user returned." };
+
+    // Verify the account has a role/org before letting the session stick.
+    const email = (data.user.email ?? "").toLowerCase();
+    const result = await loadRoleAndOrg(data.user.id, email);
+    if (result.error || !result.user) {
+      await supabase.auth.signOut();
+      return { ok: false, error: result.error ?? "This account is not authorized." };
+    }
+
+    // Apply the validated session.
+    setUser(result.user);
+    setOrg(result.org);
     return { ok: true };
   };
 
