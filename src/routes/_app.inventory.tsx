@@ -46,14 +46,14 @@ function Inventory() {
     if (mode === "adj" && amt < 0) return toast.error("Quantity cannot be negative");
     setBusy(true);
     try {
-      await adjustStock(org.id, {
+      await safeAdjustStock(org.id, {
         productId: pid,
         mode,
         amount: amt,
         note: note.trim() || undefined,
         userId: user.id,
       });
-      toast.success(mode === "in" ? "Stock in logged" : mode === "out" ? "Stock out logged" : "Adjustment logged");
+      toast.success(mode === "in" ? "Stock change queued" : mode === "out" ? "Stock change queued" : "Adjustment queued");
       setAmt(0);
       setNote("");
       await Promise.all([refreshProducts(), refreshMv()]);
