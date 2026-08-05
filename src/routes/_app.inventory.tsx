@@ -5,10 +5,10 @@ import {
   useLive,
   listProducts,
   listStockMovements,
-  adjustStock,
   type Product,
   type StockMovement,
 } from "@/lib/zpos-data";
+import { safeAdjustStock } from "@/lib/zpos-offline";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
