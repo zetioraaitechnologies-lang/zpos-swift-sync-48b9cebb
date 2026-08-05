@@ -83,7 +83,7 @@ function POS() {
     if (!lines.length) return;
     setBusy(true);
     try {
-      const saleId = await recordSale(org.id, {
+      const saleId = await safeRecordSale(org.id, {
         items: lines.map((l) => ({
           productId: l.p.id,
           name: l.p.name,
@@ -96,7 +96,14 @@ function POS() {
         customerId: customer?.id,
         customerName: customer?.name,
       });
-      toast.success(`Sale completed · ${fmtMoney(total, org.currency)}`);
+      if (isOnline()) {
+        toast.success(`Sale completed · ${fmtMoney(total, org.currency)}`);
+      } else {
+        toast.success(`Sale saved offline · ${fmtMoney(total, org.currency)}`, {
+          description: "It will sync automatically when you are back online.",
+          duration: 4000,
+        });
+      }
       setShowReceipt(saleId);
       setCart([]);
       setDiscount(0);
