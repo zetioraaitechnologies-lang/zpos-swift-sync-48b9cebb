@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Upload, Image as ImageIcon } from "lucide-react";
 import { updateOrgSettings } from "@/lib/zpos-data";
 import { useAuth } from "@/lib/zpos-auth";
