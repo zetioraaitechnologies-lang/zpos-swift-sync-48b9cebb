@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Upload, Image as ImageIcon } from "lucide-react";
 import { updateOrgSettings } from "@/lib/zpos-data";
 import { useAuth } from "@/lib/zpos-auth";
@@ -165,8 +165,8 @@ function Settings() {
           </Field>
         </Section>
 
-        <GoldButton type="submit" disabled={busy}>{busy ? "Saving…" : "Save changes"}</GoldButton>
-        <style>{`.input{width:100%;border-radius:0.375rem;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.4);padding:0.5rem 0.75rem;font-size:0.875rem;outline:none}.input:focus{border-color:color-mix(in oklab,var(--gold) 60%,transparent)}`}</style>
+      <GoldButton type="submit" disabled={busy}>{busy ? "Saving…" : "Save changes"}</GoldButton>
+      <style>{`.input{width:100%;border-radius:0;border:1px solid var(--color-border);background:var(--color-input);color:var(--color-foreground);padding:0.5rem 0.75rem;font-size:0.875rem;outline:none;font-weight:600}.input::placeholder{color:var(--color-muted-foreground);font-weight:500}.input:focus{border-color:color-mix(in oklab,var(--gold) 60%,transparent);box-shadow:0 0 0 2px color-mix(in oklab,var(--gold) 20%,transparent)}`}</style>
       </form>
 
       <div className="panel clip-cut-card p-5 text-xs text-muted-foreground">
@@ -177,6 +177,74 @@ function Settings() {
         and appears on every signed-in device for {org.businessName} within seconds.
         There is nothing to back up manually.
       </div>
+
+      <InstallAppCard />
+    </div>
+  );
+}
+
+function InstallAppCard() {
+  const [evt, setEvt] = useState<{ prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> } | null>(null);
+  const [installed, setInstalled] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const standalone =
+      window.matchMedia?.("(display-mode: standalone)").matches ||
+      // @ts-expect-error iOS
+      window.navigator.standalone === true;
+    setInstalled(standalone);
+    setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as unknown as { MSStream?: boolean }).MSStream);
+
+    const onBefore = (e: Event) => {
+      e.preventDefault();
+      setEvt(e as never);
+    };
+    const onInstalled = () => setInstalled(true);
+    window.addEventListener("beforeinstallprompt", onBefore);
+    window.addEventListener("appinstalled", onInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onBefore);
+      window.removeEventListener("appinstalled", onInstalled);
+    };
+  }, []);
+
+  if (installed) {
+    return (
+      <div className="panel clip-cut-card p-5 text-xs text-muted-foreground">
+        <div className="mb-1 font-display text-sm font-bold uppercase tracking-widest text-gold">App installed</div>
+        ZPoS is installed on this device. Use it like any other app.
+      </div>
+    );
+  }
+
+  return (
+    <div className="panel clip-cut-card p-5">
+      <div className="mb-3 font-display text-sm font-bold uppercase tracking-widest text-gold">Install ZPoS app</div>
+      <p className="mb-3 text-xs text-muted-foreground">
+        Add ZPoS to your home screen for faster access and a full-screen app experience.
+      </p>
+      {evt ? (
+        <GoldButton
+          size="sm"
+          onClick={async () => {
+            await evt.prompt();
+            const c = await evt.userChoice;
+            if (c.outcome === "accepted") setInstalled(true);
+          }}
+        >
+          Install now
+        </GoldButton>
+      ) : isIOS ? (
+        <div className="text-xs text-muted-foreground">
+          Tap <strong>Share</strong> in Safari, then <strong>Add to Home Screen</strong>.
+        </div>
+      ) : (
+        <div className="text-xs text-muted-foreground">
+          Use your browser’s menu → Install app / Add to Home Screen.
+        </div>
+      )}
     </div>
   );
 }

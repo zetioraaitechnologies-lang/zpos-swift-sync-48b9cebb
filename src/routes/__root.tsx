@@ -143,6 +143,11 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   useEffect(() => {
     void import("@/lib/pwa-register").then((m) => m.registerPwaServiceWorker());
+    let stopOffline: (() => void) | undefined;
+    void import("@/lib/zpos-offline").then((m) => {
+      stopOffline = m.startOfflineEngine();
+    });
+    return () => stopOffline?.();
   }, []);
   return (
     <QueryClientProvider client={queryClient}>

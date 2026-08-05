@@ -511,8 +511,38 @@ export function useLive<T>(
     try {
       const next = await fetcherRef.current(orgId);
       setData(next);
+      // Persist successful reads so offline screens still have data.
+      try {
+        const { readCache, writeCache } = await import("./zpos-offline");
+        const cache = readCache();
+        if (tables.includes("products")) {
+          writeCache({ ...cache, products: next as Product[] } as never);
+        } else if (tables.includes("customers")) {
+          writeCache({ ...cache, customers: next as Customer[] } as never);
+        } else if (tables.includes("sales")) {
+          writeCache({ ...cache, sales: next as Sale[] } as never);
+        } else if (tables.includes("expenses")) {
+          writeCache({ ...cache, expenses: next as Expense[] } as never);
+        } else if (tables.includes("stock_movements")) {
+          writeCache({ ...cache, stockMovements: next as StockMovement[] } as never);
+        }
+      } catch {
+        /* optional cache layer */
+      }
     } catch (e) {
       console.warn("[useLive] fetch failed", e);
+      // When offline, serve the last known local copy if we have one.
+      try {
+        const { readCache } = await import("./zpos-offline");
+        const cache = readCache();
+        if (tables.includes("products") && cache?.products.length) setData(cache.products as T);
+        else if (tables.includes("customers") && cache?.customers.length) setData(cache.customers as T);
+        else if (tables.includes("sales") && cache?.sales.length) setData(cache.sales as T);
+        else if (tables.includes("expenses") && cache?.expenses.length) setData(cache.expenses as T);
+        else if (tables.includes("stock_movements") && cache?.stockMovements.length) setData(cache.stockMovements as T);
+      } catch {
+        /* no cache available */
+      }
     } finally {
       setLoading(false);
     }
@@ -534,8 +564,18 @@ export function useLive<T>(
       );
     });
     chan.subscribe();
+
+    // Refresh after the offline queue replays, so merged data appears.
+    let unsub: (() => void) | undefined;
+    import("./zpos-offline")
+      .then((m) => {
+        unsub = m.subscribeSyncStatus(() => { void refresh(); });
+      })
+      .catch(() => {});
+
     return () => {
       void supabase.removeChannel(chan);
+      unsub?.();
     };
     // tables list is stable per-call site (literal array); safe to depend on join
     // eslint-disable-next-line react-hooks/exhaustive-deps

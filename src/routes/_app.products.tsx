@@ -5,10 +5,9 @@ import {
   fmtMoney,
   useLive,
   listProducts,
-  upsertProduct,
-  deleteProduct,
   type Product,
 } from "@/lib/zpos-data";
+import { safeUpsertProduct, safeDeleteProduct } from "@/lib/zpos-offline";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
@@ -39,7 +38,8 @@ function Products() {
   const del = async (id: string) => {
     if (!confirm("Delete this product?")) return;
     try {
-      await deleteProduct(id);
+      await safeDeleteProduct(id);
+      toast.success("Queued for deletion");
       await refresh();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to delete");
@@ -165,7 +165,7 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
     if (!form.name.trim()) return;
     setBusy(true);
     try {
-      await upsertProduct(
+      await safeUpsertProduct(
         org.id,
         {
           name: form.name.trim(),
@@ -180,7 +180,7 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
         },
         product?.id,
       );
-      toast.success(product ? "Product updated" : "Product added");
+      toast.success(product ? "Product queued for update" : "Product queued for add");
       onClose();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Save failed");

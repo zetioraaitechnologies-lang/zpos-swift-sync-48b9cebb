@@ -5,10 +5,9 @@ import {
   fmtMoney,
   useLive,
   listExpenses,
-  addExpense,
-  deleteExpense,
   type Expense,
 } from "@/lib/zpos-data";
+import { safeAddExpense, safeDeleteExpense } from "@/lib/zpos-offline";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
@@ -41,7 +40,8 @@ function Expenses() {
   const del = async (id: string) => {
     if (!confirm("Delete expense?")) return;
     try {
-      await deleteExpense(id);
+      await safeDeleteExpense(id);
+      toast.success("Queued for deletion");
       await refresh();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed");
@@ -124,7 +124,8 @@ function ExpenseForm({ onClose }: { onClose: () => void }) {
     e.preventDefault();
     setBusy(true);
     try {
-      await addExpense(org.id, user.id, { category: cat, amount: amt, note });
+      await safeAddExpense(org.id, user.id, { category: cat, amount: amt, note });
+      toast.success("Queued for add");
       onClose();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed");

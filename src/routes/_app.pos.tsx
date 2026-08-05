@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { Search, Plus, Minus, Trash2, Receipt, Printer, UserPlus, User as UserIcon, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Search, Plus, Minus, Trash2, Receipt, Printer, UserPlus, User as UserIcon, X, WifiOff } from "lucide-react";
 import {
   fmtMoney,
   useLive,
@@ -8,11 +8,11 @@ import {
   listCustomers,
   getSale,
   upsertCustomer,
-  recordSale,
   type Product,
   type Customer,
   type Sale,
 } from "@/lib/zpos-data";
+import { safeRecordSale, isOnline, pendingCount, subscribeSyncStatus } from "@/lib/zpos-offline";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
@@ -44,6 +44,20 @@ function POS() {
   const [customer, setCustomer] = useState<AttachedCustomer | null>(null);
   const [showCustomer, setShowCustomer] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [online, setOnline] = useState(isOnline());
+  const [pending, setPending] = useState(pendingCount());
+
+  useEffect(() => {
+    const onNet = () => setOnline(isOnline());
+    window.addEventListener("online", onNet);
+    window.addEventListener("offline", onNet);
+    const unsub = subscribeSyncStatus((s) => setPending(s.pending));
+    return () => {
+      window.removeEventListener("online", onNet);
+      window.removeEventListener("offline", onNet);
+      unsub();
+    };
+  }, []);
 
   const filtered = useMemo(
     () =>
@@ -83,7 +97,7 @@ function POS() {
     if (!lines.length) return;
     setBusy(true);
     try {
-      const saleId = await recordSale(org.id, {
+      const saleId = await safeRecordSale(org.id, {
         items: lines.map((l) => ({
           productId: l.p.id,
           name: l.p.name,
@@ -96,7 +110,14 @@ function POS() {
         customerId: customer?.id,
         customerName: customer?.name,
       });
-      toast.success(`Sale completed · ${fmtMoney(total, org.currency)}`);
+      if (isOnline()) {
+        toast.success(`Sale completed · ${fmtMoney(total, org.currency)}`);
+      } else {
+        toast.success(`Sale saved offline · ${fmtMoney(total, org.currency)}`, {
+          description: "It will sync automatically when you are back online.",
+          duration: 4000,
+        });
+      }
       setShowReceipt(saleId);
       setCart([]);
       setDiscount(0);
@@ -119,6 +140,18 @@ function POS() {
             Fast checkout · synced across every device
           </p>
         </div>
+
+        {!online && (
+          <div className="mb-4 flex items-center gap-2 border border-amber-300/40 bg-amber-300/10 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-amber-600">
+            <WifiOff className="h-3.5 w-3.5" />
+            Offline mode — sales are queued and will sync when connection returns
+          </div>
+        )}
+        {online && pending > 0 && (
+          <div className="mb-4 flex items-center gap-2 border border-[color:var(--gold)]/40 bg-[color:var(--gold)]/10 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--gold)]">
+            {pending} sale{pending > 1 ? "s" : ""} waiting to sync…
+          </div>
+        )}
         <div className="relative mb-4">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input

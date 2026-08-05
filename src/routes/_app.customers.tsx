@@ -6,11 +6,10 @@ import {
   useLive,
   listCustomers,
   listSales,
-  upsertCustomer,
-  deleteCustomer,
   type Customer,
   type Sale,
 } from "@/lib/zpos-data";
+import { safeUpsertCustomer, safeDeleteCustomer } from "@/lib/zpos-offline";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
@@ -36,7 +35,8 @@ function Customers() {
   const del = async (id: string) => {
     if (!confirm("Delete customer?")) return;
     try {
-      await deleteCustomer(id);
+      await safeDeleteCustomer(id);
+      toast.success("Queued for deletion");
       await refresh();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed");
@@ -140,7 +140,8 @@ function CustomerForm({
     e.preventDefault();
     setBusy(true);
     try {
-      await upsertCustomer(org.id, form, existing?.id);
+      await safeUpsertCustomer(org.id, form, existing?.id);
+      toast.success(existing ? "Queued for update" : "Queued for add");
       onClose();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Save failed");
