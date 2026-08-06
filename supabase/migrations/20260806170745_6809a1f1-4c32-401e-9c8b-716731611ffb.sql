@@ -1,0 +1,2 @@
+ALTER TABLE public.organizations ADD COLUMN IF NOT EXISTS business_type text NOT NULL DEFAULT 'general';
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS attributes jsonb NOT NULL DEFAULT '{}'::jsonb;
