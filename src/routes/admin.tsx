@@ -29,6 +29,7 @@ import {
   updateOrg,
 } from "@/lib/admin.functions";
 import { toast } from "sonner";
+import { BUSINESS_MODES, getMode } from "@/lib/business-modes";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -56,6 +57,7 @@ interface OrgRow {
   phone: string | null;
   address: string | null;
   category: string | null;
+  business_type: string | null;
   currency: string | null;
   status: string;
   created_at: string;
@@ -86,7 +88,7 @@ function Admin() {
     const { data, error } = await supabase
       .from("organizations")
       .select(
-        "id, business_name, email, phone, address, category, currency, status, created_at",
+        "id, business_name, email, phone, address, category, business_type, currency, status, created_at",
       )
       .order("created_at", { ascending: false });
     if (error) toast.error(error.message);
@@ -260,7 +262,9 @@ function Admin() {
                       {o.email ?? "—"}
                     </div>
                     <div className="truncate text-[11px] text-muted-foreground">
-                      {[o.phone, o.category].filter(Boolean).join(" · ")}
+                      {[getMode(o.business_type).label, o.phone, o.category]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </div>
                   </div>
                   <span
@@ -416,6 +420,7 @@ function CreateOrgForm({
     phone: "",
     address: "",
     category: "Retail",
+    businessType: "general",
     currency: "TZS",
   });
   const [busy, setBusy] = useState(false);
@@ -434,6 +439,7 @@ function CreateOrgForm({
           phone: f.phone || undefined,
           address: f.address || undefined,
           category: f.category,
+          businessType: f.businessType,
           currency: f.currency,
         },
       });
@@ -472,6 +478,10 @@ function CreateOrgForm({
             label="Business Category"
             value={f.category}
             onChange={(v) => setF({ ...f, category: v })}
+          />
+          <ModeField
+            value={f.businessType}
+            onChange={(v) => setF({ ...f, businessType: v })}
           />
           <Field
             label="Owner Email"
@@ -531,6 +541,7 @@ function EditOrgForm({
     phone: org.phone ?? "",
     address: org.address ?? "",
     category: org.category ?? "",
+    businessType: org.business_type ?? "general",
     currency: org.currency ?? "TZS",
   });
   const [busy, setBusy] = useState(false);
@@ -547,6 +558,7 @@ function EditOrgForm({
           phone: f.phone || null,
           address: f.address || null,
           category: f.category || null,
+          businessType: f.businessType,
           currency: f.currency || "TZS",
         },
       });
@@ -598,6 +610,10 @@ function EditOrgForm({
             value={f.currency}
             onChange={(v) => setF({ ...f, currency: v })}
           />
+          <ModeField
+            value={f.businessType}
+            onChange={(v) => setF({ ...f, businessType: v })}
+          />
           <Field
             label="Address"
             colSpan
@@ -616,6 +632,42 @@ function EditOrgForm({
         </div>
       </form>
     </Modal>
+  );
+}
+
+function ModeField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const mode = getMode(value);
+  return (
+    <label className="col-span-2 block">
+      <span className="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        Business Mode
+      </span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]"
+      >
+        {BUSINESS_MODES.map((m) => (
+          <option key={m.id} value={m.id}>
+            {m.label}
+          </option>
+        ))}
+      </select>
+      <span className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground">
+        <span
+          className="inline-block h-2.5 w-2.5"
+          style={{ background: mode.accent.base }}
+        />
+        {mode.tagline} · adds {mode.fields.length} extra field
+        {mode.fields.length === 1 ? "" : "s"} to {mode.itemPlural.toLowerCase()}
+      </span>
+    </label>
   );
 }
 

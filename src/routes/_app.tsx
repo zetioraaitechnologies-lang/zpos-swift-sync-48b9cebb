@@ -4,13 +4,14 @@ import { useAuth } from "@/lib/zpos-auth";
 import { AppSidebar, MobileMenuButton, useSidebar } from "@/components/zpos/app-sidebar";
 import { ConnectivityBadge } from "@/components/zpos/connectivity";
 import { AlphaFab } from "@/components/zpos/alpha-fab";
+import { getMode, modeStyle } from "@/lib/business-modes";
 
 export const Route = createFileRoute("/_app")({
   component: AppLayout,
 });
 
 function AppLayout() {
-  const { ready, user } = useAuth();
+  const { ready, user, org } = useAuth();
   const nav = useNavigate();
   const { open, setOpen } = useSidebar();
 
@@ -29,7 +30,7 @@ function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground" style={modeStyle(getMode(org?.businessType))}>
       <AppSidebar open={open} onClose={() => setOpen(false)} />
       <div className="lg:pl-72">
         <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-card/95 px-4 py-3 backdrop-blur-lg print:hidden">
@@ -39,7 +40,7 @@ function AppLayout() {
               {user.name}
             </div>
             <div className="truncate text-[10px] uppercase tracking-widest text-muted-foreground">
-              {user.role} · ZPOS
+              {user.role} · {getMode(org?.businessType).label}
             </div>
           </div>
           <ConnectivityBadge />

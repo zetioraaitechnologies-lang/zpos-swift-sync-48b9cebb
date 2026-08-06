@@ -141,6 +141,7 @@ export type Database = {
         Row: {
           address: string | null
           business_name: string
+          business_type: string
           category: string | null
           created_at: string
           currency: string
@@ -161,6 +162,7 @@ export type Database = {
         Insert: {
           address?: string | null
           business_name: string
+          business_type?: string
           category?: string | null
           created_at?: string
           currency?: string
@@ -181,6 +183,7 @@ export type Database = {
         Update: {
           address?: string | null
           business_name?: string
+          business_type?: string
           category?: string | null
           created_at?: string
           currency?: string
@@ -202,6 +205,7 @@ export type Database = {
       }
       products: {
         Row: {
+          attributes: Json
           barcode: string | null
           category: string | null
           cost_price: number
@@ -218,6 +222,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attributes?: Json
           barcode?: string | null
           category?: string | null
           cost_price?: number
@@ -234,6 +239,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attributes?: Json
           barcode?: string | null
           category?: string | null
           cost_price?: number

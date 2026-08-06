@@ -84,6 +84,7 @@ export const createOrgWithOwner = createServerFn({ method: "POST" })
         phone: z.string().optional(),
         address: z.string().optional(),
         category: z.string().optional(),
+        businessType: z.string().optional(),
         currency: z.string().optional(),
       })
       .parse(input),
@@ -127,6 +128,7 @@ export const createOrgWithOwner = createServerFn({ method: "POST" })
         email: emailLc,
         address: data.address,
         category: data.category || "Retail",
+        business_type: data.businessType || "general",
         currency: data.currency || "TZS",
       })
       .select("id")
@@ -313,6 +315,7 @@ export const updateOrg = createServerFn({ method: "POST" })
         phone: z.string().nullable().optional(),
         address: z.string().nullable().optional(),
         category: z.string().nullable().optional(),
+        businessType: z.string().nullable().optional(),
         currency: z.string().nullable().optional(),
       })
       .parse(input),
@@ -331,6 +334,7 @@ export const updateOrg = createServerFn({ method: "POST" })
         phone: data.phone ?? null,
         address: data.address ?? null,
         category: data.category ?? null,
+        business_type: data.businessType || "general",
         currency: data.currency ?? "TZS",
       })
       .eq("id", data.orgId);

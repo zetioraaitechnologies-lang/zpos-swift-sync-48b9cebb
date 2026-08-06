@@ -20,6 +20,7 @@ export interface Organization {
   email: string;
   address: string;
   category: string;
+  businessType: string;
   status: "active" | "suspended";
   createdAt: number;
   currency: string;
@@ -45,6 +46,7 @@ export interface Product {
   unit?: string;
   image?: string;
   description?: string;
+  attributes?: Record<string, string | number | null>;
   updatedAt: number;
 }
 
@@ -138,6 +140,7 @@ function mapProduct(r: Row): Product {
     unit: (r.unit as string) || undefined,
     image: (r.image as string) || undefined,
     description: (r.description as string) || undefined,
+    attributes: (r.attributes as Record<string, string | number | null>) ?? {},
     updatedAt: ts(r.updated_at),
   };
 }
@@ -301,6 +304,7 @@ export interface ProductInput {
   unit?: string;
   description?: string;
   image?: string;
+  attributes?: Record<string, string | number | null>;
 }
 
 export async function upsertProduct(
@@ -320,6 +324,7 @@ export async function upsertProduct(
     unit: input.unit || null,
     description: input.description || null,
     image: input.image || null,
+    attributes: input.attributes ?? {},
     updated_at: new Date().toISOString(),
   };
   if (id) {
@@ -478,6 +483,7 @@ export async function updateOrgSettings(
   if (patch.vatNumber !== undefined) upd.vat_number = patch.vatNumber || null;
   if (patch.vatRate !== undefined) upd.vat_rate = patch.vatRate ?? null;
   if (patch.website !== undefined) upd.website = patch.website || null;
+  if (patch.businessType !== undefined) upd.business_type = patch.businessType || "general";
   const { error } = await supabase.from("organizations").update(upd as never).eq("id", orgId);
   if (error) throw error;
 }
