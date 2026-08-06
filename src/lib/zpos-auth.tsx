@@ -71,6 +71,7 @@ function rowToOrg(row: Record<string, unknown>): Organization {
     email: (row.email as string) ?? "",
     address: (row.address as string) ?? "",
     category: (row.category as string) ?? "",
+    businessType: (row.business_type as string) ?? "general",
     status: ((row.status as string) === "suspended" ? "suspended" : "active"),
     createdAt: row.created_at ? new Date(row.created_at as string).getTime() : Date.now(),
     currency: (row.currency as string) ?? "TZS",
