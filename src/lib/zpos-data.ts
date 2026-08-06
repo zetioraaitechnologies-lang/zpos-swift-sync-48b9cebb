@@ -20,6 +20,7 @@ export interface Organization {
   email: string;
   address: string;
   category: string;
+  businessType: string;
   status: "active" | "suspended";
   createdAt: number;
   currency: string;
