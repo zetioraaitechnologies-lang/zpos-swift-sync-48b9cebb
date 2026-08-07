@@ -110,6 +110,8 @@ function Inventory() {
           </select>
           <input
             type="number"
+            inputMode="decimal"
+            step="any"
             min={0}
             value={amt}
             onChange={(e) => setAmt(+e.target.value)}

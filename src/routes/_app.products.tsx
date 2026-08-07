@@ -12,6 +12,7 @@ import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
 import { getMode, daysUntil, type ModeField } from "@/lib/business-modes";
+import { UNIT_SUGGESTIONS, fmtQty } from "@/lib/weighing";
 
 export const Route = createFileRoute("/_app/products")({
   component: Products,
@@ -117,7 +118,7 @@ function Products() {
                       p.stock <= p.minStock ? "text-amber-300" : ""
                     }`}
                   >
-                    {p.stock}
+                    {fmtQty(p.stock, p.unit)}
                   </td>
                   <td className="p-3">
                     <div className="flex justify-end gap-1">
@@ -165,10 +166,12 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
   const { org } = useAuth();
   const [busy, setBusy] = useState(false);
   const mode = getMode(org?.businessType);
+  const hasSoldBy = mode.fields.some((f) => f.key === "sold_by");
   const [attrs, setAttrs] = useState<Record<string, string>>(() => {
     const src = (product?.attributes ?? {}) as Record<string, unknown>;
     const out: Record<string, string> = {};
     for (const f of getMode(org?.businessType).fields) out[f.key] = src[f.key] == null ? "" : String(src[f.key]);
+    out["sold_by"] = src["sold_by"] == null ? "" : String(src["sold_by"]);
     return out;
   });
   const [form, setForm] = useState({
@@ -201,14 +204,19 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
           price: Number(form.price) || 0,
           stock: Number(form.stock) || 0,
           minStock: Number(form.minStock) || 0,
-          attributes: Object.fromEntries(
-            mode.fields
-              .filter((f) => attrs[f.key]?.trim())
-              .map((f) => [
-                f.key,
-                f.type === "number" ? Number(attrs[f.key]) : attrs[f.key]!.trim(),
-              ]),
-          ),
+          attributes: {
+            ...Object.fromEntries(
+              mode.fields
+                .filter((f) => attrs[f.key]?.trim())
+                .map((f) => [
+                  f.key,
+                  f.type === "number" ? Number(attrs[f.key]) : attrs[f.key]!.trim(),
+                ]),
+            ),
+            ...(!hasSoldBy && attrs["sold_by"]?.trim()
+              ? { sold_by: attrs["sold_by"]!.trim() }
+              : {}),
+          },
         },
         product?.id,
       );
@@ -258,12 +266,31 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
           </Field>
           <Field label="Unit">
             <input
+              list="unit-suggestions"
               value={form.unit}
               onChange={(e) => setForm({ ...form, unit: e.target.value })}
               className="input"
               placeholder="pcs, kg, ltr, box…"
             />
+            <datalist id="unit-suggestions">
+              {UNIT_SUGGESTIONS.map((u) => (
+                <option key={u} value={u} />
+              ))}
+            </datalist>
           </Field>
+          {!hasSoldBy && (
+            <Field label="Sold By">
+              <select
+                value={attrs["sold_by"] ?? ""}
+                onChange={(e) => setAttrs({ ...attrs, sold_by: e.target.value })}
+                className="input"
+              >
+                <option value="">Piece (whole units)</option>
+                <option value="Weight">Weight (kg / gm — half, quarter…)</option>
+                <option value="Volume">Volume (ltr / ml)</option>
+              </select>
+            </Field>
+          )}
           <Field label="Barcode / SKU">
             <input
               value={form.barcode}
@@ -276,6 +303,7 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
               type="number"
               inputMode="decimal"
               min={0}
+              step="any"
               value={form.costPrice}
               onChange={(e) => setForm({ ...form, costPrice: e.target.value })}
               className="input"
@@ -287,6 +315,7 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
               type="number"
               inputMode="decimal"
               min={0}
+              step="any"
               value={form.price}
               onChange={(e) => setForm({ ...form, price: e.target.value })}
               className="input"
@@ -295,7 +324,9 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
           <Field label="Stock">
             <input
               type="number"
+              inputMode="decimal"
               min={0}
+              step="any"
               value={form.stock}
               onChange={(e) => setForm({ ...form, stock: e.target.value })}
               className="input"
@@ -304,7 +335,9 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
           <Field label="Min Stock">
             <input
               type="number"
+              inputMode="decimal"
               min={0}
+              step="any"
               value={form.minStock}
               onChange={(e) => setForm({ ...form, minStock: e.target.value })}
               className="input"

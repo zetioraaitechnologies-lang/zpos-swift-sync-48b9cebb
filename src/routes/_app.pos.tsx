@@ -13,6 +13,7 @@ import {
   type Sale,
 } from "@/lib/zpos-data";
 import { safeRecordSale, isOnline, pendingCount, subscribeSyncStatus } from "@/lib/zpos-offline";
+import { isWeighed, qtyStep, roundQty, fmtQty, PORTIONS } from "@/lib/weighing";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
@@ -81,16 +82,22 @@ function POS() {
   const subtotal = lines.reduce((a, l) => a + l.p.price * l.qty, 0);
   const total = Math.max(0, subtotal - discount);
 
-  const add = (p: Product) => {
+  const add = (p: Product, amount?: number) => {
+    const step = amount ?? qtyStep(p);
     setCart((c) => {
       const ex = c.find((x) => x.productId === p.id);
-      if (ex) return c.map((x) => (x.productId === p.id ? { ...x, qty: x.qty + 1 } : x));
-      return [...c, { productId: p.id, qty: 1 }];
+      if (ex)
+        return c.map((x) =>
+          x.productId === p.id ? { ...x, qty: roundQty(x.qty + step) } : x,
+        );
+      return [...c, { productId: p.id, qty: step }];
     });
   };
   const setQty = (pid: string, qty: number) =>
     setCart((c) =>
-      qty <= 0 ? c.filter((x) => x.productId !== pid) : c.map((x) => (x.productId === pid ? { ...x, qty } : x)),
+      qty <= 0
+        ? c.filter((x) => x.productId !== pid)
+        : c.map((x) => (x.productId === pid ? { ...x, qty: roundQty(qty) } : x)),
     );
 
   const complete = async () => {
@@ -172,10 +179,15 @@ function POS() {
               >
                 <div className="text-sm font-semibold">{p.name}</div>
                 <div className="mt-1 text-[10px] uppercase tracking-widest text-muted-foreground">
-                  {p.category} · {p.stock}{p.unit ? ` ${p.unit}` : ""} in stock
+                  {p.category} · {fmtQty(p.stock, p.unit)} in stock
                 </div>
                 <div className="mt-3 font-display text-lg font-bold text-gold">
                   {fmtMoney(p.price, org.currency)}
+                  {isWeighed(p) && (
+                    <span className="ml-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                      / {p.unit ?? "kg"}
+                    </span>
+                  )}
                 </div>
               </button>
             ))}
@@ -226,27 +238,47 @@ function POS() {
               Cart is empty
             </div>
           )}
-          {lines.map((l) => (
+          {lines.map((l) => {
+            const weighed = isWeighed(l.p);
+            const step = qtyStep(l.p);
+            return (
             <div
               key={l.p.id}
-              className="flex items-center gap-2 rounded-none border border-border bg-secondary p-2"
+              className="rounded-none border border-border bg-secondary p-2"
             >
+              <div className="flex items-center gap-2">
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-semibold">{l.p.name}</div>
                 <div className="text-[11px] text-muted-foreground">
                   {fmtMoney(l.p.price, org.currency)}
+                  {l.p.unit ? ` / ${l.p.unit}` : ""} ·{" "}
+                  <span className="font-bold text-foreground">
+                    {fmtMoney(l.p.price * l.qty, org.currency)}
+                  </span>
                 </div>
               </div>
               <div className="flex items-center gap-1">
                 <button
-                  onClick={() => setQty(l.p.id, l.qty - 1)}
+                  onClick={() => setQty(l.p.id, l.qty - step)}
                   className="grid h-7 w-7 place-items-center rounded-none border border-border hover:bg-secondary"
                 >
                   <Minus className="h-3 w-3" />
                 </button>
-                <span className="w-6 text-center text-sm font-bold">{l.qty}</span>
+                {weighed ? (
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    min={0}
+                    step={0.05}
+                    value={l.qty}
+                    onChange={(e) => setQty(l.p.id, Number(e.target.value) || 0)}
+                    className="w-16 rounded-none border border-border bg-input px-1 py-1 text-center text-sm font-bold outline-none focus:border-[color:var(--gold)]/60"
+                  />
+                ) : (
+                  <span className="w-6 text-center text-sm font-bold">{l.qty}</span>
+                )}
                 <button
-                  onClick={() => setQty(l.p.id, l.qty + 1)}
+                  onClick={() => setQty(l.p.id, l.qty + step)}
                   className="grid h-7 w-7 place-items-center rounded-none border border-border hover:bg-secondary"
                 >
                   <Plus className="h-3 w-3" />
@@ -258,8 +290,30 @@ function POS() {
                   <Trash2 className="h-3 w-3" />
                 </button>
               </div>
+              </div>
+              {weighed && (
+                <div className="mt-2 flex flex-wrap items-center gap-1">
+                  <span className="mr-1 text-[10px] uppercase tracking-widest text-muted-foreground">
+                    {l.p.unit ?? "kg"}
+                  </span>
+                  {PORTIONS.map((pt) => (
+                    <button
+                      key={pt.value}
+                      onClick={() => setQty(l.p.id, pt.value)}
+                      className={`rounded-none border px-2 py-0.5 text-[11px] font-bold ${
+                        l.qty === pt.value
+                          ? "border-[color:var(--gold)] bg-[color:var(--gold)]/15 text-gold"
+                          : "border-border text-muted-foreground hover:bg-secondary"
+                      }`}
+                    >
+                      {pt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="mt-4 space-y-2 border-t border-border pt-4 text-sm">
@@ -483,7 +537,7 @@ function ReceiptModal({ saleId, onClose }: { saleId: string; onClose: () => void
           {sale.items.map((i) => (
             <div key={i.productId + i.name} className="flex justify-between">
               <span>
-                {i.qty} × {i.name}
+                {fmtQty(i.qty)} × {i.name}
               </span>
               <span>{fmtMoney(i.qty * i.price, org.currency)}</span>
             </div>
