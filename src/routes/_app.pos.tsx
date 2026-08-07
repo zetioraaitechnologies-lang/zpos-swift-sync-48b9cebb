@@ -13,6 +13,7 @@ import {
   type Sale,
 } from "@/lib/zpos-data";
 import { safeRecordSale, isOnline, pendingCount, subscribeSyncStatus } from "@/lib/zpos-offline";
+import { isWeighed, qtyStep, roundQty, fmtQty, PORTIONS } from "@/lib/weighing";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
