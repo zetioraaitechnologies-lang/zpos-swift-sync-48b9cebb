@@ -165,10 +165,12 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
   const { org } = useAuth();
   const [busy, setBusy] = useState(false);
   const mode = getMode(org?.businessType);
+  const hasSoldBy = mode.fields.some((f) => f.key === "sold_by");
   const [attrs, setAttrs] = useState<Record<string, string>>(() => {
     const src = (product?.attributes ?? {}) as Record<string, unknown>;
     const out: Record<string, string> = {};
     for (const f of getMode(org?.businessType).fields) out[f.key] = src[f.key] == null ? "" : String(src[f.key]);
+    out["sold_by"] = src["sold_by"] == null ? "" : String(src["sold_by"]);
     return out;
   });
   const [form, setForm] = useState({
