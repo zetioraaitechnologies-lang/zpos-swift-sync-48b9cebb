@@ -203,14 +203,19 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
           price: Number(form.price) || 0,
           stock: Number(form.stock) || 0,
           minStock: Number(form.minStock) || 0,
-          attributes: Object.fromEntries(
-            mode.fields
-              .filter((f) => attrs[f.key]?.trim())
-              .map((f) => [
-                f.key,
-                f.type === "number" ? Number(attrs[f.key]) : attrs[f.key]!.trim(),
-              ]),
-          ),
+          attributes: {
+            ...Object.fromEntries(
+              mode.fields
+                .filter((f) => attrs[f.key]?.trim())
+                .map((f) => [
+                  f.key,
+                  f.type === "number" ? Number(attrs[f.key]) : attrs[f.key]!.trim(),
+                ]),
+            ),
+            ...(!hasSoldBy && attrs["sold_by"]?.trim()
+              ? { sold_by: attrs["sold_by"]!.trim() }
+              : {}),
+          },
         },
         product?.id,
       );
