@@ -118,7 +118,7 @@ function Products() {
                       p.stock <= p.minStock ? "text-amber-300" : ""
                     }`}
                   >
-                    {p.stock}
+                    {fmtQty(p.stock, p.unit)}
                   </td>
                   <td className="p-3">
                     <div className="flex justify-end gap-1">
