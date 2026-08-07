@@ -12,6 +12,7 @@ import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
 import { getMode, daysUntil, type ModeField } from "@/lib/business-modes";
+import { UNIT_SUGGESTIONS, fmtQty } from "@/lib/weighing";
 
 export const Route = createFileRoute("/_app/products")({
   component: Products,
