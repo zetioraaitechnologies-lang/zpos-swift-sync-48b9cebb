@@ -265,12 +265,31 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
           </Field>
           <Field label="Unit">
             <input
+              list="unit-suggestions"
               value={form.unit}
               onChange={(e) => setForm({ ...form, unit: e.target.value })}
               className="input"
               placeholder="pcs, kg, ltr, box…"
             />
+            <datalist id="unit-suggestions">
+              {UNIT_SUGGESTIONS.map((u) => (
+                <option key={u} value={u} />
+              ))}
+            </datalist>
           </Field>
+          {!hasSoldBy && (
+            <Field label="Sold By">
+              <select
+                value={attrs["sold_by"] ?? ""}
+                onChange={(e) => setAttrs({ ...attrs, sold_by: e.target.value })}
+                className="input"
+              >
+                <option value="">Piece (whole units)</option>
+                <option value="Weight">Weight (kg / gm — half, quarter…)</option>
+                <option value="Volume">Volume (ltr / ml)</option>
+              </select>
+            </Field>
+          )}
           <Field label="Barcode / SKU">
             <input
               value={form.barcode}
@@ -283,6 +302,7 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
               type="number"
               inputMode="decimal"
               min={0}
+              step="any"
               value={form.costPrice}
               onChange={(e) => setForm({ ...form, costPrice: e.target.value })}
               className="input"
@@ -294,6 +314,7 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
               type="number"
               inputMode="decimal"
               min={0}
+              step="any"
               value={form.price}
               onChange={(e) => setForm({ ...form, price: e.target.value })}
               className="input"
@@ -302,7 +323,9 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
           <Field label="Stock">
             <input
               type="number"
+              inputMode="decimal"
               min={0}
+              step="any"
               value={form.stock}
               onChange={(e) => setForm({ ...form, stock: e.target.value })}
               className="input"
@@ -311,7 +334,9 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
           <Field label="Min Stock">
             <input
               type="number"
+              inputMode="decimal"
               min={0}
+              step="any"
               value={form.minStock}
               onChange={(e) => setForm({ ...form, minStock: e.target.value })}
               className="input"
