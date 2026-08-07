@@ -21,6 +21,7 @@ import { Route as AppPosRouteImport } from './routes/_app.pos'
 import { Route as AppInventoryRouteImport } from './routes/_app.inventory'
 import { Route as AppExpensesRouteImport } from './routes/_app.expenses'
 import { Route as AppEmployeesRouteImport } from './routes/_app.employees'
+import { Route as AppDebtsRouteImport } from './routes/_app.debts'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppCustomersRouteImport } from './routes/_app.customers'
 import { Route as AppAlphaAiRouteImport } from './routes/_app.alpha-ai'
@@ -84,6 +85,11 @@ const AppEmployeesRoute = AppEmployeesRouteImport.update({
   path: '/employees',
   getParentRoute: () => AppRoute,
 } as any)
+const AppDebtsRoute = AppDebtsRouteImport.update({
+  id: '/debts',
+  path: '/debts',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/alpha-ai': typeof AppAlphaAiRoute
   '/customers': typeof AppCustomersRoute
   '/dashboard': typeof AppDashboardRoute
+  '/debts': typeof AppDebtsRoute
   '/employees': typeof AppEmployeesRoute
   '/expenses': typeof AppExpensesRoute
   '/inventory': typeof AppInventoryRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/alpha-ai': typeof AppAlphaAiRoute
   '/customers': typeof AppCustomersRoute
   '/dashboard': typeof AppDashboardRoute
+  '/debts': typeof AppDebtsRoute
   '/employees': typeof AppEmployeesRoute
   '/expenses': typeof AppExpensesRoute
   '/inventory': typeof AppInventoryRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/_app/alpha-ai': typeof AppAlphaAiRoute
   '/_app/customers': typeof AppCustomersRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/debts': typeof AppDebtsRoute
   '/_app/employees': typeof AppEmployeesRoute
   '/_app/expenses': typeof AppExpensesRoute
   '/_app/inventory': typeof AppInventoryRoute
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/alpha-ai'
     | '/customers'
     | '/dashboard'
+    | '/debts'
     | '/employees'
     | '/expenses'
     | '/inventory'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/alpha-ai'
     | '/customers'
     | '/dashboard'
+    | '/debts'
     | '/employees'
     | '/expenses'
     | '/inventory'
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
     | '/_app/alpha-ai'
     | '/_app/customers'
     | '/_app/dashboard'
+    | '/_app/debts'
     | '/_app/employees'
     | '/_app/expenses'
     | '/_app/inventory'
@@ -295,6 +307,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEmployeesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/debts': {
+      id: '/_app/debts'
+      path: '/debts'
+      fullPath: '/debts'
+      preLoaderRoute: typeof AppDebtsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
@@ -323,6 +342,7 @@ interface AppRouteChildren {
   AppAlphaAiRoute: typeof AppAlphaAiRoute
   AppCustomersRoute: typeof AppCustomersRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppDebtsRoute: typeof AppDebtsRoute
   AppEmployeesRoute: typeof AppEmployeesRoute
   AppExpensesRoute: typeof AppExpensesRoute
   AppInventoryRoute: typeof AppInventoryRoute
@@ -337,6 +357,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAlphaAiRoute: AppAlphaAiRoute,
   AppCustomersRoute: AppCustomersRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppDebtsRoute: AppDebtsRoute,
   AppEmployeesRoute: AppEmployeesRoute,
   AppExpensesRoute: AppExpensesRoute,
   AppInventoryRoute: AppInventoryRoute,

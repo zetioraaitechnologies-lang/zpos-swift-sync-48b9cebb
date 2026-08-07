@@ -24,6 +24,8 @@ const NAV = [
   { to: "/products", label: "Products", icon: Package },
   { to: "/inventory", label: "Inventory", icon: Boxes },
   { to: "/customers", label: "Customers", icon: Users },
+  { to: "/purchases", label: "Purchases", icon: Truck },
+  { to: "/debts", label: "Debts", icon: HandCoins },
   { to: "/expenses", label: "Expenses", icon: Wallet },
   { to: "/reports", label: "Reports", icon: BarChart3, ownerOnly: true },
   { to: "/employees", label: "Employees", icon: UserCog, ownerOnly: true },
