@@ -81,16 +81,22 @@ function POS() {
   const subtotal = lines.reduce((a, l) => a + l.p.price * l.qty, 0);
   const total = Math.max(0, subtotal - discount);
 
-  const add = (p: Product) => {
+  const add = (p: Product, amount?: number) => {
+    const step = amount ?? qtyStep(p);
     setCart((c) => {
       const ex = c.find((x) => x.productId === p.id);
-      if (ex) return c.map((x) => (x.productId === p.id ? { ...x, qty: x.qty + 1 } : x));
-      return [...c, { productId: p.id, qty: 1 }];
+      if (ex)
+        return c.map((x) =>
+          x.productId === p.id ? { ...x, qty: roundQty(x.qty + step) } : x,
+        );
+      return [...c, { productId: p.id, qty: step }];
     });
   };
   const setQty = (pid: string, qty: number) =>
     setCart((c) =>
-      qty <= 0 ? c.filter((x) => x.productId !== pid) : c.map((x) => (x.productId === pid ? { ...x, qty } : x)),
+      qty <= 0
+        ? c.filter((x) => x.productId !== pid)
+        : c.map((x) => (x.productId === pid ? { ...x, qty: roundQty(qty) } : x)),
     );
 
   const complete = async () => {
