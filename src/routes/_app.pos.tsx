@@ -532,7 +532,7 @@ function ReceiptModal({ saleId, onClose }: { saleId: string; onClose: () => void
           {sale.items.map((i) => (
             <div key={i.productId + i.name} className="flex justify-between">
               <span>
-                {i.qty} × {i.name}
+                {fmtQty(i.qty)} × {i.name}
               </span>
               <span>{fmtMoney(i.qty * i.price, org.currency)}</span>
             </div>
