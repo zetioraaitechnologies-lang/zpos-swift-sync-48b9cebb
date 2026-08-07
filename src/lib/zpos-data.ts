@@ -441,6 +441,7 @@ export async function adjustStock(
 export interface RecordSaleInput {
   items: Array<{
     productId?: string;
+    variantId?: string;
     name: string;
     qty: number;
     price: number;
@@ -450,6 +451,8 @@ export interface RecordSaleInput {
   payment: Sale["payment"];
   customerId?: string;
   customerName?: string;
+  /** For credit sales: deposit paid now. Ignored for other payment types. */
+  amountPaid?: number;
 }
 
 export async function recordSale(orgId: string, input: RecordSaleInput): Promise<string> {
@@ -457,6 +460,7 @@ export async function recordSale(orgId: string, input: RecordSaleInput): Promise
     _org_id: orgId,
     _items: input.items.map((i) => ({
       product_id: i.productId ?? null,
+      variant_id: i.variantId ?? null,
       name: i.name,
       qty: i.qty,
       price: i.price,
@@ -466,7 +470,8 @@ export async function recordSale(orgId: string, input: RecordSaleInput): Promise
     _payment: input.payment,
     _customer_id: input.customerId ?? undefined,
     _customer_name: input.customerName ?? undefined,
-  });
+    _amount_paid: input.amountPaid ?? undefined,
+  } as never);
   if (error) throw error;
   return String(data);
 }
