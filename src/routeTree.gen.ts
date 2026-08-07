@@ -15,6 +15,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppReportsRouteImport } from './routes/_app.reports'
+import { Route as AppPurchasesRouteImport } from './routes/_app.purchases'
 import { Route as AppProductsRouteImport } from './routes/_app.products'
 import { Route as AppPosRouteImport } from './routes/_app.pos'
 import { Route as AppInventoryRouteImport } from './routes/_app.inventory'
@@ -51,6 +52,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
 const AppReportsRoute = AppReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPurchasesRoute = AppPurchasesRouteImport.update({
+  id: '/purchases',
+  path: '/purchases',
   getParentRoute: () => AppRoute,
 } as any)
 const AppProductsRoute = AppProductsRouteImport.update({
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/inventory': typeof AppInventoryRoute
   '/pos': typeof AppPosRoute
   '/products': typeof AppProductsRoute
+  '/purchases': typeof AppPurchasesRoute
   '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
 }
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/inventory': typeof AppInventoryRoute
   '/pos': typeof AppPosRoute
   '/products': typeof AppProductsRoute
+  '/purchases': typeof AppPurchasesRoute
   '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
 }
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/_app/inventory': typeof AppInventoryRoute
   '/_app/pos': typeof AppPosRoute
   '/_app/products': typeof AppProductsRoute
+  '/_app/purchases': typeof AppPurchasesRoute
   '/_app/reports': typeof AppReportsRoute
   '/_app/settings': typeof AppSettingsRoute
 }
@@ -155,6 +164,7 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/pos'
     | '/products'
+    | '/purchases'
     | '/reports'
     | '/settings'
   fileRoutesByTo: FileRoutesByTo
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/pos'
     | '/products'
+    | '/purchases'
     | '/reports'
     | '/settings'
   id:
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/_app/inventory'
     | '/_app/pos'
     | '/_app/products'
+    | '/_app/purchases'
     | '/_app/reports'
     | '/_app/settings'
   fileRoutesById: FileRoutesById
@@ -239,6 +251,13 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof AppReportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/purchases': {
+      id: '/_app/purchases'
+      path: '/purchases'
+      fullPath: '/purchases'
+      preLoaderRoute: typeof AppPurchasesRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/products': {
@@ -309,6 +328,7 @@ interface AppRouteChildren {
   AppInventoryRoute: typeof AppInventoryRoute
   AppPosRoute: typeof AppPosRoute
   AppProductsRoute: typeof AppProductsRoute
+  AppPurchasesRoute: typeof AppPurchasesRoute
   AppReportsRoute: typeof AppReportsRoute
   AppSettingsRoute: typeof AppSettingsRoute
 }
@@ -322,6 +342,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppInventoryRoute: AppInventoryRoute,
   AppPosRoute: AppPosRoute,
   AppProductsRoute: AppProductsRoute,
+  AppPurchasesRoute: AppPurchasesRoute,
   AppReportsRoute: AppReportsRoute,
   AppSettingsRoute: AppSettingsRoute,
 }
@@ -337,13 +358,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
