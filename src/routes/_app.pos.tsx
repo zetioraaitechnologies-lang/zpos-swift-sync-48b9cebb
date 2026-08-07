@@ -179,10 +179,15 @@ function POS() {
               >
                 <div className="text-sm font-semibold">{p.name}</div>
                 <div className="mt-1 text-[10px] uppercase tracking-widest text-muted-foreground">
-                  {p.category} · {p.stock}{p.unit ? ` ${p.unit}` : ""} in stock
+                  {p.category} · {fmtQty(p.stock, p.unit)} in stock
                 </div>
                 <div className="mt-3 font-display text-lg font-bold text-gold">
                   {fmtMoney(p.price, org.currency)}
+                  {isWeighed(p) && (
+                    <span className="ml-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                      / {p.unit ?? "kg"}
+                    </span>
+                  )}
                 </div>
               </button>
             ))}
