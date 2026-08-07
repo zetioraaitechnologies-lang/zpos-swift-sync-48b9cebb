@@ -796,17 +796,40 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
-      record_sale: {
+      record_purchase: {
         Args: {
-          _customer_id?: string
-          _customer_name?: string
-          _discount?: number
           _items: Json
+          _note?: string
           _org_id: string
-          _payment?: Database["public"]["Enums"]["payment_method"]
+          _supplier_id?: string
+          _supplier_name?: string
         }
         Returns: string
       }
+      record_sale:
+        | {
+            Args: {
+              _customer_id?: string
+              _customer_name?: string
+              _discount?: number
+              _items: Json
+              _org_id: string
+              _payment?: Database["public"]["Enums"]["payment_method"]
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _amount_paid?: number
+              _customer_id?: string
+              _customer_name?: string
+              _discount?: number
+              _items: Json
+              _org_id: string
+              _payment?: Database["public"]["Enums"]["payment_method"]
+            }
+            Returns: string
+          }
     }
     Enums: {
       app_role: "super_admin" | "owner" | "cashier"
