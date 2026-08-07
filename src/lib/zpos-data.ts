@@ -61,6 +61,7 @@ export interface Customer {
 
 export interface SaleItem {
   productId: string;
+  variantId?: string;
   name: string;
   qty: number;
   price: number;
@@ -75,7 +76,8 @@ export interface Sale {
   discount: number;
   total: number;
   profit: number;
-  payment: "cash" | "mobile" | "bank";
+  amountPaid: number;
+  payment: "cash" | "mobile" | "bank" | "credit";
   customerId?: string;
   customerName?: string;
   cashierId: string;
