@@ -143,6 +143,10 @@ export async function safeRecordSale(orgId: string, input: RecordSaleInput): Pro
         discount: input.discount,
         total: Math.max(0, input.items.reduce((a, i) => a + i.qty * i.price, 0) - input.discount),
         profit: input.items.reduce((a, i) => a + i.qty * (i.price - i.cost), 0),
+        amountPaid:
+          input.payment === "credit"
+            ? (input.amountPaid ?? 0)
+            : Math.max(0, input.items.reduce((a, i) => a + i.qty * i.price, 0) - input.discount),
         payment: input.payment,
         customerId: input.customerId,
         customerName: input.customerName,

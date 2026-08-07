@@ -40,7 +40,8 @@ function POS() {
   const [q, setQ] = useState("");
   const [cart, setCart] = useState<CartLine[]>([]);
   const [discount, setDiscount] = useState(0);
-  const [pay, setPay] = useState<"cash" | "mobile" | "bank">("cash");
+  const [pay, setPay] = useState<"cash" | "mobile" | "bank" | "credit">("cash");
+  const [deposit, setDeposit] = useState("");
   const [showReceipt, setShowReceipt] = useState<null | string>(null);
   const [customer, setCustomer] = useState<AttachedCustomer | null>(null);
   const [showCustomer, setShowCustomer] = useState(false);
@@ -116,6 +117,7 @@ function POS() {
         payment: pay,
         customerId: customer?.id,
         customerName: customer?.name,
+        amountPaid: pay === "credit" ? Number(deposit) || 0 : undefined,
       });
       if (isOnline()) {
         toast.success(`Sale completed · ${fmtMoney(total, org.currency)}`);
@@ -128,6 +130,7 @@ function POS() {
       setShowReceipt(saleId);
       setCart([]);
       setDiscount(0);
+      setDeposit("");
       setCustomer(null);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Sale failed");
@@ -330,8 +333,8 @@ function POS() {
           </div>
           <Row label="Total" value={fmtMoney(total, org.currency)} big />
 
-          <div className="mt-3 grid grid-cols-3 gap-2">
-            {(["cash", "mobile", "bank"] as const).map((m) => (
+          <div className="mt-3 grid grid-cols-4 gap-2">
+            {(["cash", "mobile", "bank", "credit"] as const).map((m) => (
               <button
                 key={m}
                 onClick={() => setPay(m)}
@@ -346,11 +349,42 @@ function POS() {
             ))}
           </div>
 
+          {pay === "credit" && (
+            <div className="mt-3 space-y-2 border border-[color:var(--gold)]/40 bg-[color:var(--gold)]/5 p-2">
+              <div className="text-[10px] font-semibold uppercase tracking-widest text-gold">
+                Credit sale · deni
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs text-muted-foreground">Paid now</span>
+                <input
+                  type="number"
+                  min={0}
+                  step="any"
+                  value={deposit}
+                  onChange={(e) => setDeposit(e.target.value)}
+                  placeholder="0"
+                  className="w-28 rounded-none border border-border bg-input px-2 py-1 text-right text-sm outline-none"
+                />
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">Balance owed</span>
+                <span className="font-bold text-gold">
+                  {fmtMoney(Math.max(0, total - (Number(deposit) || 0)), org.currency)}
+                </span>
+              </div>
+              {!customer && (
+                <div className="text-[11px] text-amber-500">
+                  Attach a customer so the debt can be tracked.
+                </div>
+              )}
+            </div>
+          )}
+
           <GoldButton
             onClick={complete}
             size="lg"
             className="mt-4 w-full"
-            disabled={!lines.length || busy}
+            disabled={!lines.length || busy || (pay === "credit" && !customer)}
           >
             <Receipt className="h-4 w-4" /> {busy ? "Processing…" : "Complete Sale"}
           </GoldButton>

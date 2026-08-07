@@ -61,6 +61,7 @@ export interface Customer {
 
 export interface SaleItem {
   productId: string;
+  variantId?: string;
   name: string;
   qty: number;
   price: number;
@@ -75,7 +76,8 @@ export interface Sale {
   discount: number;
   total: number;
   profit: number;
-  payment: "cash" | "mobile" | "bank";
+  amountPaid: number;
+  payment: "cash" | "mobile" | "bank" | "credit";
   customerId?: string;
   customerName?: string;
   cashierId: string;
@@ -189,6 +191,7 @@ function mapSale(r: Row, items: Row[] = []): Sale {
     orgId: str(r.org_id),
     items: items.map((i) => ({
       productId: str(i.product_id),
+      variantId: (i.variant_id as string) || undefined,
       name: str(i.name),
       qty: num(i.qty),
       price: num(i.price),
@@ -198,6 +201,7 @@ function mapSale(r: Row, items: Row[] = []): Sale {
     discount: num(r.discount),
     total: num(r.total),
     profit: num(r.profit),
+    amountPaid: r.amount_paid == null ? num(r.total) : num(r.amount_paid),
     payment: (str(r.payment, "cash") as Sale["payment"]),
     customerId: (r.customer_id as string) || undefined,
     customerName: (r.customer_name as string) || undefined,
@@ -437,6 +441,7 @@ export async function adjustStock(
 export interface RecordSaleInput {
   items: Array<{
     productId?: string;
+    variantId?: string;
     name: string;
     qty: number;
     price: number;
@@ -446,6 +451,8 @@ export interface RecordSaleInput {
   payment: Sale["payment"];
   customerId?: string;
   customerName?: string;
+  /** For credit sales: deposit paid now. Ignored for other payment types. */
+  amountPaid?: number;
 }
 
 export async function recordSale(orgId: string, input: RecordSaleInput): Promise<string> {
@@ -453,6 +460,7 @@ export async function recordSale(orgId: string, input: RecordSaleInput): Promise
     _org_id: orgId,
     _items: input.items.map((i) => ({
       product_id: i.productId ?? null,
+      variant_id: i.variantId ?? null,
       name: i.name,
       qty: i.qty,
       price: i.price,
@@ -462,7 +470,8 @@ export async function recordSale(orgId: string, input: RecordSaleInput): Promise
     _payment: input.payment,
     _customer_id: input.customerId ?? undefined,
     _customer_name: input.customerName ?? undefined,
-  });
+    _amount_paid: input.amountPaid ?? undefined,
+  } as never);
   if (error) throw error;
   return String(data);
 }
