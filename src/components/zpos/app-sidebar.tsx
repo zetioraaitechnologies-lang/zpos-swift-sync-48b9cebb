@@ -5,6 +5,8 @@ import {
   Package,
   Boxes,
   Users,
+  Truck,
+  HandCoins,
   Wallet,
   BarChart3,
   UserCog,
