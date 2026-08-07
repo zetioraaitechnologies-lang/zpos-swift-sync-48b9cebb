@@ -191,6 +191,7 @@ function mapSale(r: Row, items: Row[] = []): Sale {
     orgId: str(r.org_id),
     items: items.map((i) => ({
       productId: str(i.product_id),
+      variantId: (i.variant_id as string) || undefined,
       name: str(i.name),
       qty: num(i.qty),
       price: num(i.price),
@@ -200,6 +201,7 @@ function mapSale(r: Row, items: Row[] = []): Sale {
     discount: num(r.discount),
     total: num(r.total),
     profit: num(r.profit),
+    amountPaid: r.amount_paid == null ? num(r.total) : num(r.amount_paid),
     payment: (str(r.payment, "cash") as Sale["payment"]),
     customerId: (r.customer_id as string) || undefined,
     customerName: (r.customer_name as string) || undefined,
