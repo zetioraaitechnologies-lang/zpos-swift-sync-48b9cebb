@@ -125,6 +125,13 @@ function Products() {
                   <td className="p-3">
                     <div className="flex justify-end gap-1">
                       <button
+                        title="Sizes / colours"
+                        onClick={() => setVariantsFor(p)}
+                        className="grid h-8 w-8 place-items-center rounded-none hover:bg-white/10"
+                      >
+                        <Layers className="h-4 w-4 text-muted-foreground" />
+                      </button>
+                      <button
                         onClick={() => { setEditing(p); setShowForm(true); }}
                         className="grid h-8 w-8 place-items-center rounded-none hover:bg-white/10"
                       >
