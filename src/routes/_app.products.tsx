@@ -167,6 +167,9 @@ function Products() {
           onClose={() => { setShowForm(false); void refresh(); }}
         />
       )}
+      {variantsFor && (
+        <VariantsModal product={variantsFor} onClose={() => setVariantsFor(null)} />
+      )}
     </div>
   );
 }
