@@ -204,16 +204,19 @@ function POS() {
         </div>
         <div className="max-h-[calc(100vh-16rem)] overflow-y-auto pr-1">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
-            {filtered.map((p) => (
+            {filtered.map((p) => {
+              const vcount = variants.filter((v) => v.productId === p.id).length;
+              return (
               <button
                 key={p.id}
-                onClick={() => add(p)}
-                disabled={p.stock <= 0}
+                onClick={() => pick(p)}
+                disabled={p.stock <= 0 && vcount === 0}
                 className="panel clip-cut-card p-4 text-left transition hover:scale-[1.02] disabled:opacity-40"
               >
                 <div className="text-sm font-semibold">{p.name}</div>
                 <div className="mt-1 text-[10px] uppercase tracking-widest text-muted-foreground">
                   {p.category} · {fmtQty(p.stock, p.unit)} in stock
+                  {vcount > 0 && ` · ${vcount} options`}
                 </div>
                 <div className="mt-3 font-display text-lg font-bold text-gold">
                   {fmtMoney(p.price, org.currency)}
@@ -224,7 +227,8 @@ function POS() {
                   )}
                 </div>
               </button>
-            ))}
+              );
+            })}
             {filtered.length === 0 && (
               <div className="col-span-full py-12 text-center text-sm text-muted-foreground">
                 No products match "{q}".
