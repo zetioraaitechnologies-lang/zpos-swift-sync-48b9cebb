@@ -30,6 +30,7 @@ function Products() {
   const [q, setQ] = useState("");
   const [editing, setEditing] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [variantsFor, setVariantsFor] = useState<Product | null>(null);
 
   if (!org) return null;
   const mode = getMode(org.businessType);
