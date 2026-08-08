@@ -25,8 +25,12 @@ export const Route = createFileRoute("/_app/pos")({
 
 interface CartLine {
   productId: string;
+  variantId?: string;
   qty: number;
 }
+
+const lineKey = (productId: string, variantId?: string) =>
+  `${productId}:${variantId ?? ""}`;
 
 interface AttachedCustomer {
   id?: string;
@@ -37,9 +41,16 @@ interface AttachedCustomer {
 function POS() {
   const { org, user } = useAuth();
   const { data: products } = useLive<Product[]>(org?.id, ["products"], listProducts, []);
+  const { data: variants } = useLive<ProductVariant[]>(
+    org?.id,
+    ["product_variants"],
+    listVariants,
+    [],
+  );
 
   const [q, setQ] = useState("");
   const [cart, setCart] = useState<CartLine[]>([]);
+  const [picking, setPicking] = useState<Product | null>(null);
   const [discount, setDiscount] = useState(0);
   const [pay, setPay] = useState<"cash" | "mobile" | "bank" | "credit">("cash");
   const [deposit, setDeposit] = useState("");
