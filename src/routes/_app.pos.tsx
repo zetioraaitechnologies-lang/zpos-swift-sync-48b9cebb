@@ -435,6 +435,15 @@ function POS() {
           onPick={(c) => { setCustomer(c); setShowCustomer(false); }}
         />
       )}
+      {picking && (
+        <VariantPicker
+          product={picking}
+          variants={variants.filter((v) => v.productId === picking.id)}
+          currency={org.currency}
+          onClose={() => setPicking(null)}
+          onPick={(v) => { add(picking, undefined, v); setPicking(null); }}
+        />
+      )}
     </div>
   );
 }
