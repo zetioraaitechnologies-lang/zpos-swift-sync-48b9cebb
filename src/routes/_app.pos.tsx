@@ -673,3 +673,58 @@ function ReceiptModal({ saleId, onClose }: { saleId: string; onClose: () => void
     </div>
   );
 }
+
+function VariantPicker({
+  product,
+  variants,
+  currency,
+  onClose,
+  onPick,
+}: {
+  product: Product;
+  variants: ProductVariant[];
+  currency: string;
+  onClose: () => void;
+  onPick: (v?: ProductVariant) => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-navy-deep/60 p-4">
+      <div className="panel clip-cut-card w-full max-w-md space-y-4 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-display text-lg font-bold uppercase tracking-widest text-gold">
+              Choose option
+            </h3>
+            <p className="text-xs text-muted-foreground">{product.name}</p>
+          </div>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-2">
+          {variants.map((v) => (
+            <button
+              key={v.id}
+              disabled={v.stock <= 0}
+              onClick={() => onPick(v)}
+              className="border border-border bg-secondary p-3 text-left hover:border-[color:var(--gold)]/60 disabled:opacity-40"
+            >
+              <div className="text-sm font-semibold">{variantLabel(v)}</div>
+              <div className="text-[11px] text-muted-foreground">
+                {fmtMoney(v.price ?? product.price, currency)} · {v.stock} left
+              </div>
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={() => onPick(undefined)}
+          className="w-full border border-border py-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground hover:text-gold"
+        >
+          Sell base item without option
+        </button>
+      </div>
+    </div>
+  );
+}
