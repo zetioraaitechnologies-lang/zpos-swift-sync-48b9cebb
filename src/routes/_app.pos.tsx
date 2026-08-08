@@ -76,30 +76,48 @@ function POS() {
   const lines = cart
     .map((c) => {
       const p = products.find((x) => x.id === c.productId);
-      return p ? { p, qty: c.qty } : null;
+      if (!p) return null;
+      const v = c.variantId ? variants.find((x) => x.id === c.variantId) : undefined;
+      const price = v?.price ?? p.price;
+      const cost = v?.costPrice ?? p.costPrice;
+      const name = v ? `${p.name} (${variantLabel(v)})` : p.name;
+      return { key: lineKey(c.productId, c.variantId), p, v, qty: c.qty, price, cost, name };
     })
-    .filter((x): x is { p: Product; qty: number } => !!x);
+    .filter((x): x is NonNullable<typeof x> => !!x);
 
-  const subtotal = lines.reduce((a, l) => a + l.p.price * l.qty, 0);
+  const subtotal = lines.reduce((a, l) => a + l.price * l.qty, 0);
   const total = Math.max(0, subtotal - discount);
 
-  const add = (p: Product, amount?: number) => {
+  const add = (p: Product, amount?: number, variant?: ProductVariant) => {
     const step = amount ?? qtyStep(p);
+    const vid = variant?.id;
     setCart((c) => {
-      const ex = c.find((x) => x.productId === p.id);
+      const ex = c.find((x) => x.productId === p.id && x.variantId === vid);
       if (ex)
         return c.map((x) =>
-          x.productId === p.id ? { ...x, qty: roundQty(x.qty + step) } : x,
+          x.productId === p.id && x.variantId === vid
+            ? { ...x, qty: roundQty(x.qty + step) }
+            : x,
         );
-      return [...c, { productId: p.id, qty: step }];
+      return [...c, { productId: p.id, variantId: vid, qty: step }];
     });
   };
-  const setQty = (pid: string, qty: number) =>
+
+  const pick = (p: Product) => {
+    const opts = variants.filter((v) => v.productId === p.id);
+    if (opts.length) setPicking(p);
+    else add(p);
+  };
+
+  const setQty = (key: string, qty: number) =>
     setCart((c) =>
       qty <= 0
-        ? c.filter((x) => x.productId !== pid)
-        : c.map((x) => (x.productId === pid ? { ...x, qty: roundQty(qty) } : x)),
+        ? c.filter((x) => lineKey(x.productId, x.variantId) !== key)
+        : c.map((x) =>
+            lineKey(x.productId, x.variantId) === key ? { ...x, qty: roundQty(qty) } : x,
+          ),
     );
+
 
   const complete = async () => {
     if (!lines.length) return;
