@@ -14,6 +14,7 @@ import {
 } from "@/lib/zpos-data";
 import { safeRecordSale, isOnline, pendingCount, subscribeSyncStatus } from "@/lib/zpos-offline";
 import { isWeighed, qtyStep, roundQty, fmtQty, PORTIONS } from "@/lib/weighing";
+import { listVariants, variantLabel, type ProductVariant } from "@/lib/zpos-trade";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
