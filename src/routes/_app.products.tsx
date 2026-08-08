@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Layers } from "lucide-react";
 import {
   fmtMoney,
   useLive,
@@ -13,6 +13,7 @@ import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
 import { getMode, daysUntil, type ModeField } from "@/lib/business-modes";
 import { UNIT_SUGGESTIONS, fmtQty } from "@/lib/weighing";
+import { VariantsModal } from "@/components/zpos/variants-modal";
 
 export const Route = createFileRoute("/_app/products")({
   component: Products,
@@ -29,6 +30,7 @@ function Products() {
   const [q, setQ] = useState("");
   const [editing, setEditing] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [variantsFor, setVariantsFor] = useState<Product | null>(null);
 
   if (!org) return null;
   const mode = getMode(org.businessType);
@@ -123,6 +125,13 @@ function Products() {
                   <td className="p-3">
                     <div className="flex justify-end gap-1">
                       <button
+                        title="Sizes / colours"
+                        onClick={() => setVariantsFor(p)}
+                        className="grid h-8 w-8 place-items-center rounded-none hover:bg-white/10"
+                      >
+                        <Layers className="h-4 w-4 text-muted-foreground" />
+                      </button>
+                      <button
                         onClick={() => { setEditing(p); setShowForm(true); }}
                         className="grid h-8 w-8 place-items-center rounded-none hover:bg-white/10"
                       >
@@ -157,6 +166,9 @@ function Products() {
           product={editing}
           onClose={() => { setShowForm(false); void refresh(); }}
         />
+      )}
+      {variantsFor && (
+        <VariantsModal product={variantsFor} onClose={() => setVariantsFor(null)} />
       )}
     </div>
   );

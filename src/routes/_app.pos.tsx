@@ -14,6 +14,7 @@ import {
 } from "@/lib/zpos-data";
 import { safeRecordSale, isOnline, pendingCount, subscribeSyncStatus } from "@/lib/zpos-offline";
 import { isWeighed, qtyStep, roundQty, fmtQty, PORTIONS } from "@/lib/weighing";
+import { listVariants, variantLabel, type ProductVariant } from "@/lib/zpos-trade";
 import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { toast } from "sonner";
@@ -24,8 +25,12 @@ export const Route = createFileRoute("/_app/pos")({
 
 interface CartLine {
   productId: string;
+  variantId?: string;
   qty: number;
 }
+
+const lineKey = (productId: string, variantId?: string) =>
+  `${productId}:${variantId ?? ""}`;
 
 interface AttachedCustomer {
   id?: string;
@@ -36,9 +41,16 @@ interface AttachedCustomer {
 function POS() {
   const { org, user } = useAuth();
   const { data: products } = useLive<Product[]>(org?.id, ["products"], listProducts, []);
+  const { data: variants } = useLive<ProductVariant[]>(
+    org?.id,
+    ["product_variants"],
+    listVariants,
+    [],
+  );
 
   const [q, setQ] = useState("");
   const [cart, setCart] = useState<CartLine[]>([]);
+  const [picking, setPicking] = useState<Product | null>(null);
   const [discount, setDiscount] = useState(0);
   const [pay, setPay] = useState<"cash" | "mobile" | "bank" | "credit">("cash");
   const [deposit, setDeposit] = useState("");
@@ -76,30 +88,48 @@ function POS() {
   const lines = cart
     .map((c) => {
       const p = products.find((x) => x.id === c.productId);
-      return p ? { p, qty: c.qty } : null;
+      if (!p) return null;
+      const v = c.variantId ? variants.find((x) => x.id === c.variantId) : undefined;
+      const price = v?.price ?? p.price;
+      const cost = v?.costPrice ?? p.costPrice;
+      const name = v ? `${p.name} (${variantLabel(v)})` : p.name;
+      return { key: lineKey(c.productId, c.variantId), p, v, qty: c.qty, price, cost, name };
     })
-    .filter((x): x is { p: Product; qty: number } => !!x);
+    .filter((x): x is NonNullable<typeof x> => !!x);
 
-  const subtotal = lines.reduce((a, l) => a + l.p.price * l.qty, 0);
+  const subtotal = lines.reduce((a, l) => a + l.price * l.qty, 0);
   const total = Math.max(0, subtotal - discount);
 
-  const add = (p: Product, amount?: number) => {
+  const add = (p: Product, amount?: number, variant?: ProductVariant) => {
     const step = amount ?? qtyStep(p);
+    const vid = variant?.id;
     setCart((c) => {
-      const ex = c.find((x) => x.productId === p.id);
+      const ex = c.find((x) => x.productId === p.id && x.variantId === vid);
       if (ex)
         return c.map((x) =>
-          x.productId === p.id ? { ...x, qty: roundQty(x.qty + step) } : x,
+          x.productId === p.id && x.variantId === vid
+            ? { ...x, qty: roundQty(x.qty + step) }
+            : x,
         );
-      return [...c, { productId: p.id, qty: step }];
+      return [...c, { productId: p.id, variantId: vid, qty: step }];
     });
   };
-  const setQty = (pid: string, qty: number) =>
+
+  const pick = (p: Product) => {
+    const opts = variants.filter((v) => v.productId === p.id);
+    if (opts.length) setPicking(p);
+    else add(p);
+  };
+
+  const setQty = (key: string, qty: number) =>
     setCart((c) =>
       qty <= 0
-        ? c.filter((x) => x.productId !== pid)
-        : c.map((x) => (x.productId === pid ? { ...x, qty: roundQty(qty) } : x)),
+        ? c.filter((x) => lineKey(x.productId, x.variantId) !== key)
+        : c.map((x) =>
+            lineKey(x.productId, x.variantId) === key ? { ...x, qty: roundQty(qty) } : x,
+          ),
     );
+
 
   const complete = async () => {
     if (!lines.length) return;
@@ -108,10 +138,11 @@ function POS() {
       const saleId = await safeRecordSale(org.id, {
         items: lines.map((l) => ({
           productId: l.p.id,
-          name: l.p.name,
+          variantId: l.v?.id,
+          name: l.name,
           qty: l.qty,
-          price: l.p.price,
-          cost: l.p.costPrice,
+          price: l.price,
+          cost: l.cost,
         })),
         discount,
         payment: pay,
@@ -173,16 +204,19 @@ function POS() {
         </div>
         <div className="max-h-[calc(100vh-16rem)] overflow-y-auto pr-1">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
-            {filtered.map((p) => (
+            {filtered.map((p) => {
+              const vcount = variants.filter((v) => v.productId === p.id).length;
+              return (
               <button
                 key={p.id}
-                onClick={() => add(p)}
-                disabled={p.stock <= 0}
+                onClick={() => pick(p)}
+                disabled={p.stock <= 0 && vcount === 0}
                 className="panel clip-cut-card p-4 text-left transition hover:scale-[1.02] disabled:opacity-40"
               >
                 <div className="text-sm font-semibold">{p.name}</div>
                 <div className="mt-1 text-[10px] uppercase tracking-widest text-muted-foreground">
                   {p.category} · {fmtQty(p.stock, p.unit)} in stock
+                  {vcount > 0 && ` · ${vcount} options`}
                 </div>
                 <div className="mt-3 font-display text-lg font-bold text-gold">
                   {fmtMoney(p.price, org.currency)}
@@ -193,7 +227,8 @@ function POS() {
                   )}
                 </div>
               </button>
-            ))}
+              );
+            })}
             {filtered.length === 0 && (
               <div className="col-span-full py-12 text-center text-sm text-muted-foreground">
                 No products match "{q}".
@@ -246,23 +281,23 @@ function POS() {
             const step = qtyStep(l.p);
             return (
             <div
-              key={l.p.id}
+              key={l.key}
               className="rounded-none border border-border bg-secondary p-2"
             >
               <div className="flex items-center gap-2">
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-semibold">{l.p.name}</div>
+                <div className="truncate text-sm font-semibold">{l.name}</div>
                 <div className="text-[11px] text-muted-foreground">
-                  {fmtMoney(l.p.price, org.currency)}
+                  {fmtMoney(l.price, org.currency)}
                   {l.p.unit ? ` / ${l.p.unit}` : ""} ·{" "}
                   <span className="font-bold text-foreground">
-                    {fmtMoney(l.p.price * l.qty, org.currency)}
+                    {fmtMoney(l.price * l.qty, org.currency)}
                   </span>
                 </div>
               </div>
               <div className="flex items-center gap-1">
                 <button
-                  onClick={() => setQty(l.p.id, l.qty - step)}
+                  onClick={() => setQty(l.key, l.qty - step)}
                   className="grid h-7 w-7 place-items-center rounded-none border border-border hover:bg-secondary"
                 >
                   <Minus className="h-3 w-3" />
@@ -274,20 +309,20 @@ function POS() {
                     min={0}
                     step={0.05}
                     value={l.qty}
-                    onChange={(e) => setQty(l.p.id, Number(e.target.value) || 0)}
+                    onChange={(e) => setQty(l.key, Number(e.target.value) || 0)}
                     className="w-16 rounded-none border border-border bg-input px-1 py-1 text-center text-sm font-bold outline-none focus:border-[color:var(--gold)]/60"
                   />
                 ) : (
                   <span className="w-6 text-center text-sm font-bold">{l.qty}</span>
                 )}
                 <button
-                  onClick={() => setQty(l.p.id, l.qty + step)}
+                  onClick={() => setQty(l.key, l.qty + step)}
                   className="grid h-7 w-7 place-items-center rounded-none border border-border hover:bg-secondary"
                 >
                   <Plus className="h-3 w-3" />
                 </button>
                 <button
-                  onClick={() => setQty(l.p.id, 0)}
+                  onClick={() => setQty(l.key, 0)}
                   className="ml-1 grid h-7 w-7 place-items-center rounded-none text-red-400 hover:bg-red-500/10"
                 >
                   <Trash2 className="h-3 w-3" />
@@ -302,7 +337,7 @@ function POS() {
                   {PORTIONS.map((pt) => (
                     <button
                       key={pt.value}
-                      onClick={() => setQty(l.p.id, pt.value)}
+                      onClick={() => setQty(l.key, pt.value)}
                       className={`rounded-none border px-2 py-0.5 text-[11px] font-bold ${
                         l.qty === pt.value
                           ? "border-[color:var(--gold)] bg-[color:var(--gold)]/15 text-gold"
@@ -398,6 +433,15 @@ function POS() {
         <CustomerPicker
           onClose={() => setShowCustomer(false)}
           onPick={(c) => { setCustomer(c); setShowCustomer(false); }}
+        />
+      )}
+      {picking && (
+        <VariantPicker
+          product={picking}
+          variants={variants.filter((v) => v.productId === picking.id)}
+          currency={org.currency}
+          onClose={() => setPicking(null)}
+          onPick={(v) => { add(picking, undefined, v); setPicking(null); }}
         />
       )}
     </div>
@@ -625,6 +669,61 @@ function ReceiptModal({ saleId, onClose }: { saleId: string; onClose: () => void
             Close
           </GoldButton>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function VariantPicker({
+  product,
+  variants,
+  currency,
+  onClose,
+  onPick,
+}: {
+  product: Product;
+  variants: ProductVariant[];
+  currency: string;
+  onClose: () => void;
+  onPick: (v?: ProductVariant) => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-navy-deep/60 p-4">
+      <div className="panel clip-cut-card w-full max-w-md space-y-4 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-display text-lg font-bold uppercase tracking-widest text-gold">
+              Choose option
+            </h3>
+            <p className="text-xs text-muted-foreground">{product.name}</p>
+          </div>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-2">
+          {variants.map((v) => (
+            <button
+              key={v.id}
+              disabled={v.stock <= 0}
+              onClick={() => onPick(v)}
+              className="border border-border bg-secondary p-3 text-left hover:border-[color:var(--gold)]/60 disabled:opacity-40"
+            >
+              <div className="text-sm font-semibold">{variantLabel(v)}</div>
+              <div className="text-[11px] text-muted-foreground">
+                {fmtMoney(v.price ?? product.price, currency)} · {v.stock} left
+              </div>
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={() => onPick(undefined)}
+          className="w-full border border-border py-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground hover:text-gold"
+        >
+          Sell base item without option
+        </button>
       </div>
     </div>
   );
