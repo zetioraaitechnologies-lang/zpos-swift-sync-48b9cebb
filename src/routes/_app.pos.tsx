@@ -281,23 +281,23 @@ function POS() {
             const step = qtyStep(l.p);
             return (
             <div
-              key={l.p.id}
+              key={l.key}
               className="rounded-none border border-border bg-secondary p-2"
             >
               <div className="flex items-center gap-2">
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-semibold">{l.p.name}</div>
+                <div className="truncate text-sm font-semibold">{l.name}</div>
                 <div className="text-[11px] text-muted-foreground">
-                  {fmtMoney(l.p.price, org.currency)}
+                  {fmtMoney(l.price, org.currency)}
                   {l.p.unit ? ` / ${l.p.unit}` : ""} ·{" "}
                   <span className="font-bold text-foreground">
-                    {fmtMoney(l.p.price * l.qty, org.currency)}
+                    {fmtMoney(l.price * l.qty, org.currency)}
                   </span>
                 </div>
               </div>
               <div className="flex items-center gap-1">
                 <button
-                  onClick={() => setQty(l.p.id, l.qty - step)}
+                  onClick={() => setQty(l.key, l.qty - step)}
                   className="grid h-7 w-7 place-items-center rounded-none border border-border hover:bg-secondary"
                 >
                   <Minus className="h-3 w-3" />
@@ -309,20 +309,20 @@ function POS() {
                     min={0}
                     step={0.05}
                     value={l.qty}
-                    onChange={(e) => setQty(l.p.id, Number(e.target.value) || 0)}
+                    onChange={(e) => setQty(l.key, Number(e.target.value) || 0)}
                     className="w-16 rounded-none border border-border bg-input px-1 py-1 text-center text-sm font-bold outline-none focus:border-[color:var(--gold)]/60"
                   />
                 ) : (
                   <span className="w-6 text-center text-sm font-bold">{l.qty}</span>
                 )}
                 <button
-                  onClick={() => setQty(l.p.id, l.qty + step)}
+                  onClick={() => setQty(l.key, l.qty + step)}
                   className="grid h-7 w-7 place-items-center rounded-none border border-border hover:bg-secondary"
                 >
                   <Plus className="h-3 w-3" />
                 </button>
                 <button
-                  onClick={() => setQty(l.p.id, 0)}
+                  onClick={() => setQty(l.key, 0)}
                   className="ml-1 grid h-7 w-7 place-items-center rounded-none text-red-400 hover:bg-red-500/10"
                 >
                   <Trash2 className="h-3 w-3" />
@@ -337,7 +337,7 @@ function POS() {
                   {PORTIONS.map((pt) => (
                     <button
                       key={pt.value}
-                      onClick={() => setQty(l.p.id, pt.value)}
+                      onClick={() => setQty(l.key, pt.value)}
                       className={`rounded-none border px-2 py-0.5 text-[11px] font-bold ${
                         l.qty === pt.value
                           ? "border-[color:var(--gold)] bg-[color:var(--gold)]/15 text-gold"
