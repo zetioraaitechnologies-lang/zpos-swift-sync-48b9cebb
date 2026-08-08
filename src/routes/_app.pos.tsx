@@ -138,10 +138,11 @@ function POS() {
       const saleId = await safeRecordSale(org.id, {
         items: lines.map((l) => ({
           productId: l.p.id,
-          name: l.p.name,
+          variantId: l.v?.id,
+          name: l.name,
           qty: l.qty,
-          price: l.p.price,
-          cost: l.p.costPrice,
+          price: l.price,
+          cost: l.cost,
         })),
         discount,
         payment: pay,
