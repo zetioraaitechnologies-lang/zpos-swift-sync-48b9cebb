@@ -3,6 +3,8 @@ import { useEffect } from "react";
 import { useAuth } from "@/lib/zpos-auth";
 import { AppSidebar, MobileMenuButton, useSidebar } from "@/components/zpos/app-sidebar";
 import { ConnectivityBadge } from "@/components/zpos/connectivity";
+import { StoreSwitcher } from "@/components/zpos/store-switcher";
+
 import { AlphaFab } from "@/components/zpos/alpha-fab";
 import { getMode, modeStyle } from "@/lib/business-modes";
 
