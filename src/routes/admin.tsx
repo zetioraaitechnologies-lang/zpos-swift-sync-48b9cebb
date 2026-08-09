@@ -502,11 +502,14 @@ function CreateOrgForm({
             value={f.businessName}
             onChange={(v) => setF({ ...f, businessName: v })}
           />
-          <Field
-            label="Owner Name"
-            value={f.ownerName}
-            onChange={(v) => setF({ ...f, ownerName: v })}
-          />
+          {!existingOwner && (
+            <Field
+              label="Owner Name"
+              value={f.ownerName}
+              onChange={(v) => setF({ ...f, ownerName: v })}
+            />
+          )}
+
           <Field
             label="Business Category"
             value={f.category}
