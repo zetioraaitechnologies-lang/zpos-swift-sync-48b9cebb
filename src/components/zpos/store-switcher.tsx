@@ -46,7 +46,7 @@ export function StoreSwitcher() {
         className="flex max-w-[220px] items-center gap-2 border border-border bg-secondary/60 px-3 py-1.5 text-left text-xs transition-colors hover:bg-secondary disabled:cursor-default"
         aria-label="Switch store"
       >
-        <Store className="h-3.5 w-3.5 shrink-0 text-accent" />
+        <Store className="h-3.5 w-3.5 shrink-0 text-gold" />
         <span className="min-w-0 flex-1">
           <span className="block truncate font-display text-[11px] font-bold uppercase tracking-widest">
             {org.businessName}
@@ -75,7 +75,7 @@ export function StoreSwitcher() {
                   {o.role} · {getMode(o.businessType).label}
                 </span>
               </span>
-              {o.id === org.id && <Check className="h-3.5 w-3.5 text-accent" />}
+              {o.id === org.id && <Check className="h-3.5 w-3.5 text-gold" />}
             </button>
           ))}
         </div>

@@ -209,7 +209,7 @@ function Inventory() {
               onClick={() => setMode(m.k)}
               className={`inline-flex items-center gap-2 rounded-none border px-4 py-2 text-xs font-bold uppercase tracking-widest ${
                 mode === m.k
-                  ? "border-accent bg-accent/15 text-accent"
+                  ? "border-[color:var(--gold)] bg-[color:var(--gold)]/15 text-gold"
                   : "border-border text-muted-foreground hover:bg-secondary"
               }`}
             >
@@ -221,7 +221,7 @@ function Inventory() {
           <select
             value={pid}
             onChange={(e) => setPid(e.target.value)}
-            className="rounded-none border border-border bg-input px-3 py-2.5 text-sm outline-none focus:border-accent/60"
+            className="rounded-none border border-border bg-input px-3 py-2.5 text-sm outline-none focus:border-[color:var(--gold)]/60"
           >
             <option value="">Select product…</option>
             {products.map((p) => (
@@ -238,7 +238,7 @@ function Inventory() {
             value={amt}
             onChange={(e) => setAmt(+e.target.value)}
             placeholder={mode === "adj" ? "New qty" : "Amount"}
-            className="rounded-none border border-border bg-input px-3 py-2.5 text-sm outline-none focus:border-accent/60"
+            className="rounded-none border border-border bg-input px-3 py-2.5 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
           <GoldButton onClick={apply} disabled={busy}>{busy ? "Saving…" : "Apply"}</GoldButton>
         </div>
@@ -246,7 +246,7 @@ function Inventory() {
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder="Note (optional) — e.g. Supplier delivery, damaged goods…"
-          className="mt-3 w-full rounded-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-accent/60"
+          className="mt-3 w-full rounded-none border border-border bg-input px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
         />
       </div>
 
@@ -258,7 +258,7 @@ function Inventory() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search product, category or barcode…"
-              className="w-full rounded-none border border-border bg-input py-2 pl-9 pr-3 text-sm outline-none focus:border-accent/60"
+              className="w-full rounded-none border border-border bg-input py-2 pl-9 pr-3 text-sm outline-none focus:border-[color:var(--gold)]/60"
             />
           </div>
           {filters.map((f) => (
@@ -267,7 +267,7 @@ function Inventory() {
               onClick={() => setFilter(f.k)}
               className={`rounded-none border px-3 py-2 text-[11px] font-bold uppercase tracking-widest ${
                 filter === f.k
-                  ? "border-accent bg-accent/15 text-accent"
+                  ? "border-[color:var(--gold)] bg-[color:var(--gold)]/15 text-gold"
                   : "border-border text-muted-foreground hover:bg-secondary"
               }`}
             >
@@ -306,7 +306,7 @@ function Inventory() {
                             className="inline-flex items-center gap-1.5 text-left"
                             disabled={vs.length === 0}
                           >
-                            {vs.length > 0 && <Layers className="h-3.5 w-3.5 text-accent" />}
+                            {vs.length > 0 && <Layers className="h-3.5 w-3.5 text-gold" />}
                             {p.name}
                             {vs.length > 0 && (
                               <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -379,7 +379,7 @@ function Inventory() {
       <div className="panel clip-cut-card p-5">
         <div className="mb-3 flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 text-amber-300" />
-          <h3 className="font-display font-bold uppercase tracking-widest text-accent">
+          <h3 className="font-display font-bold uppercase tracking-widest text-gold">
             Reorder list ({stats.low + stats.out})
           </h3>
         </div>
@@ -412,14 +412,14 @@ function Inventory() {
 
       <div className="panel clip-cut-card p-5">
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <History className="h-4 w-4 text-accent" />
-          <h3 className="flex-1 font-display font-bold uppercase tracking-widest text-accent">
+          <History className="h-4 w-4 text-gold" />
+          <h3 className="flex-1 font-display font-bold uppercase tracking-widest text-gold">
             Stock movements
           </h3>
           <select
             value={mvProduct}
             onChange={(e) => setMvProduct(e.target.value)}
-            className="rounded-none border border-border bg-input px-2 py-1.5 text-xs outline-none focus:border-accent/60"
+            className="rounded-none border border-border bg-input px-2 py-1.5 text-xs outline-none focus:border-[color:var(--gold)]/60"
           >
             <option value="">All products</option>
             {products.map((p) => (
@@ -487,7 +487,7 @@ function StatBox({
 }) {
   return (
     <div className="panel clip-cut-card flex items-center gap-3 p-4">
-      <Icon className={`h-5 w-5 ${alert ? "text-amber-300" : "text-accent"}`} />
+      <Icon className={`h-5 w-5 ${alert ? "text-amber-300" : "text-gold"}`} />
       <div className="min-w-0">
         <div className="truncate text-[10px] uppercase tracking-widest text-muted-foreground">
           {label}
