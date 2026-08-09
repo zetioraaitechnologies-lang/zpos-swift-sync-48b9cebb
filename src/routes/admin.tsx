@@ -540,15 +540,18 @@ function CreateOrgForm({
             value={f.address}
             onChange={(v) => setF({ ...f, address: v })}
           />
-          <Field
-            label="Owner Password (leave blank to auto-generate)"
-            colSpan
-            requiredField={false}
-            value={f.password}
-            onChange={(v) => setF({ ...f, password: v })}
-            hint="Minimum 6 characters. The owner can change it later."
-          />
+          {!existingOwner && (
+            <Field
+              label="Owner Password (leave blank to auto-generate)"
+              colSpan
+              requiredField={false}
+              value={f.password}
+              onChange={(v) => setF({ ...f, password: v })}
+              hint="Minimum 6 characters. The owner can change it later."
+            />
+          )}
         </div>
+
         <div className="flex gap-2 pt-1">
           <GoldButton type="submit" className="flex-1" disabled={busy}>
             {busy ? "Creating…" : "Create"}
