@@ -20,7 +20,8 @@ export const claimSuperAdmin = createServerFn({ method: "POST" })
     if (!SUPER_ADMIN_EMAILS.includes(email)) {
       return { granted: false as const };
     }
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getAdminClient } = await import("@/lib/admin-client.server");
+    const supabaseAdmin = await getAdminClient();
     const { data: existingRole } = await supabaseAdmin
       .from("user_roles")
       .select("id")
@@ -51,7 +52,8 @@ export const bootstrapSuperAdmin = createServerFn({ method: "POST" })
     if (!SUPER_ADMIN_EMAILS.includes(email)) {
       throw new Error("This email is not authorised to be a super admin.");
     }
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getAdminClient } = await import("@/lib/admin-client.server");
+    const supabaseAdmin = await getAdminClient();
     const { data: list } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 });
     const existing = list?.users?.find((u) => (u.email ?? "").toLowerCase() === email);
     if (existing) return { created: false as const, existed: true as const };
@@ -95,7 +97,8 @@ export const createOrgWithOwner = createServerFn({ method: "POST" })
     });
     if (!ok) throw new Error("Forbidden: super admin only");
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getAdminClient } = await import("@/lib/admin-client.server");
+    const supabaseAdmin = await getAdminClient();
 
     const emailLc = data.email.trim().toLowerCase();
     let ownerId: string | undefined;
@@ -149,7 +152,8 @@ export const resetOwnerPassword = createServerFn({ method: "POST" })
       _user_id: context.userId,
     });
     if (!ok) throw new Error("Forbidden");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getAdminClient } = await import("@/lib/admin-client.server");
+    const supabaseAdmin = await getAdminClient();
     const { data: org } = await supabaseAdmin
       .from("organizations")
       .select("owner_user_id")
@@ -191,7 +195,8 @@ export const inviteCashier = createServerFn({ method: "POST" })
     if (ownerErr) throw new Error(ownerErr.message);
     if (!ownerCheck) throw new Error("Forbidden: not the owner of this organization");
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getAdminClient } = await import("@/lib/admin-client.server");
+    const supabaseAdmin = await getAdminClient();
 
     // Create or find the auth user.
     const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
@@ -251,7 +256,8 @@ export const removeCashier = createServerFn({ method: "POST" })
       _org_id: data.orgId,
     });
     if (!ok) throw new Error("Forbidden");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getAdminClient } = await import("@/lib/admin-client.server");
+    const supabaseAdmin = await getAdminClient();
     await supabaseAdmin
       .from("user_roles")
       .delete()
@@ -279,7 +285,8 @@ export const setOrgStatus = createServerFn({ method: "POST" })
       _user_id: context.userId,
     });
     if (!ok) throw new Error("Forbidden");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getAdminClient } = await import("@/lib/admin-client.server");
+    const supabaseAdmin = await getAdminClient();
     const { error } = await supabaseAdmin
       .from("organizations")
       .update({ status: data.status })
@@ -297,7 +304,8 @@ export const deleteOrg = createServerFn({ method: "POST" })
       _user_id: context.userId,
     });
     if (!ok) throw new Error("Forbidden");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getAdminClient } = await import("@/lib/admin-client.server");
+    const supabaseAdmin = await getAdminClient();
     const { error } = await supabaseAdmin.from("organizations").delete().eq("id", data.orgId);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -325,7 +333,8 @@ export const updateOrg = createServerFn({ method: "POST" })
       _user_id: context.userId,
     });
     if (!ok) throw new Error("Forbidden");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getAdminClient } = await import("@/lib/admin-client.server");
+    const supabaseAdmin = await getAdminClient();
     const { error } = await supabaseAdmin
       .from("organizations")
       .update({
@@ -350,7 +359,8 @@ export const getPlatformStats = createServerFn({ method: "POST" })
       _user_id: context.userId,
     });
     if (!ok) throw new Error("Forbidden");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getAdminClient } = await import("@/lib/admin-client.server");
+    const supabaseAdmin = await getAdminClient();
 
     const [products, employees, sales, customers] = await Promise.all([
       supabaseAdmin.from("products").select("org_id"),
