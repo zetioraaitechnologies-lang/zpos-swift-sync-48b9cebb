@@ -39,9 +39,19 @@ export interface AppUser {
 export type { Organization } from "./zpos-data";
 import type { Organization } from "./zpos-data";
 
+export interface OrgMembership {
+  id: string;
+  name: string;
+  role: "owner" | "cashier";
+  businessType: string;
+  status: "active" | "suspended";
+}
+
 interface AuthCtx {
   user: AppUser | null;
   org: Organization | null;
+  orgs: OrgMembership[];
+  switchOrg: (orgId: string) => Promise<void>;
   ready: boolean;
   isOnline: boolean;
   login: (
@@ -59,6 +69,28 @@ interface RoleRow {
   org_id: string | null;
   role: "super_admin" | "owner" | "cashier";
 }
+
+const ACTIVE_ORG_KEY = "zpos.activeOrgId";
+
+function readActiveOrgId(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(ACTIVE_ORG_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeActiveOrgId(id: string | null) {
+  if (typeof window === "undefined") return;
+  try {
+    if (id) window.localStorage.setItem(ACTIVE_ORG_KEY, id);
+    else window.localStorage.removeItem(ACTIVE_ORG_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 
 const SUPER_ADMIN_EMAILS = ["zetioraaitechnologies@gmail.com"];
 
@@ -94,19 +126,27 @@ async function loadProfileName(userId: string): Promise<string | null> {
   return (data?.display_name as string | null) ?? null;
 }
 
+interface LoadResult {
+  user: AppUser | null;
+  org: Organization | null;
+  orgs: OrgMembership[];
+  error?: string;
+}
+
 async function loadRoleAndOrg(
   userId: string,
   email: string,
-): Promise<{ user: AppUser | null; org: Organization | null; error?: string }> {
+  preferredOrgId?: string | null,
+): Promise<LoadResult> {
   const { data: roles, error: rolesErr } = await supabase
     .from("user_roles")
     .select("user_id, org_id, role")
     .eq("user_id", userId);
-  if (rolesErr) return { user: null, org: null, error: rolesErr.message };
+  if (rolesErr) return { user: null, org: null, orgs: [], error: rolesErr.message };
 
   const rows = (roles ?? []) as RoleRow[];
   if (rows.length === 0) {
-    return { user: null, org: null, error: "This account is not assigned to any organization." };
+    return { user: null, org: null, orgs: [], error: "This account is not assigned to any organization." };
   }
 
   const super_ = rows.find((r) => r.role === "super_admin");
@@ -115,45 +155,73 @@ async function loadRoleAndOrg(
     return {
       user: { id: userId, email, name, role: "super_admin" },
       org: null,
+      orgs: [],
     };
   }
 
-  const owner = rows.find((r) => r.role === "owner" && r.org_id);
-  const cashier = rows.find((r) => r.role === "cashier" && r.org_id);
-  const active = owner ?? cashier;
-  if (!active?.org_id) {
-    return { user: null, org: null, error: "This account has no organization assigned." };
+  // A user can belong to many stores (multi-store owners, roaming cashiers).
+  const memberRows = rows.filter((r) => r.org_id && (r.role === "owner" || r.role === "cashier"));
+  if (memberRows.length === 0) {
+    return { user: null, org: null, orgs: [], error: "This account has no organization assigned." };
   }
 
-  const { data: orgRow, error: orgErr } = await supabase
+  const ids = Array.from(new Set(memberRows.map((r) => r.org_id as string)));
+  const { data: orgRows, error: orgErr } = await supabase
     .from("organizations")
     .select("*")
-    .eq("id", active.org_id)
-    .maybeSingle();
-  if (orgErr) return { user: null, org: null, error: orgErr.message };
-  if (!orgRow) return { user: null, org: null, error: "Organization not found." };
+    .in("id", ids);
+  if (orgErr) return { user: null, org: null, orgs: [], error: orgErr.message };
 
-  const org = rowToOrg(orgRow as Record<string, unknown>);
-  if (org.status === "suspended") {
-    return { user: null, org: null, error: "This organization has been suspended. Contact support." };
+  const orgsById = new Map<string, Organization>();
+  for (const row of (orgRows ?? []) as Record<string, unknown>[]) {
+    const o = rowToOrg(row);
+    orgsById.set(o.id, o);
   }
 
+  const memberships: OrgMembership[] = ids
+    .map((id) => {
+      const o = orgsById.get(id);
+      if (!o) return null;
+      const isOwner = memberRows.some((r) => r.org_id === id && r.role === "owner");
+      return {
+        id,
+        name: o.businessName,
+        role: (isOwner ? "owner" : "cashier") as "owner" | "cashier",
+        businessType: o.businessType,
+        status: o.status,
+      };
+    })
+    .filter((m): m is OrgMembership => m !== null)
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const usable = memberships.filter((m) => m.status !== "suspended");
+  if (usable.length === 0) {
+    return {
+      user: null,
+      org: null,
+      orgs: [],
+      error: "This organization has been suspended. Contact support.",
+    };
+  }
+
+  const chosen =
+    usable.find((m) => m.id === preferredOrgId) ??
+    usable.find((m) => m.role === "owner") ??
+    usable[0];
+  const org = orgsById.get(chosen.id) ?? null;
   const name = (await loadProfileName(userId)) || email.split("@")[0];
+
   return {
-    user: {
-      id: userId,
-      email,
-      name,
-      role: owner ? "owner" : "cashier",
-      orgId: active.org_id,
-    },
+    user: { id: userId, email, name, role: chosen.role, orgId: chosen.id },
     org,
+    orgs: usable,
   };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [org, setOrg] = useState<Organization | null>(null);
+  const [orgs, setOrgs] = useState<OrgMembership[]>([]);
   const [ready, setReady] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const claimedRef = useRef<string | null>(null);
@@ -163,6 +231,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!session?.user) {
       setUser(null);
       setOrg(null);
+      setOrgs([]);
       return;
     }
 
@@ -178,16 +247,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    const result = await loadRoleAndOrg(session.user.id, email);
+    const result = await loadRoleAndOrg(session.user.id, email, readActiveOrgId());
     if (result.error) {
       // Sign out unknown/unassigned accounts so they can't wander the app.
       await supabase.auth.signOut();
       setUser(null);
       setOrg(null);
+      setOrgs([]);
       return;
     }
     setUser(result.user);
     setOrg(result.org);
+    setOrgs(result.orgs);
+    writeActiveOrgId(result.org?.id ?? null);
   }, []);
 
   useEffect(() => {
@@ -227,7 +299,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Verify the account has a role/org before letting the session stick.
     const email = (data.user.email ?? "").toLowerCase();
-    const result = await loadRoleAndOrg(data.user.id, email);
+    const result = await loadRoleAndOrg(data.user.id, email, readActiveOrgId());
     if (result.error || !result.user) {
       await supabase.auth.signOut();
       return { ok: false, error: result.error ?? "This account is not authorized." };
@@ -236,10 +308,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Apply the validated session.
     setUser(result.user);
     setOrg(result.org);
+    setOrgs(result.orgs);
+    writeActiveOrgId(result.org?.id ?? null);
     return { ok: true };
   };
 
   const logout: AuthCtx["logout"] = async () => {
+    writeActiveOrgId(null);
     await supabase.auth.signOut();
   };
 
@@ -248,13 +323,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await applySession(data.session as never);
   };
 
+  const switchOrg: AuthCtx["switchOrg"] = useCallback(
+    async (orgId: string) => {
+      const { data } = await supabase.auth.getSession();
+      const session = data.session;
+      if (!session?.user) return;
+      writeActiveOrgId(orgId);
+      const email = (session.user.email ?? "").toLowerCase();
+      const result = await loadRoleAndOrg(session.user.id, email, orgId);
+      if (result.error || !result.user) return;
+      setUser(result.user);
+      setOrg(result.org);
+      setOrgs(result.orgs);
+      writeActiveOrgId(result.org?.id ?? null);
+    },
+    [],
+  );
+
   const value = useMemo(
-    () => ({ user, org, ready, isOnline, login, logout, refresh }),
-    [user, org, ready, isOnline],
+    () => ({ user, org, orgs, switchOrg, ready, isOnline, login, logout, refresh }),
+    [user, org, orgs, switchOrg, ready, isOnline],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
+
 
 export function useAuth() {
   const ctx = useContext(Ctx);

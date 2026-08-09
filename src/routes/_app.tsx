@@ -3,6 +3,8 @@ import { useEffect } from "react";
 import { useAuth } from "@/lib/zpos-auth";
 import { AppSidebar, MobileMenuButton, useSidebar } from "@/components/zpos/app-sidebar";
 import { ConnectivityBadge } from "@/components/zpos/connectivity";
+import { StoreSwitcher } from "@/components/zpos/store-switcher";
+
 import { AlphaFab } from "@/components/zpos/alpha-fab";
 import { getMode, modeStyle } from "@/lib/business-modes";
 
@@ -43,8 +45,10 @@ function AppLayout() {
               {user.role} · {getMode(org?.businessType).label}
             </div>
           </div>
+          <StoreSwitcher />
           <ConnectivityBadge />
         </header>
+
         <main className="mx-auto max-w-6xl px-4 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
           <Outlet />
         </main>

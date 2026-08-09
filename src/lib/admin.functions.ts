@@ -396,3 +396,56 @@ export const getPlatformStats = createServerFn({ method: "POST" })
 
     return { per };
   });
+
+/**
+ * Super-admin only: add ANOTHER store (branch/shop) to an owner that already
+ * exists. Multi-store owners keep one login and switch stores inside the app,
+ * so this never touches the existing password.
+ */
+export const addStoreForOwner = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        ownerEmail: z.string().email(),
+        businessName: z.string().min(1),
+        phone: z.string().optional(),
+        address: z.string().optional(),
+        category: z.string().optional(),
+        businessType: z.string().optional(),
+        currency: z.string().optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: ok } = await context.supabase.rpc("is_super_admin", {
+      _user_id: context.userId,
+    });
+    if (!ok) throw new Error("Forbidden: super admin only");
+
+    const { getAdminClient } = await import("@/lib/admin-client.server");
+    const supabaseAdmin = await getAdminClient();
+
+    const emailLc = data.ownerEmail.trim().toLowerCase();
+    const { data: list } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    const found = list?.users?.find((u) => (u.email ?? "").toLowerCase() === emailLc);
+    if (!found) throw new Error("No existing account with that email. Create the owner first.");
+
+    const { data: org, error: orgErr } = await supabaseAdmin
+      .from("organizations")
+      .insert({
+        business_name: data.businessName,
+        owner_user_id: found.id,
+        phone: data.phone,
+        email: emailLc,
+        address: data.address,
+        category: data.category || "Retail",
+        business_type: data.businessType || "general",
+        currency: data.currency || "TZS",
+      })
+      .select("id")
+      .single();
+    if (orgErr || !org) throw new Error(orgErr?.message ?? "Failed to create store");
+
+    return { orgId: org.id as string, ownerId: found.id, email: emailLc };
+  });

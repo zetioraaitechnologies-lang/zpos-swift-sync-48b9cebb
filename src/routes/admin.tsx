@@ -22,6 +22,8 @@ import { ConnectivityBadge } from "@/components/zpos/connectivity";
 import { StatCard } from "@/components/zpos/stat-card";
 import {
   createOrgWithOwner,
+  addStoreForOwner,
+
   deleteOrg,
   getPlatformStats,
   resetOwnerPassword,
@@ -423,12 +425,31 @@ function CreateOrgForm({
     businessType: "general",
     currency: "TZS",
   });
+  const [existingOwner, setExistingOwner] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
     try {
+      if (existingOwner) {
+        await addStoreForOwner({
+          data: {
+            ownerEmail: f.email.trim(),
+            businessName: f.businessName,
+            phone: f.phone || undefined,
+            address: f.address || undefined,
+            category: f.category,
+            businessType: f.businessType,
+            currency: f.currency,
+          },
+        });
+        toast.success(`Store added to ${f.email.trim()} — they can switch stores after re-login.`, {
+          duration: 15000,
+        });
+        onCreated();
+        return;
+      }
       const pw = f.password.trim() || "Owner" + Math.random().toString(36).slice(2, 10);
       await createOrgWithOwner({
         data: {
@@ -456,11 +477,23 @@ function CreateOrgForm({
     <Modal onClose={onClose}>
       <form onSubmit={save} className="space-y-3">
         <h3 className="font-display text-lg font-bold tracking-tight text-gold">
-          Create organization
+          {existingOwner ? "Add store to existing owner" : "Create organization"}
         </h3>
         <p className="text-xs text-muted-foreground">
-          Issues login credentials for the owner. Copy them before closing the toast.
+          {existingOwner
+            ? "The owner keeps their current login and switches between stores inside the app."
+            : "Issues login credentials for the owner. Copy them before closing the toast."}
         </p>
+
+        <label className="flex items-center gap-2 border border-border bg-secondary/40 px-3 py-2 text-xs">
+          <input
+            type="checkbox"
+            checked={existingOwner}
+            onChange={(e) => setExistingOwner(e.target.checked)}
+          />
+          <span>This owner already has an account (multi-store / new branch)</span>
+        </label>
+
 
         <div className="grid grid-cols-2 gap-2.5">
           <Field
@@ -469,11 +502,14 @@ function CreateOrgForm({
             value={f.businessName}
             onChange={(v) => setF({ ...f, businessName: v })}
           />
-          <Field
-            label="Owner Name"
-            value={f.ownerName}
-            onChange={(v) => setF({ ...f, ownerName: v })}
-          />
+          {!existingOwner && (
+            <Field
+              label="Owner Name"
+              value={f.ownerName}
+              onChange={(v) => setF({ ...f, ownerName: v })}
+            />
+          )}
+
           <Field
             label="Business Category"
             value={f.category}
@@ -504,15 +540,18 @@ function CreateOrgForm({
             value={f.address}
             onChange={(v) => setF({ ...f, address: v })}
           />
-          <Field
-            label="Owner Password (leave blank to auto-generate)"
-            colSpan
-            requiredField={false}
-            value={f.password}
-            onChange={(v) => setF({ ...f, password: v })}
-            hint="Minimum 6 characters. The owner can change it later."
-          />
+          {!existingOwner && (
+            <Field
+              label="Owner Password (leave blank to auto-generate)"
+              colSpan
+              requiredField={false}
+              value={f.password}
+              onChange={(v) => setF({ ...f, password: v })}
+              hint="Minimum 6 characters. The owner can change it later."
+            />
+          )}
         </div>
+
         <div className="flex gap-2 pt-1">
           <GoldButton type="submit" className="flex-1" disabled={busy}>
             {busy ? "Creating…" : "Create"}
