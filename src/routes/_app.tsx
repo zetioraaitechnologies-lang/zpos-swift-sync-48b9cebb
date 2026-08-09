@@ -43,8 +43,10 @@ function AppLayout() {
               {user.role} · {getMode(org?.businessType).label}
             </div>
           </div>
+          <StoreSwitcher />
           <ConnectivityBadge />
         </header>
+
         <main className="mx-auto max-w-6xl px-4 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
           <Outlet />
         </main>
