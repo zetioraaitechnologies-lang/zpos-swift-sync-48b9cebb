@@ -22,6 +22,8 @@ import { ConnectivityBadge } from "@/components/zpos/connectivity";
 import { StatCard } from "@/components/zpos/stat-card";
 import {
   createOrgWithOwner,
+  addStoreForOwner,
+
   deleteOrg,
   getPlatformStats,
   resetOwnerPassword,
