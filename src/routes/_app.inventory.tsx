@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import {
   ArrowUp,
   ArrowDown,
@@ -298,8 +298,8 @@ function Inventory() {
                   const status =
                     p.stock <= 0 ? "out" : p.stock <= p.minStock ? "low" : "ok";
                   return (
-                    <>
-                      <tr key={p.id} className="border-t border-border">
+                    <Fragment key={p.id}>
+                      <tr className="border-t border-border">
                         <td className="p-2 font-semibold">
                           <button
                             onClick={() => setExpanded(expanded === p.id ? null : p.id)}
@@ -367,7 +367,7 @@ function Inventory() {
                             <td className="p-2" />
                           </tr>
                         ))}
-                    </>
+                    </Fragment>
                   );
                 })}
               </tbody>
