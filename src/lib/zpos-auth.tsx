@@ -39,9 +39,19 @@ export interface AppUser {
 export type { Organization } from "./zpos-data";
 import type { Organization } from "./zpos-data";
 
+export interface OrgMembership {
+  id: string;
+  name: string;
+  role: "owner" | "cashier";
+  businessType: string;
+  status: "active" | "suspended";
+}
+
 interface AuthCtx {
   user: AppUser | null;
   org: Organization | null;
+  orgs: OrgMembership[];
+  switchOrg: (orgId: string) => Promise<void>;
   ready: boolean;
   isOnline: boolean;
   login: (
@@ -59,6 +69,28 @@ interface RoleRow {
   org_id: string | null;
   role: "super_admin" | "owner" | "cashier";
 }
+
+const ACTIVE_ORG_KEY = "zpos.activeOrgId";
+
+function readActiveOrgId(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(ACTIVE_ORG_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeActiveOrgId(id: string | null) {
+  if (typeof window === "undefined") return;
+  try {
+    if (id) window.localStorage.setItem(ACTIVE_ORG_KEY, id);
+    else window.localStorage.removeItem(ACTIVE_ORG_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 
 const SUPER_ADMIN_EMAILS = ["zetioraaitechnologies@gmail.com"];
 
