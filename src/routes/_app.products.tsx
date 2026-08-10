@@ -242,11 +242,11 @@ function ProductForm({ product, onClose }: { product: Product | null; onClose: (
   };
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-navy-deep/60 p-4">
-      <form
-        onSubmit={save}
-        className="panel clip-cut-card w-full max-w-md space-y-4 p-6"
-      >
+  <div className="fixed inset-0 z-50 flex items-start justify-center overflow-auto p-4 bg-navy-deep/60">
+  <form
+    onSubmit={save}
+    className="panel clip-cut-card w-full max-w-md max-h-[calc(100vh-4rem)] overflow-auto space-y-4 p-6"
+  >
         <h3 className="font-display text-xl font-bold tracking-tight text-gold">
           {product ? "Edit" : "Add"} {mode.itemSingular}
         </h3>
