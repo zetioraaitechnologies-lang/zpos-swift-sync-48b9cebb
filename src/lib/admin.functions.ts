@@ -429,6 +429,8 @@ export const addStoreForOwner = createServerFn({ method: "POST" })
     z
       .object({
         ownerEmail: z.string().email(),
+        ownerName: z.string().optional(),
+        password: z.string().min(6).optional(),
         businessName: z.string().min(1),
         phone: z.string().optional(),
         address: z.string().optional(),
