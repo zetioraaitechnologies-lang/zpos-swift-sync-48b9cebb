@@ -484,5 +484,11 @@ export const addStoreForOwner = createServerFn({ method: "POST" })
       .single();
     if (orgErr || !org) throw new Error(orgErr?.message ?? "Failed to create store");
 
-    return { orgId: org.id as string, ownerId: found.id, email: emailLc };
+    return {
+      orgId: org.id as string,
+      ownerId: found.id,
+      email: emailLc,
+      createdAccount: generatedPassword !== null,
+      password: generatedPassword,
+    };
   });
