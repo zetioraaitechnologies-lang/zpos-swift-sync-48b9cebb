@@ -92,7 +92,13 @@ function writeActiveOrgId(id: string | null) {
 }
 
 
-const SUPER_ADMIN_EMAILS = ["zetioraaitechnologies@gmail.com"];
+// Configurable per deployment: VITE_SUPER_ADMIN_EMAILS="a@x.com,b@y.com"
+const SUPER_ADMIN_EMAILS = (
+  import.meta.env.VITE_SUPER_ADMIN_EMAILS || "zetioraaitechnologies@gmail.com"
+)
+  .split(",")
+  .map((e: string) => e.trim().toLowerCase())
+  .filter(Boolean);
 
 function rowToOrg(row: Record<string, unknown>): Organization {
   return {
