@@ -451,8 +451,22 @@ export const addStoreForOwner = createServerFn({ method: "POST" })
 
     const emailLc = data.ownerEmail.trim().toLowerCase();
     const { data: list } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-    const found = list?.users?.find((u) => (u.email ?? "").toLowerCase() === emailLc);
-    if (!found) throw new Error("No existing account with that email. Create the owner first.");
+    let found = list?.users?.find((u) => (u.email ?? "").toLowerCase() === emailLc);
+    let generatedPassword: string | null = null;
+    if (!found) {
+      // No account yet — create it here instead of forcing a manual step.
+      const pw = data.password?.trim() || "Owner" + Math.random().toString(36).slice(2, 10);
+      const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
+        email: emailLc,
+        password: pw,
+        email_confirm: true,
+        user_metadata: { display_name: data.ownerName || emailLc.split("@")[0], phone: data.phone },
+      });
+      if (!created?.user) throw new Error(createErr?.message ?? "Could not create owner account");
+      found = created.user;
+      generatedPassword = pw;
+    }
+
 
     const { data: org, error: orgErr } = await supabaseAdmin
       .from("organizations")
