@@ -225,28 +225,41 @@ export const inviteCashier = createServerFn({ method: "POST" })
     }
     if (!newUserId) throw new Error("Could not create user");
 
-    // Assign cashier role for this org.
-    const { error: roleErr } = await supabaseAdmin
+    // Assign cashier role for this org (check-then-insert; the unique indexes
+    // in some deployments are partial, so ON CONFLICT cannot target them).
+    const { data: roleRow } = await supabaseAdmin
       .from("user_roles")
-      .upsert(
-        { user_id: newUserId, org_id: data.orgId, role: "cashier" },
-        { onConflict: "user_id,org_id,role", ignoreDuplicates: true },
-      );
-    if (roleErr) throw new Error(roleErr.message);
+      .select("id")
+      .eq("user_id", newUserId)
+      .eq("org_id", data.orgId)
+      .eq("role", "cashier")
+      .maybeSingle();
+    if (!roleRow) {
+      const { error: roleErr } = await supabaseAdmin
+        .from("user_roles")
+        .insert({ user_id: newUserId, org_id: data.orgId, role: "cashier" });
+      if (roleErr && !/duplicate key/i.test(roleErr.message)) throw new Error(roleErr.message);
+    }
 
-    // Employee record (owner-visible list) — unique on (org_id, user_id).
-    const { error: empErr } = await supabaseAdmin.from("employees").upsert(
-      {
-        org_id: data.orgId,
-        user_id: newUserId,
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        role_label: "Cashier",
-        wage: data.wage,
-      },
-      { onConflict: "org_id,user_id" },
-    );
+    // Employee record (owner-visible list).
+    const empPayload = {
+      org_id: data.orgId,
+      user_id: newUserId,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      role_label: "Cashier",
+      wage: data.wage,
+    };
+    const { data: empRow } = await supabaseAdmin
+      .from("employees")
+      .select("id")
+      .eq("org_id", data.orgId)
+      .eq("user_id", newUserId)
+      .maybeSingle();
+    const { error: empErr } = empRow
+      ? await supabaseAdmin.from("employees").update(empPayload).eq("id", empRow.id)
+      : await supabaseAdmin.from("employees").insert(empPayload);
     if (empErr) throw new Error(empErr.message);
 
     return { userId: newUserId };
