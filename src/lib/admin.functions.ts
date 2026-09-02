@@ -6,8 +6,16 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-// Emails that are allowed to claim the super_admin role.
-const SUPER_ADMIN_EMAILS = ["zetioraaitechnologies@gmail.com"];
+// Emails allowed to claim the super_admin role.
+// Configurable per deployment via the SUPER_ADMIN_EMAILS env var
+// (comma separated). Read inside handlers — never at module scope.
+function superAdminEmails(): string[] {
+  const raw = process.env['SUPER_ADMIN_EMAILS'] ?? "zetioraaitechnologies@gmail.com";
+  return raw
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+}
 
 /**
  * Grants the current signed-in user the super_admin role if their email
@@ -17,7 +25,7 @@ export const claimSuperAdmin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const email = (context.claims?.email ?? "").toString().toLowerCase();
-    if (!SUPER_ADMIN_EMAILS.includes(email)) {
+    if (!superAdminEmails().includes(email)) {
       return { granted: false as const };
     }
     const { getAdminClient } = await import("@/lib/admin-client.server");
@@ -49,7 +57,7 @@ export const bootstrapSuperAdmin = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const email = data.email.trim().toLowerCase();
-    if (!SUPER_ADMIN_EMAILS.includes(email)) {
+    if (!superAdminEmails().includes(email)) {
       throw new Error("This email is not authorised to be a super admin.");
     }
     const { getAdminClient } = await import("@/lib/admin-client.server");
