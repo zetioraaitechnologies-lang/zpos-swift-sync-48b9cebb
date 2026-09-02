@@ -6,8 +6,16 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-// Emails that are allowed to claim the super_admin role.
-const SUPER_ADMIN_EMAILS = ["zetioraaitechnologies@gmail.com"];
+// Emails allowed to claim the super_admin role.
+// Configurable per deployment via the SUPER_ADMIN_EMAILS env var
+// (comma separated). Read inside handlers — never at module scope.
+function superAdminEmails(): string[] {
+  const raw = process.env['SUPER_ADMIN_EMAILS'] ?? "zetioraaitechnologies@gmail.com";
+  return raw
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+}
 
 /**
  * Grants the current signed-in user the super_admin role if their email
