@@ -19,6 +19,7 @@ Fungua **SQL Editor** kwenye project yako, kisha endesha faili hizi kwa mpangili
 | --- | --- | --- |
 | 1 | `sql/01_zpos_full_schema.sql` | Tables zote, enums, RLS policies, GRANTs, functions (`record_sale`, `record_purchase`, `has_role`, n.k.), triggers, indexes. **Haina data yoyote.** |
 | 2 | `sql/02_bootstrap_super_admin.sql` | Mtumiaji **wa kwanza** kwenye Auth anakuwa `super_admin` kiotomatiki + helper `promote_super_admin('email')`. |
+| 3 | `sql/03_employees_roles_unique_constraints.sql` | Unique constraints kamili za `employees` na `user_roles` (huondoa error ya *"no unique or exclusion constraint matching the ON CONFLICT specification"* wakati wa kuongeza cashier/employee). |
 | (hiari) | `sql/99_reset_data.sql` | Kufuta data zote baadaye ukitaka kuanza upya (schema inabaki). |
 
 > Kila mabadiliko mapya ya database yataandikwa kama faili jipya kwenye folder `sql/`
