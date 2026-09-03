@@ -433,9 +433,11 @@ function CreateOrgForm({
     setBusy(true);
     try {
       if (existingOwner) {
-        await addStoreForOwner({
+        const res = await addStoreForOwner({
           data: {
             ownerEmail: f.email.trim(),
+            ownerName: f.ownerName || undefined,
+            password: f.password.trim() || undefined,
             businessName: f.businessName,
             phone: f.phone || undefined,
             address: f.address || undefined,
@@ -444,12 +446,20 @@ function CreateOrgForm({
             currency: f.currency,
           },
         });
-        toast.success(`Store added to ${f.email.trim()} — they can switch stores after re-login.`, {
-          duration: 15000,
-        });
+        if (res?.createdAccount && res.password) {
+          toast.success(`New owner account created · ${res.email} / ${res.password}`, {
+            duration: 25000,
+          });
+        } else {
+          toast.success(
+            `Store added to ${f.email.trim()} — they can switch stores after re-login.`,
+            { duration: 15000 },
+          );
+        }
         onCreated();
         return;
       }
+
       const pw = f.password.trim() || "Owner" + Math.random().toString(36).slice(2, 10);
       await createOrgWithOwner({
         data: {
@@ -502,13 +512,12 @@ function CreateOrgForm({
             value={f.businessName}
             onChange={(v) => setF({ ...f, businessName: v })}
           />
-          {!existingOwner && (
-            <Field
-              label="Owner Name"
-              value={f.ownerName}
-              onChange={(v) => setF({ ...f, ownerName: v })}
-            />
-          )}
+          <Field
+            label="Owner Name"
+            requiredField={!existingOwner}
+            value={f.ownerName}
+            onChange={(v) => setF({ ...f, ownerName: v })}
+          />
 
           <Field
             label="Business Category"
@@ -540,16 +549,18 @@ function CreateOrgForm({
             value={f.address}
             onChange={(v) => setF({ ...f, address: v })}
           />
-          {!existingOwner && (
-            <Field
-              label="Owner Password (leave blank to auto-generate)"
-              colSpan
-              requiredField={false}
-              value={f.password}
-              onChange={(v) => setF({ ...f, password: v })}
-              hint="Minimum 6 characters. The owner can change it later."
-            />
-          )}
+          <Field
+            label="Owner Password (leave blank to auto-generate)"
+            colSpan
+            requiredField={false}
+            value={f.password}
+            onChange={(v) => setF({ ...f, password: v })}
+            hint={
+              existingOwner
+                ? "Only used if this email has no account yet — an account will be created."
+                : "Minimum 6 characters. The owner can change it later."
+            }
+          />
         </div>
 
         <div className="flex gap-2 pt-1">
