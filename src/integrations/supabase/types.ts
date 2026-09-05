@@ -195,6 +195,78 @@ export type Database = {
           },
         ]
       }
+      handovers: {
+        Row: {
+          created_at: string
+          id: string
+          issued_by: string
+          issued_qty: number
+          note: string | null
+          org_id: string
+          product_id: string | null
+          product_name: string
+          received_qty: number
+          returned_qty: number
+          sold_qty: number
+          staff_name: string
+          staff_user_id: string | null
+          status: string
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          issued_by: string
+          issued_qty?: number
+          note?: string | null
+          org_id: string
+          product_id?: string | null
+          product_name: string
+          received_qty?: number
+          returned_qty?: number
+          sold_qty?: number
+          staff_name: string
+          staff_user_id?: string | null
+          status?: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          issued_by?: string
+          issued_qty?: number
+          note?: string | null
+          org_id?: string
+          product_id?: string | null
+          product_name?: string
+          received_qty?: number
+          returned_qty?: number
+          sold_qty?: number
+          staff_name?: string
+          staff_user_id?: string | null
+          status?: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "handovers_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "handovers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           address: string | null
@@ -672,6 +744,82 @@ export type Database = {
           },
         ]
       }
+      store_transfers: {
+        Row: {
+          cost: number
+          created_at: string
+          created_by: string
+          from_org_id: string
+          id: string
+          note: string | null
+          price: number
+          product_id: string | null
+          product_name: string
+          qty: number
+          received_at: string | null
+          received_by: string | null
+          status: string
+          to_org_id: string
+          unit: string | null
+        }
+        Insert: {
+          cost?: number
+          created_at?: string
+          created_by: string
+          from_org_id: string
+          id?: string
+          note?: string | null
+          price?: number
+          product_id?: string | null
+          product_name: string
+          qty: number
+          received_at?: string | null
+          received_by?: string | null
+          status?: string
+          to_org_id: string
+          unit?: string | null
+        }
+        Update: {
+          cost?: number
+          created_at?: string
+          created_by?: string
+          from_org_id?: string
+          id?: string
+          note?: string | null
+          price?: number
+          product_id?: string | null
+          product_name?: string
+          qty?: number
+          received_at?: string | null
+          received_by?: string | null
+          status?: string
+          to_org_id?: string
+          unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_transfers_from_org_id_fkey"
+            columns: ["from_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_transfers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_transfers_to_org_id_fkey"
+            columns: ["to_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           address: string | null
@@ -779,6 +927,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_store_transfer: {
+        Args: { _transfer_id: string }
+        Returns: undefined
+      }
+      create_store_transfer: {
+        Args: {
+          _from_org_id: string
+          _note?: string
+          _product_id: string
+          _qty: number
+          _to_org_id: string
+        }
+        Returns: string
+      }
       current_org_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
@@ -796,6 +958,10 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      receive_store_transfer: {
+        Args: { _transfer_id: string }
+        Returns: string
+      }
       record_purchase: {
         Args: {
           _items: Json
@@ -806,30 +972,18 @@ export type Database = {
         }
         Returns: string
       }
-      record_sale:
-        | {
-            Args: {
-              _customer_id?: string
-              _customer_name?: string
-              _discount?: number
-              _items: Json
-              _org_id: string
-              _payment?: Database["public"]["Enums"]["payment_method"]
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              _amount_paid?: number
-              _customer_id?: string
-              _customer_name?: string
-              _discount?: number
-              _items: Json
-              _org_id: string
-              _payment?: Database["public"]["Enums"]["payment_method"]
-            }
-            Returns: string
-          }
+      record_sale: {
+        Args: {
+          _amount_paid?: number
+          _customer_id?: string
+          _customer_name?: string
+          _discount?: number
+          _items: Json
+          _org_id: string
+          _payment?: Database["public"]["Enums"]["payment_method"]
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "super_admin" | "owner" | "cashier"
