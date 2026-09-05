@@ -1,0 +1,10 @@
+REVOKE EXECUTE ON FUNCTION public.create_store_transfer(uuid, uuid, uuid, numeric, text) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.receive_store_transfer(uuid) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.cancel_store_transfer(uuid) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.record_sale(uuid, jsonb, numeric, payment_method, uuid, text, numeric) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.record_purchase(uuid, jsonb, uuid, text, text) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.has_role(uuid, app_role) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.is_org_member(uuid, uuid) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.is_org_owner(uuid, uuid) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.is_super_admin(uuid) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.current_org_id(uuid) FROM anon;
