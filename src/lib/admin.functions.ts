@@ -190,7 +190,9 @@ export const inviteCashier = createServerFn({ method: "POST" })
         email: z.string().email(),
         password: z.string().min(6),
         phone: z.string().optional(),
+        roleLabel: z.string().optional(),
         wage: z.number().optional(),
+
       })
       .parse(input),
   )
