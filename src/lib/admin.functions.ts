@@ -190,7 +190,9 @@ export const inviteCashier = createServerFn({ method: "POST" })
         email: z.string().email(),
         password: z.string().min(6),
         phone: z.string().optional(),
+        roleLabel: z.string().optional(),
         wage: z.number().optional(),
+
       })
       .parse(input),
   )
@@ -248,7 +250,7 @@ export const inviteCashier = createServerFn({ method: "POST" })
       name: data.name,
       email: data.email,
       phone: data.phone,
-      role_label: "Cashier",
+      role_label: data.roleLabel || "Cashier",
       wage: data.wage,
     };
     const { data: empRow } = await supabaseAdmin

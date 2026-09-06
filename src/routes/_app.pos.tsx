@@ -302,19 +302,17 @@ function POS() {
                 >
                   <Minus className="h-3 w-3" />
                 </button>
-                {weighed ? (
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step={0.05}
-                    value={l.qty}
-                    onChange={(e) => setQty(l.key, Number(e.target.value) || 0)}
-                    className="w-16 rounded-none border border-border bg-input px-1 py-1 text-center text-sm font-bold outline-none focus:border-[color:var(--gold)]/60"
-                  />
-                ) : (
-                  <span className="w-6 text-center text-sm font-bold">{l.qty}</span>
-                )}
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  step={weighed ? 0.05 : 1}
+                  value={l.qty}
+                  onChange={(e) => setQty(l.key, Number(e.target.value) || 0)}
+                  onFocus={(e) => e.currentTarget.select()}
+                  className="w-16 rounded-none border border-border bg-input px-1 py-1 text-center text-sm font-bold outline-none focus:border-[color:var(--gold)]/60"
+                />
+
                 <button
                   onClick={() => setQty(l.key, l.qty + step)}
                   className="grid h-7 w-7 place-items-center rounded-none border border-border hover:bg-secondary"

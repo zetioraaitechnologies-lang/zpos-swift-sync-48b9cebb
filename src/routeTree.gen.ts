@@ -15,10 +15,12 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppReportsRouteImport } from './routes/_app.reports'
+import { Route as AppReceiptsRouteImport } from './routes/_app.receipts'
 import { Route as AppPurchasesRouteImport } from './routes/_app.purchases'
 import { Route as AppProductsRouteImport } from './routes/_app.products'
 import { Route as AppPosRouteImport } from './routes/_app.pos'
 import { Route as AppInventoryRouteImport } from './routes/_app.inventory'
+import { Route as AppHandoversRouteImport } from './routes/_app.handovers'
 import { Route as AppExpensesRouteImport } from './routes/_app.expenses'
 import { Route as AppEmployeesRouteImport } from './routes/_app.employees'
 import { Route as AppDebtsRouteImport } from './routes/_app.debts'
@@ -55,6 +57,11 @@ const AppReportsRoute = AppReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => AppRoute,
 } as any)
+const AppReceiptsRoute = AppReceiptsRouteImport.update({
+  id: '/receipts',
+  path: '/receipts',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppPurchasesRoute = AppPurchasesRouteImport.update({
   id: '/purchases',
   path: '/purchases',
@@ -73,6 +80,11 @@ const AppPosRoute = AppPosRouteImport.update({
 const AppInventoryRoute = AppInventoryRouteImport.update({
   id: '/inventory',
   path: '/inventory',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHandoversRoute = AppHandoversRouteImport.update({
+  id: '/handovers',
+  path: '/handovers',
   getParentRoute: () => AppRoute,
 } as any)
 const AppExpensesRoute = AppExpensesRouteImport.update({
@@ -116,10 +128,12 @@ export interface FileRoutesByFullPath {
   '/debts': typeof AppDebtsRoute
   '/employees': typeof AppEmployeesRoute
   '/expenses': typeof AppExpensesRoute
+  '/handovers': typeof AppHandoversRoute
   '/inventory': typeof AppInventoryRoute
   '/pos': typeof AppPosRoute
   '/products': typeof AppProductsRoute
   '/purchases': typeof AppPurchasesRoute
+  '/receipts': typeof AppReceiptsRoute
   '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
 }
@@ -133,10 +147,12 @@ export interface FileRoutesByTo {
   '/debts': typeof AppDebtsRoute
   '/employees': typeof AppEmployeesRoute
   '/expenses': typeof AppExpensesRoute
+  '/handovers': typeof AppHandoversRoute
   '/inventory': typeof AppInventoryRoute
   '/pos': typeof AppPosRoute
   '/products': typeof AppProductsRoute
   '/purchases': typeof AppPurchasesRoute
+  '/receipts': typeof AppReceiptsRoute
   '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
 }
@@ -152,10 +168,12 @@ export interface FileRoutesById {
   '/_app/debts': typeof AppDebtsRoute
   '/_app/employees': typeof AppEmployeesRoute
   '/_app/expenses': typeof AppExpensesRoute
+  '/_app/handovers': typeof AppHandoversRoute
   '/_app/inventory': typeof AppInventoryRoute
   '/_app/pos': typeof AppPosRoute
   '/_app/products': typeof AppProductsRoute
   '/_app/purchases': typeof AppPurchasesRoute
+  '/_app/receipts': typeof AppReceiptsRoute
   '/_app/reports': typeof AppReportsRoute
   '/_app/settings': typeof AppSettingsRoute
 }
@@ -171,10 +189,12 @@ export interface FileRouteTypes {
     | '/debts'
     | '/employees'
     | '/expenses'
+    | '/handovers'
     | '/inventory'
     | '/pos'
     | '/products'
     | '/purchases'
+    | '/receipts'
     | '/reports'
     | '/settings'
   fileRoutesByTo: FileRoutesByTo
@@ -188,10 +208,12 @@ export interface FileRouteTypes {
     | '/debts'
     | '/employees'
     | '/expenses'
+    | '/handovers'
     | '/inventory'
     | '/pos'
     | '/products'
     | '/purchases'
+    | '/receipts'
     | '/reports'
     | '/settings'
   id:
@@ -206,10 +228,12 @@ export interface FileRouteTypes {
     | '/_app/debts'
     | '/_app/employees'
     | '/_app/expenses'
+    | '/_app/handovers'
     | '/_app/inventory'
     | '/_app/pos'
     | '/_app/products'
     | '/_app/purchases'
+    | '/_app/receipts'
     | '/_app/reports'
     | '/_app/settings'
   fileRoutesById: FileRoutesById
@@ -265,6 +289,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppReportsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/receipts': {
+      id: '/_app/receipts'
+      path: '/receipts'
+      fullPath: '/receipts'
+      preLoaderRoute: typeof AppReceiptsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/purchases': {
       id: '/_app/purchases'
       path: '/purchases'
@@ -291,6 +322,13 @@ declare module '@tanstack/react-router' {
       path: '/inventory'
       fullPath: '/inventory'
       preLoaderRoute: typeof AppInventoryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/handovers': {
+      id: '/_app/handovers'
+      path: '/handovers'
+      fullPath: '/handovers'
+      preLoaderRoute: typeof AppHandoversRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/expenses': {
@@ -345,10 +383,12 @@ interface AppRouteChildren {
   AppDebtsRoute: typeof AppDebtsRoute
   AppEmployeesRoute: typeof AppEmployeesRoute
   AppExpensesRoute: typeof AppExpensesRoute
+  AppHandoversRoute: typeof AppHandoversRoute
   AppInventoryRoute: typeof AppInventoryRoute
   AppPosRoute: typeof AppPosRoute
   AppProductsRoute: typeof AppProductsRoute
   AppPurchasesRoute: typeof AppPurchasesRoute
+  AppReceiptsRoute: typeof AppReceiptsRoute
   AppReportsRoute: typeof AppReportsRoute
   AppSettingsRoute: typeof AppSettingsRoute
 }
@@ -360,10 +400,12 @@ const AppRouteChildren: AppRouteChildren = {
   AppDebtsRoute: AppDebtsRoute,
   AppEmployeesRoute: AppEmployeesRoute,
   AppExpensesRoute: AppExpensesRoute,
+  AppHandoversRoute: AppHandoversRoute,
   AppInventoryRoute: AppInventoryRoute,
   AppPosRoute: AppPosRoute,
   AppProductsRoute: AppProductsRoute,
   AppPurchasesRoute: AppPurchasesRoute,
+  AppReceiptsRoute: AppReceiptsRoute,
   AppReportsRoute: AppReportsRoute,
   AppSettingsRoute: AppSettingsRoute,
 }
