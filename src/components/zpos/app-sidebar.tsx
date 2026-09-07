@@ -15,10 +15,14 @@ import {
   LogOut,
   Menu,
   X,
+  ReceiptText,
+  ClipboardList,
+  ArrowLeftRight,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/zpos-auth";
+import { canOpen } from "@/lib/staff-roles";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
