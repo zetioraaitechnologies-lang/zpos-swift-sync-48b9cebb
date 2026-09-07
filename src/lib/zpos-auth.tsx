@@ -34,6 +34,8 @@ export interface AppUser {
   name: string;
   role: UserRole;
   orgId?: string;
+  /** Job role for staff (Manager, Waiter, Storekeeper…). Owners: undefined. */
+  jobRole?: string;
 }
 
 export type { Organization } from "./zpos-data";
@@ -217,8 +219,19 @@ async function loadRoleAndOrg(
   const org = orgsById.get(chosen.id) ?? null;
   const name = (await loadProfileName(userId)) || email.split("@")[0];
 
+  let jobRole: string | undefined;
+  if (chosen.role !== "owner") {
+    const { data: emp } = await supabase
+      .from("employees")
+      .select("role_label")
+      .eq("org_id", chosen.id)
+      .eq("user_id", userId)
+      .maybeSingle();
+    jobRole = (emp?.role_label as string | null) ?? undefined;
+  }
+
   return {
-    user: { id: userId, email, name, role: chosen.role, orgId: chosen.id },
+    user: { id: userId, email, name, role: chosen.role, orgId: chosen.id, jobRole },
     org,
     orgs: usable,
   };
