@@ -115,7 +115,7 @@ export async function updateHandover(
   if (patch.returnedQty !== undefined) upd.returned_qty = patch.returnedQty;
   if (patch.note !== undefined) upd.note = patch.note || null;
   if (patch.status !== undefined) upd.status = patch.status;
-  const { error } = await supabase.from("handovers").update(upd).eq("id", id);
+  const { error } = await supabase.from("handovers").update(upd as never).eq("id", id);
   if (error) throw error;
 }
 
