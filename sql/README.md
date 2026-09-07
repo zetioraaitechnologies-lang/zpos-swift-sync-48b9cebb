@@ -7,6 +7,7 @@ Endesha faili hizi kwenye **Supabase → SQL Editor** kwa mpangilio wa namba.
 | `01_zpos_full_schema.sql` | Schema kamili: enums, tables, GRANTs, RLS policies, functions, triggers, indexes. Haina data. | Mara moja, project mpya |
 | `02_bootstrap_super_admin.sql` | Mtumiaji wa kwanza wa Auth = `super_admin`; helper `promote_super_admin('email')` | Baada ya 01 |
 | `03_employees_roles_unique_constraints.sql` | Unique constraints kamili za `employees` na `user_roles` (inaondoa error ya "no unique or exclusion constraint matching the ON CONFLICT specification") | Baada ya 02 |
+| `04_handovers_transfers.sql` | Handovers (kitchen → staff) na store transfers (tawi → tawi) + RPC zake | Baada ya 03 |
 | `99_reset_data.sql` | Kufuta data zote (schema inabaki) | Ukitaka kuanza upya |
 
 Mabadiliko yote mapya ya database yataongezwa hapa kama `03_...`, `04_...` n.k.
