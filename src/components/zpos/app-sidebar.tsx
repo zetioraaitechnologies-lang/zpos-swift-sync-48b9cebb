@@ -15,16 +15,23 @@ import {
   LogOut,
   Menu,
   X,
+  ReceiptText,
+  ClipboardList,
+  ArrowLeftRight,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/zpos-auth";
+import { canOpen } from "@/lib/staff-roles";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/pos", label: "POS", icon: ShoppingCart },
+  { to: "/receipts", label: "Receipts", icon: ReceiptText },
   { to: "/products", label: "Products", icon: Package },
   { to: "/inventory", label: "Inventory", icon: Boxes },
+  { to: "/handovers", label: "Handovers", icon: ClipboardList },
+  { to: "/transfers", label: "Transfers", icon: ArrowLeftRight },
   { to: "/customers", label: "Customers", icon: Users },
   { to: "/purchases", label: "Purchases", icon: Truck },
   { to: "/debts", label: "Debts", icon: HandCoins },
@@ -46,7 +53,12 @@ export function AppSidebar({
   const loc = useRouterState({ select: (s) => s.location.pathname });
   const isOwner = user?.role === "owner";
 
-  const items = NAV.filter((n) => !n.ownerOnly || isOwner);
+  const items = NAV.filter(
+    (n) =>
+      (!n.ownerOnly || isOwner) &&
+      canOpen(n.to, user?.role ?? "cashier", user?.jobRole),
+  );
+
 
   return (
     <>

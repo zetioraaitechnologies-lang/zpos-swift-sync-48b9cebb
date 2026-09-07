@@ -1,6 +1,7 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/lib/zpos-auth";
+import { canOpen, allowedPaths } from "@/lib/staff-roles";
 import { AppSidebar, MobileMenuButton, useSidebar } from "@/components/zpos/app-sidebar";
 import { ConnectivityBadge } from "@/components/zpos/connectivity";
 import { StoreSwitcher } from "@/components/zpos/store-switcher";
@@ -16,12 +17,17 @@ function AppLayout() {
   const { ready, user, org } = useAuth();
   const nav = useNavigate();
   const { open, setOpen } = useSidebar();
+  const path = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
     if (!ready) return;
     if (!user) nav({ to: "/login" });
     else if (user.role === "super_admin") nav({ to: "/admin" });
-  }, [ready, user, nav]);
+    else if (!canOpen(path, user.role, user.jobRole)) {
+      const fallback = allowedPaths(user.role, user.jobRole)[0] ?? "/pos";
+      if (path !== fallback) nav({ to: fallback });
+    }
+  }, [ready, user, nav, path]);
 
   if (!ready || !user || user.role === "super_admin") {
     return (
