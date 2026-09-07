@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/zpos-auth";
 import { GoldButton } from "@/components/zpos/gold-button";
 import { inviteCashier, removeCashier } from "@/lib/admin.functions";
 import { toast } from "sonner";
+import { STAFF_ROLES } from "@/lib/staff-roles";
 
 export const Route = createFileRoute("/_app/employees")({
   component: Employees,
@@ -79,7 +80,7 @@ function Employees() {
           </p>
         </div>
         <GoldButton onClick={() => setShow(true)}>
-          <UserPlus className="h-4 w-4" /> Add Cashier
+          <UserPlus className="h-4 w-4" /> Add Staff
         </GoldButton>
       </div>
 
@@ -116,7 +117,7 @@ function Employees() {
         ))}
         {!loading && rows.length === 0 && (
           <div className="col-span-full panel clip-cut-card p-8 text-center text-muted-foreground">
-            No cashiers yet. Click <span className="text-gold">Add Cashier</span> to issue their login.
+            No staff yet. Click <span className="text-gold">Add Staff</span> to issue their login.
           </div>
         )}
       </div>
@@ -136,7 +137,7 @@ function Employees() {
 
 function CashierForm({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
   const { org } = useAuth();
-  const [f, setF] = useState({ name: "", email: "", phone: "", password: "", wage: "" });
+  const [f, setF] = useState({ name: "", email: "", phone: "", password: "", wage: "", roleLabel: "Cashier" });
   const [busy, setBusy] = useState(false);
   if (!org) return null;
 
@@ -152,13 +153,14 @@ function CashierForm({ onClose, onDone }: { onClose: () => void; onDone: () => v
           email: f.email.trim(),
           password: pw,
           phone: f.phone || undefined,
+          roleLabel: f.roleLabel,
           wage: f.wage ? Number(f.wage) : undefined,
         },
       });
-      toast.success(`Cashier created · ${f.email.trim()} / ${pw}`, { duration: 20000 });
+      toast.success(`${f.roleLabel} created · ${f.email.trim()} / ${pw}`, { duration: 20000 });
       onDone();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to add cashier");
+      toast.error(err instanceof Error ? err.message : "Failed to add staff");
     } finally {
       setBusy(false);
     }
@@ -168,7 +170,7 @@ function CashierForm({ onClose, onDone }: { onClose: () => void; onDone: () => v
     <div className="fixed inset-0 z-50 grid place-items-center bg-navy-deep/50 p-4">
       <form onSubmit={save} className="panel clip-cut-card w-full max-w-md space-y-4 p-6">
         <h3 className="font-display text-xl font-bold tracking-tight text-gold">
-          Add Cashier
+          Add Staff
         </h3>
         <p className="text-xs text-muted-foreground">
           Creates a login account for this business. Copy the credentials
@@ -191,6 +193,19 @@ function CashierForm({ onClose, onDone }: { onClose: () => void; onDone: () => v
             onChange={(e) => setF({ ...f, email: e.target.value })}
             className="w-full rounded-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
           />
+        </FormRow>
+        <FormRow label="Job role">
+          <select
+            value={f.roleLabel}
+            onChange={(e) => setF({ ...f, roleLabel: e.target.value })}
+            className="w-full rounded-none border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--gold)]/60"
+          >
+            {STAFF_ROLES.map((r) => (
+              <option key={r} value={r}>
+                {r}
+              </option>
+            ))}
+          </select>
         </FormRow>
         <FormRow label="Phone (optional)">
           <input
