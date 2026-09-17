@@ -206,7 +206,10 @@ function ReceiptModal({ sale, onClose }: { sale: Sale; onClose: () => void }) {
   if (!org) return null;
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-navy-deep/60 p-4 print:static print:bg-transparent print:p-0">
-      <div className="panel clip-cut-card w-full max-w-sm p-5 print:max-w-none print:border-0 print:shadow-none">
+      <div
+        id="receipt-print-area"
+        className="panel clip-cut-card w-full max-w-sm p-5 print:max-w-none print:border-0 print:shadow-none"
+      >
         <div className="flex items-start justify-between print:hidden">
           <h3 className="font-display text-lg font-bold text-gold">Receipt</h3>
           <button onClick={onClose} aria-label="Close">
