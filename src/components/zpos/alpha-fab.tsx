@@ -172,7 +172,7 @@ export function AlphaFab() {
           <div className="flex-1">
             <div className="font-display text-sm font-bold text-gold">Alpha AI</div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
-              {online ? "Powered by Lovable AI" : "Offline mode"}
+              {online ? "Powered by Zetiora AI Technologies" : "Offline mode"}
             </div>
           </div>
         </div>
