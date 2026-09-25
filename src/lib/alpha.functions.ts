@@ -47,7 +47,7 @@ If the snapshot doesn't contain enough info, say so briefly.`;
 
     // Preferred: the user's own Gemini API key (works on any host, e.g. Vercel).
     if (geminiKey) {
-      const model = process.env['GEMINI_MODEL'] || "gemini-2.0-flash";
+      const model = process.env['GEMINI_MODEL'] || "gemini-3.1-flash-lite";
       const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
         {
@@ -83,7 +83,7 @@ If the snapshot doesn't contain enough info, say so briefly.`;
         Authorization: `Bearer ${lovableKey}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3.1-flash-lite",
         messages: [
           { role: "system", content: system },
           { role: "user", content: userMsg },
@@ -104,4 +104,3 @@ If the snapshot doesn't contain enough info, say so briefly.`;
     const text = json.choices?.[0]?.message?.content?.trim() ?? "";
     return { text };
   });
-
